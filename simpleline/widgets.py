@@ -1,8 +1,8 @@
 # encoding: utf-8
 #
-# Widgets for Anaconda TUI.
+# Widgets for Text UI framework.
 #
-# Copyright (C) 2012  Red Hat, Inc.
+# Copyright (C) 2016  Red Hat, Inc.
 #
 # This copyrighted material is made available to anyone wishing to use,
 # modify, copy, or redistribute it subject to the terms and conditions of
@@ -22,9 +22,9 @@
 __all__ = ["Widget", "TextWidget", "ColumnWidget", "CheckboxWidget", "CenterWidget"]
 
 import functools
-from pyanaconda.i18n import _
+from simpleline.i18n import _
 from textwrap import wrap
-from pyanaconda import iutil
+from simpleline.utils import ensure_str
 
 class Widget(object):
     def __init__(self, max_width=None, default=None):
@@ -36,7 +36,6 @@ class Widget(object):
         :param default: string containing the default content to fill the buffer with
         :type default: string
         """
-
         self._buffer = []
         if default:
             self._buffer = [[c for c in l] for l in default.split("\n")]
@@ -80,7 +79,6 @@ class Widget(object):
         :return: lines representing this widget
         :rtype: list(str)
         """
-
         return [str(u"".join(line)) for line in self._buffer]
 
     def setxy(self, row, col):
@@ -117,7 +115,6 @@ class Widget(object):
         :param block: when printing newline, start at column col (True) or at column 0 (False)
         :type block: boolean
         """
-
         # if the starting row is not present, start at the cursor position
         if row is None:
             row = self._cursor[0]
@@ -169,7 +166,7 @@ class Widget(object):
         if not text:
             return
 
-        text = iutil.ensure_str(text)
+        text = ensure_str(text)
         if row is None:
             row = self._cursor[0]
 
@@ -242,7 +239,6 @@ class TextWidget(Widget):
         :param text: text to format
         :type text: str
         """
-
         Widget.__init__(self)
         self._text = text
 
@@ -254,7 +250,6 @@ class TextWidget(Widget):
 
         :raises
         """
-
         Widget.render(self, width)
         self.write(self._text, width=width, wordwrap=True)
 
@@ -275,7 +270,6 @@ class CenterWidget(Widget):
         :param width: maximum width the widget should use
         :type width: int
         """
-
         Widget.render(self, width)
         self._w.render(width)
         # make sure col is an integer
@@ -291,7 +285,6 @@ class ColumnWidget(Widget):
         :param spacing: number of spaces to use between columns
         :type spacing: int
         """
-
         Widget.__init__(self)
         self._spacing = spacing
         self._columns = columns
@@ -305,7 +298,6 @@ class ColumnWidget(Widget):
         :return: nothing
         :rtype: None
         """
-
         Widget.render(self, width)
 
         # the leftmost empty column
@@ -350,7 +342,6 @@ class CheckboxWidget(Widget):
         :param completed: is the checkbox ticked or not?
         :type completed: True|False
         """
-
         Widget.__init__(self)
         self._key = key
         self._title = title

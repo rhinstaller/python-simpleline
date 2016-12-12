@@ -1,6 +1,6 @@
-# Base classes for the Anaconda TUI framework.
+# Base classes for Simpleline Text UI framework.
 #
-# Copyright (C) 2012  Red Hat, Inc.
+# Copyright (C) 2016  Red Hat, Inc.
 #
 # This copyrighted material is made available to anyone wishing to use,
 # modify, copy, or redistribute it subject to the terms and conditions of
@@ -16,6 +16,8 @@
 # License and may only be used or replicated with the express permission of
 # Red Hat, Inc.
 #
+# Author(s): Jiri Konecny <jkonecny@redhat.com>
+#
 
 __all__ = ["App", "UIScreen"]
 
@@ -23,9 +25,7 @@ import sys
 import queue
 import getpass
 import threading
-from pyanaconda.threads import threadMgr, AnacondaThread
-from pyanaconda.ui.communication import hubQ
-from pyanaconda import constants, iutil
+from simpleline.communication.communication import hubQ
 from simpleline.utils.i18n import _, N_, C_
 from simpleline import Widget, TextWidget, Prompt
 
@@ -61,7 +61,6 @@ class App(object):
     - show new screen and wait for it to end (dialog)
     - close current window and return to the next one in stack
     """
-
     START_MAINLOOP = True
     STOP_MAINLOOP = False
     NOP = None
@@ -79,12 +78,18 @@ class App(object):
 
         :param width: screen width for rendering purposes
         :type width: int
-        """
 
+        :param queue_instance: if specified use this message queue for communication
+        :type queue_instance: queue.Queue()
+
+        :param quit_message: if specified write this message when user wants to quit UI
+        :type quit_message: str
+        """
         self._header = title
         self._redraw = True
         self._spacer = "\n".join(2 * [width * "="])
         self._width = width
+        self._input_thread = None
         self.quit_question = yes_or_no_question
         self.quit_message = quit_message or N_(u"Do you really want to quit?")
 
@@ -109,7 +114,8 @@ class App(object):
         self._screens = []
 
     def register_event_handler(self, event, callback, data=None):
-        """This method registers a callback which will be called when message "event" is encountered during process_events.
+        """This method registers a callback which will be called when message "event"
+        is encountered during process_events.
 
         The callback has to accept two arguments:
         - the received message in the form of (type, [arguments])
@@ -143,7 +149,6 @@ class App(object):
         :param hidden: whether typed characters should be echoed or not
         :type hidden: bool
         """
-
         if hidden:
             data = getpass.getpass(prompt)
         else:
@@ -178,7 +183,6 @@ class App(object):
         :param args: optional argument to pass to ui's refresh method (can be used to select what item should be displayed or so)
         :type args: anything
         """
-
         # (oldscr, oldattr, oldloop)
         oldloop = self._screens.pop()[2]
 
@@ -196,7 +200,6 @@ class App(object):
         :param args: optional argument, please see switch_screen for details
         :type args: anything
         """
-
         self._screens.append((ui, args, self.NOP))
 
         self.redraw()
@@ -214,7 +217,6 @@ class App(object):
         :param args: optional argument, please see switch_screen for details
         :type args: anything
         """
-
         # set the third item to True so new loop gets started
         self._screens.append((ui, args, self.START_MAINLOOP))
         self._do_redraw()
@@ -240,7 +242,6 @@ class App(object):
         :param scr: if an UIScreen instance is passed it is checked to be the screen we are trying to close.
         :type scr: UIScreen instance
         """
-
         oldscr, _oldattr, oldloop = self._screens.pop()
         if scr is not None:
             assert oldscr == scr
@@ -266,7 +267,6 @@ class App(object):
         :return: this method returns True if user input processing is requested
         :rtype: bool
         """
-
         # there is nothing to display, exit
         if not self._screens:
             raise ExitMainLoop()
@@ -311,7 +311,6 @@ class App(object):
         Do not use self.mainloop() directly as run() handles all the required exceptions
         needed to keep nested mainloops working.
         """
-
         try:
             self._mainloop()
             return True
@@ -320,7 +319,6 @@ class App(object):
 
     def _mainloop(self):
         """Single mainloop. Do not use directly, start the application using run()."""
-
         # ask for redraw by default
         self._redraw = True
 
@@ -391,6 +389,12 @@ class App(object):
             except ExitMainLoop:
                 break
 
+    def application_quit_cb(self):
+        """This callback will be called when user quits the application.
+        This is mainly for overriding purposes.
+        """
+        pass
+
     def process_events(self, return_at=None):
         """This method processes incoming async messages and returns
         when a specific message is encountered or when the queue_instance
@@ -418,12 +422,13 @@ class App(object):
         """This method reads one input from user. Its basic form has only one
         line, but we might need to override it for more complex apps or testing.
         """
+        if self._input_thread is not None and self._input_thread.is_alive():
+            raise KeyError("Can't run multiple input threads at the same time!")
 
-        input_thread = AnacondaThread(prefix=constants.THREAD_INPUT_BASENAME,
-                                      target=self._thread_input,
-                                      args=(self.queue_instance, prompt, hidden))
-        input_thread.daemon = True
-        threadMgr.add(input_thread)
+        self._input_thread = Thread(target=self._thread_input, name="InputThread"
+                              args=(self.queue_instance, prompt, hidden))
+        self._input_thread.daemon = True
+        self._input_thread.start()
         event = self.process_events(return_at=hubQ.HUB_CODE_INPUT)
         return event[1][0]  # return the user input
 
@@ -441,7 +446,6 @@ class App(object):
         :return: True if key was processed, False if it was not recognized
         :rtype: True|False
         """
-
         # delegate the handling to active screen first
         if self._screens:
             try:
@@ -473,9 +477,10 @@ class App(object):
                 d = self.quit_question(self, _(self.quit_message))
                 self.switch_screen_modal(d)
                 if d.answer:
+                    self.application_quit_cb()
                     raise ExitAllMainLoops()
-
-            iutil.ipmi_report(constants.IPMI_ABORTED)
+            else:
+                self.application_quit_cb()
             return True
 
         return False
@@ -505,12 +510,11 @@ class App(object):
         Why are we using App._current_screen and not self._current_screen ?
 
         There can actually be multiple App instances (the AskVNCSpoke for example
-        has a different App instance than the SummaryHub), but there can still
-        be only one screen displayed at once.
+        has a different App instance than the SummaryHub in Anaconda), but there can
+        still be only one screen displayed at once.
         So we use the class variable and simply track what screen is the last displayed
         regardless of App instance.
         """
-
         # is this a new screen or still the same one ?
         if new_screen != App._current_screen:
             # in some cases we run simple dialogs that are not full spokes
@@ -526,13 +530,13 @@ class App(object):
 
         App._current_screen = new_screen
 
+
 class UIScreen(object):
     """Base class representing one TUI Screen.
 
     Shares some API with anaconda's GUI to make it easy for devs to create similar UI
     with the familiar API.
     """
-
     # title line of the screen
     title = u"Screen.."
 
@@ -544,7 +548,6 @@ class UIScreen(object):
         :param screen_height: height of the screen (useful for printing long widgets)
         :type screen_height: int
         """
-
         self._app = app
         self._screen_height = screen_height
 
@@ -555,15 +558,14 @@ class UIScreen(object):
         # indexing starts with 0
         self._page = 0
 
-    def setup(self, environment):
+    def setup(self, *args):
         """Do additional setup right before this screen is used.
 
-        :param environment: environment (see pyanaconda.constants) the UI is running in
-        :type environment: either FIRSTBOOT_ENVIRON or ANACONDA_ENVIRON
+        :param args: arguments for the setup
+        :type args: array of values
         :return: whether this screen should be scheduled or not
         :rtype: bool
         """
-
         return True
 
     def refresh(self, args=None):
@@ -576,7 +578,6 @@ class UIScreen(object):
                  the screen will get printed and the main loop will continue
         :rtype: True|False
         """
-
         self._window = [_(self.title), u""]
         return True
 
@@ -586,7 +587,6 @@ class UIScreen(object):
         :param widget: possibly long widget to print
         :type widget: Widget instance
         """
-
         pos = 0
         lines = widget.get_lines()
         num_lines = len(lines)
@@ -614,7 +614,6 @@ class UIScreen(object):
 
     def show_all(self):
         """Prepares all elements of self._window for output and then prints them on the screen."""
-
         for w in self._window:
             if hasattr(w, "render"):
                 w.render(self.app.width)                    # pylint: disable=no-member
@@ -645,7 +644,6 @@ class UIScreen(object):
                  on the App and key if you want it to.
         :rtype: True|False|None|str
         """
-
         return key
 
     def prompt(self, args=None):

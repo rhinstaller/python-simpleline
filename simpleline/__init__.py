@@ -1,6 +1,6 @@
-# Library containing the TUI framework for Anaconda installer.
+# Library containing the Text UI framework.
 #
-# Copyright (C) 2012  Red Hat, Inc.
+# Copyright (C) 2016  Red Hat, Inc.
 #
 # This copyrighted material is made available to anyone wishing to use,
 # modify, copy, or redistribute it subject to the terms and conditions of
@@ -18,8 +18,8 @@
 #
 
 # pylint: disable=wildcard-import
-from pyanaconda.ui.tui.simpleline.widgets import *
+from simpleline.widgets import *
 # pylint: disable=wildcard-import
-from pyanaconda.ui.tui.simpleline.prompt import *
+from simpleline.prompt import *
 # pylint: disable=wildcard-import
-from pyanaconda.ui.tui.simpleline.base import *
+from simpleline.base import *

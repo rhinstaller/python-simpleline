@@ -19,7 +19,7 @@
 # Author(s):  Vendula Poncova <vponcova@redhat.com>
 #
 
-from pyanaconda.i18n import C_, N_
+from simpleline.utils.i18n import C_, N_
 
 import logging
 log = logging.getLogger("anaconda")
@@ -27,7 +27,6 @@ log = logging.getLogger("anaconda")
 
 class Prompt(object):
     """Class to create a prompt message with options."""
-
     # Default message of the prompt
     DEFAULT_MESSAGE = N_("Please make a selection from the above")
 
