@@ -425,8 +425,8 @@ class App(object):
         if self._input_thread is not None and self._input_thread.is_alive():
             raise KeyError("Can't run multiple input threads at the same time!")
 
-        self._input_thread = Thread(target=self._thread_input, name="InputThread"
-                              args=(self.queue_instance, prompt, hidden))
+        self._input_thread = threading.Thread(target=self._thread_input, name="InputThread",
+                                              args=(self.queue_instance, prompt, hidden))
         self._input_thread.daemon = True
         self._input_thread.start()
         event = self.process_events(return_at=hubQ.HUB_CODE_INPUT)

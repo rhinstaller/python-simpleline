@@ -4,5 +4,5 @@ import unittest
 
 class HandleUnicode_TestCase(unittest.TestCase):
     def runTest(self):
-        self.assertTrue(True)
+        self.assertTrue(1 == 1)
 

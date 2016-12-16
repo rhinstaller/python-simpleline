@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import queue
-from simpleline.utils.utils import lowerASCII, upperASCII
+from simpleline.utils import lowerASCII, upperASCII
 
 class QueueFactory(object):
     """Constructs a new object wrapping a Queue.Queue, complete with constants

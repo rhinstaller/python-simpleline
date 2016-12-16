@@ -22,7 +22,7 @@
 __all__ = ["Widget", "TextWidget", "ColumnWidget", "CheckboxWidget", "CenterWidget"]
 
 import functools
-from simpleline.i18n import _
+from simpleline.utils.i18n import _
 from textwrap import wrap
 from simpleline.utils import ensure_str
 
