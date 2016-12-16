@@ -1,0 +1,16 @@
+*.pyc
+.*.swp
+
+python-simpleline*.tar.gz
+
+ChangeLog
+
+po/*.gmo
+po/*.po
+po/POTFILES
+
+tests/pylint/.pylint.d/
+
+build/
+
+.directory
