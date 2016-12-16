@@ -1,7 +1,7 @@
 PKGNAME=python-simpleline
 VERSION=$(shell awk '/Version:/ { print $$2 }' $(PKGNAME).spec)
 RELEASE=$(shell awk '/Release:/ { print $$2 }' $(PKGNAME).spec | sed -e 's|%.*$$||g')
-TAG=r$(VERSION)-$(RELEASE)
+TAG=simpleline-$(VERSION)-$(RELEASE)
 
 PREFIX=/usr
 
