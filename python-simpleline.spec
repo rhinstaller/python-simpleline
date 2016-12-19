@@ -1,6 +1,8 @@
+%global srcname simpleline
+
 Summary: A python library for text UI framework
 Name: python-simpleline
-Url: https://github.com/rhinstaller/simpleline
+Url: https://github.com/rhinstaller/python-%{srcname}
 Version: 0.1
 Release: 1%{?dist}
 # This is a Red Hat maintained package which is specific to
@@ -9,7 +11,7 @@ Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/simpleline
 #   cd simpleline && make archive
-Source0: https://github.com/rhinstaller/simpleline/archive/%{name}-%{version}.tar.gz
+Source0: https://github.com/rhinstaller/python-simpleline/archive/%{name}-%{version}.tar.gz
 
 License: GPLv2+
 Group: System Environment/Libraries
@@ -21,19 +23,17 @@ BuildRequires: python3-setuptools
 BuildRequires: intltool
 BuildRequires: python3-pocketlint
 
-Requires: python3
 Requires: rpm-python3
 Requires: python3-meh
 
+%{?python_provide:%python_provide python3-%{srcname}}
+
 %description
-The simpleline package is a python library for creating simpleline but powerfull
+The simpleline package is a python library for creating simpleline but powerful
 text UI.
 
 %prep
 %setup -q
-
-rm -rf %{py3dir}
-cp -a . %{py3dir}
 
 %build
 make
@@ -52,8 +52,9 @@ rm -rf %{buildroot}
 
 %files -f %{name}.lang
 %defattr(-,root,root,-)
-%doc ChangeLog COPYING
-%{python_sitelib}/simpleline*
+%license COPYING
+%doc ChangeLog README
+%{python3_sitelib}/*
 
 %changelog
 * Fri Dec 16 2016 Jiri Konecny <jkonecny@redhat.com> - 0.1-1
