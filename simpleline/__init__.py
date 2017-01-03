@@ -17,9 +17,6 @@
 # Red Hat, Inc.
 #
 
-# pylint: disable=wildcard-import
-from simpleline.widgets import *
-# pylint: disable=wildcard-import
-from simpleline.prompt import *
-# pylint: disable=wildcard-import
-from simpleline.base import *
+# Make the return calls from the UIScreen input() function more clear
+INPUT_PROCESSED = None
+INPUT_DISCARDED = False
