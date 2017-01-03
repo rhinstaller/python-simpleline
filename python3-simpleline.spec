@@ -12,7 +12,7 @@ Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/simpleline
 #   cd simpleline && make archive
-Source0: https://github.com/rhinstaller/python-simpleline/archive/python-%{srcname}-%{version}.tar.gz
+Source0: https://github.com/rhinstaller/python-%{srcname}/archive/python-%{srcname}-%{version}.tar.gz
 
 License: GPLv2+
 Group: System Environment/Libraries
@@ -25,6 +25,8 @@ BuildRequires: python3-pocketlint
 
 Requires: rpm-python3
 Requires: python3-meh
+
+%{?python_provide:%python_provide python3-%{srcname}}
 
 %description
 Simpleline package is a python library for creating simpleline but powerful
@@ -40,7 +42,6 @@ make
 make test
 
 %install
-rm -rf %{buildroot}
 make DESTDIR=%{buildroot} install
 
 %find_lang python-%{srcname}
@@ -49,7 +50,6 @@ make DESTDIR=%{buildroot} install
 rm -rf %{buildroot}
 
 %files -f python-%{srcname}.lang
-%defattr(-,root,root,-)
 %license COPYING
 %doc ChangeLog README
 %{python3_sitelib}/*

@@ -1,0 +1,4 @@
+include COPYING Makefile ChangeLog README
+recursive-include simpleline *.py
+recursive-include po *.po *.pot Makefile
+recursive-include tests *.py
