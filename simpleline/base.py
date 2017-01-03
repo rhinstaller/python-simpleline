@@ -27,7 +27,8 @@ import getpass
 import threading
 from simpleline.communication.communication import hubQ
 from simpleline.utils.i18n import _, N_, C_
-from simpleline import Widget, TextWidget, Prompt
+from simpleline.widgets import Widget, TextWidget
+from simpleline.prompt import Prompt
 
 RAW_INPUT_LOCK = threading.Lock()
 
@@ -40,12 +41,14 @@ class ExitMainLoop(Exception):
     """This exception ends the outermost mainloop. Used internally when dialogs close."""
     pass
 
+
 class ExitAllMainLoops(ExitMainLoop):
     """This exception ends the whole App mainloop structure.
 
     App.run() returns False after the exception is processed.
     """
     pass
+
 
 class App(object):
     """This is the main class for TUI screen handling.
@@ -67,14 +70,14 @@ class App(object):
 
     _current_screen = None
 
-    def __init__(self, title, yes_or_no_question=None, width=80, queue_instance=None,
+    def __init__(self, title, quit_screen=None, width=80, queue_instance=None,
                  quit_message=None):
         """
         :param title: application title for whenever we need to display app name
         :type title: str
 
-        :param yes_or_no_question: UIScreen object class used for Quit dialog
-        :type yes_or_no_question: class UIScreen accepting additional message arg
+        :param quit_screen: UIScreen object class used for Quit dialog
+        :type quit_screen: class UIScreen accepting additional message arg
 
         :param width: screen width for rendering purposes
         :type width: int
@@ -82,7 +85,7 @@ class App(object):
         :param queue_instance: if specified use this message queue for communication
         :type queue_instance: queue.Queue()
 
-        :param quit_message: if specified write this message when user wants to quit UI
+        :param quit_message: this message will be send to quit_screen
         :type quit_message: str
         """
         self._header = title
@@ -90,7 +93,7 @@ class App(object):
         self._spacer = "\n".join(2 * [width * "="])
         self._width = width
         self._input_thread = None
-        self.quit_question = yes_or_no_question
+        self.quit_screen = quit_screen
         self.quit_message = quit_message or N_(u"Do you really want to quit?")
 
         # async control queue
@@ -473,14 +476,15 @@ class App(object):
         # global quit command
         # TRANSLATORS: 'q' to quit
         elif self._screens and (key == C_('TUI|Spoke Navigation', 'q')):
-            if self.quit_question:
-                d = self.quit_question(self, _(self.quit_message))
+            if self.quit_screen:
+                d = self.quit_screen(self, _(self.quit_message))
                 self.switch_screen_modal(d)
                 if d.answer:
                     self.application_quit_cb()
                     raise ExitAllMainLoops()
             else:
                 self.application_quit_cb()
+                raise ExitAllMainLoops()
             return True
 
         return False
