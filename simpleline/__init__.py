@@ -17,6 +17,16 @@
 # Red Hat, Inc.
 #
 
+from simpleline.utils.i18n import C_
+
 # Make the return calls from the UIScreen input() function more clear
 INPUT_PROCESSED = None
 INPUT_DISCARDED = False
+
+# Translated keys
+# TRANSLATORS: 'r' to refresh
+KEY_REFRESH = C_('TUI|Spoke Navigation', 'r')
+# TRANSLATORS: 'c' to continue
+KEY_CONTINUE = C_('TUI|Spoke Navigation', 'c')
+# TRANSLATORS: 'q' to quit
+KEY_QUIT = C_('TUI|Spoke Navigation', 'q')
