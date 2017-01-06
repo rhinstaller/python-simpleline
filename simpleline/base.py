@@ -697,14 +697,3 @@ class UIScreen(object):
         """Callback when this screen is closed."""
         pass
 
-
-if __name__ == "__main__":
-    class HelloWorld(UIScreen):
-        def show(self, args=None):
-            print("""Hello World\nquit by typing 'quit'""")
-            return True
-
-    a = App("Hello World")
-    s = HelloWorld(a, None)
-    a.schedule_screen(s)
-    a.run()
