@@ -430,6 +430,10 @@ class App(object):
                         raise
                     except Exception:    # pylint: disable=broad-except
                         send_exception(self.queue_instance, sys.exc_info())
+            # unhandled exception, raise it here
+            elif event[0] == hubQ.HUB_CODE_EXCEPTION:
+                # raise the original exception from here
+                raise event[1][0][0] from event[1][0][1]
 
     def raw_input(self, prompt, hidden=False):
         """This method reads one input from user. Its basic form has only one
