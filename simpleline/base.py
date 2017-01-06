@@ -109,7 +109,7 @@ class App(object):
 
         # screen stack contains triplets
         #  UIScreen to show
-        #  arguments for it's show method
+        #  arguments for it's refresh and setup method
         #  value indicating whether new mainloop is needed
         #   - None = do nothing
         #   - True = execute new loop
@@ -183,7 +183,8 @@ class App(object):
         :param ui: screen to show
         :type ui: instance of UIScreen
 
-        :param args: optional argument to pass to ui's refresh method (can be used to select what item should be displayed or so)
+        :param args: optional argument to pass to ui's refresh and setup methods
+                     (can be used to select what item should be displayed or so)
         :type args: anything
         """
         # (oldscr, oldattr, oldloop)
@@ -242,7 +243,8 @@ class App(object):
 
         Next screen from the stack is then displayed.
 
-        :param scr: if an UIScreen instance is passed it is checked to be the screen we are trying to close.
+        :param scr: if an UIScreen instance is passed it is checked to be the screen
+                    we are trying to close.
         :type scr: UIScreen instance
         """
         oldscr, _oldattr, oldloop = self._screens.pop()
@@ -343,7 +345,14 @@ class App(object):
                 # draw the screen if redraw is needed or the screen changed
                 # (unlikely to happen separately, but just be sure)
                 if self._redraw or last_screen != self._screens[-1][0]:
-                    # we have fresh screen, reset error counter
+                    # we have fresh screen
+
+                    # this screen is used first time (call setup() method)
+                    if not self._screens[-1][0].ready:
+                        if not self._screens[-1][0].setup(self._screens[-1][1]):
+                            # skip if setup went wrong
+                            continue
+                    # reset error counter
                     error_counter = 0
                     if not self._do_redraw():
                         # if no input processing is requested, go for another cycle
@@ -554,6 +563,7 @@ class UIScreen(object):
         """
         self._app = app
         self._screen_height = screen_height
+        self._ready = False
 
         # list that holds the content to be printed out
         self._window = []
@@ -570,6 +580,7 @@ class UIScreen(object):
         :return: whether this screen should be scheduled or not
         :rtype: bool
         """
+        self._ready = True
         return True
 
     def refresh(self, args=None):
@@ -670,6 +681,14 @@ class UIScreen(object):
     def app(self):
         """The reference to this Screen's assigned App instance."""
         return self._app
+
+    @property
+    def ready(self):
+        """This screen is ready for use.
+
+        The setup() method was already called.
+        """
+        return self._ready
 
     def close(self):
         """Close the current screen."""
