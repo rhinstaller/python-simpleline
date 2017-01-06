@@ -251,6 +251,9 @@ class App(object):
         if scr is not None:
             assert oldscr == scr
 
+        # User can react when screen is closing
+        oldscr.closed()
+
         # this cannot happen, if we are closing the window,
         # the loop must have been running or not be there at all
         assert oldloop != self.START_MAINLOOP
@@ -690,6 +693,9 @@ class UIScreen(object):
         """Close the current screen."""
         self.app.close_screen(self)
 
+    def closed(self):
+        """Callback when this screen is closed."""
+        pass
 
 
 if __name__ == "__main__":
