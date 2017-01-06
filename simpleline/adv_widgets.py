@@ -61,15 +61,16 @@ class PasswordDialog(UIScreen):
 
     title = N_("Password")
 
-    def __init__(self, app, device):
+    def __init__(self, app, message=None):
         """
         :param app: the running application reference
         :type app: instance of App class
-        """
 
+        :param message: password prompt question
+        :type message: string
+        """
         UIScreen.__init__(self, app)
-        self._device = device
-        self._message = "You must enter your LUKS passphrase to decrypt device %s" % device
+        self._message = message or "Enter your passphrase"
         self._password = None
 
     def refresh(self, args=None):
