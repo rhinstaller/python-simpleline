@@ -25,7 +25,6 @@ import sys
 import queue
 import getpass
 import threading
-from simpleline import KEY_CONTINUE, KEY_REFRESH, KEY_QUIT
 from simpleline.communication.communication import hubQ
 from simpleline.utils.i18n import _, N_
 from simpleline.widgets import Widget, TextWidget
@@ -476,17 +475,17 @@ class App(object):
                 return False
 
         # global refresh command
-        if self._screens and (key == KEY_REFRESH):
+        if self._screens and (key == Prompt.REFRESH):
             self._do_redraw()
             return True
 
         # global close command
-        if self._screens and (key == KEY_CONTINUE):
+        if self._screens and (key == Prompt.CONTINUE):
             self.close_screen()
             return True
 
         # global quit command
-        elif self._screens and (key == KEY_QUIT):
+        elif self._screens and (key == Prompt.QUIT):
             if self.quit_screen:
                 d = self.quit_screen(self, _(self.quit_message))
                 self.switch_screen_modal(d)
