@@ -639,11 +639,6 @@ class UIScreen(object):
             else:
                 # not a widget or string, just print its string representation
                 print(str(w))
-    show = show_all
-
-    def hide(self):
-        """This does nothing in TUI, it is here to make API similar."""
-        pass
 
     def input(self, args, key):
         """Method called to process input. If the input is not handled here, return it.
