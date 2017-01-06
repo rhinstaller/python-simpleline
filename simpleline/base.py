@@ -576,7 +576,7 @@ class UIScreen(object):
         # indexing starts with 0
         self._page = 0
 
-    def setup(self, *args):
+    def setup(self, args):
         """Do additional setup right before this screen is used.
 
         :param args: arguments for the setup
