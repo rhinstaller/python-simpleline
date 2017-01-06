@@ -17,6 +17,7 @@
 # Red Hat, Inc.
 #
 import sys
+from simpleline import INPUT_PROCESSED
 from simpleline import widgets
 from simpleline.prompt import Prompt
 from simpleline.utils.i18n import _, N_, C_
