@@ -22,7 +22,7 @@
 from simpleline.utils.i18n import C_, N_
 
 import logging
-log = logging.getLogger("anaconda")
+log = logging.getLogger("simpleline")
 
 
 class Prompt(object):
