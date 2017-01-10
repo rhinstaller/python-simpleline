@@ -196,7 +196,8 @@ class App(object):
         self.redraw()
 
     def switch_screen_with_return(self, ui, args=None):
-        """Schedules a screen to show, but keeps the current one in stack to return to, when the new one is closed.
+        """Schedules a screen to show, but keeps the current one in stack to
+        return to, when the new one is closed.
 
         :param ui: screen to show
         :type ui: UIScreen instance
