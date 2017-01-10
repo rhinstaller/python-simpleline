@@ -97,19 +97,31 @@ class Prompt(object):
 
     def add_refresh_option(self, description=REFRESH_DESCRIPTION):
         """Add the option to refresh."""
-        self.add_option(Prompt.REFRESH, description)
+        if Prompt.REFRESH in self.options:
+            self.update_option(Prompt.REFRESH, description)
+        else:
+            self.add_option(Prompt.REFRESH, description)
 
     def add_continue_option(self, description=CONTINUE_DESCRIPTION):
         """Add the option to continue."""
-        self.add_option(Prompt.CONTINUE, description)
+        if Prompt.CONTINUE in self.options:
+            self.update_option(Prompt.CONTINUE, description)
+        else:
+            self.add_option(Prompt.CONTINUE, description)
 
     def add_quit_option(self, description=QUIT_DESCRIPTION):
         """Add the option to quit."""
-        self.add_option(Prompt.QUIT, description)
+        if Prompt.QUIT in self.options:
+            self.update_option(Prompt.QUIT, description)
+        else:
+            self.add_option(Prompt.QUIT, description)
 
     def add_help_option(self, description=HELP_DESCRIPTION):
         """Add the option to help."""
-        self.add_option(Prompt.HELP, description)
+        if Prompt.HELP in self.options:
+            self.update_option(Prompt.HELP, description)
+        else:
+            self.add_option(Prompt.HELP, description)
 
     def remove_option(self, key):
         """Remove an option with the given key.
