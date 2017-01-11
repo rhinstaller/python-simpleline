@@ -19,14 +19,18 @@
 # Red Hat, Inc.
 #
 
-__all__ = ["Widget", "TextWidget", "ColumnWidget", "CheckboxWidget", "CenterWidget"]
+__all__ = ["Widget", "TextWidget", "ColumnWidget","CheckboxWidget",
+           "CenterWidget"]
+
 
 import functools
 from textwrap import wrap
 from simpleline.utils.i18n import _
 from simpleline.utils import ensure_str
 
+
 class Widget(object):
+
     def __init__(self, max_width=None, default=None):
         """Initializes base Widgets buffer.
 
@@ -191,7 +195,8 @@ class Widget(object):
                         sublines.append('\n')
                     # line with length == width will be wrapped by the width based
                     # wrapping logic
-                # end of line will be wrapped by '\n' following the line in original text
+                # end of line will be wrapped by '\n' following the line in
+                # original text
                 if sublines and sublines[-1] == '\n':
                     sublines.pop()
                 lines.append("".join(sublines))
@@ -231,6 +236,7 @@ class Widget(object):
 
         self._cursor = (x, y)
 
+
 class TextWidget(Widget):
     """Class to handle wrapped text output."""
 
@@ -239,7 +245,7 @@ class TextWidget(Widget):
         :param text: text to format
         :type text: str
         """
-        Widget.__init__(self)
+        super().__init__()
         self._text = text
 
     def render(self, width):
@@ -250,8 +256,9 @@ class TextWidget(Widget):
 
         :raises
         """
-        Widget.render(self, width)
+        super().render(width)
         self.write(self._text, width=width, wordwrap=True)
+
 
 class CenterWidget(Widget):
     """Class to handle horizontal centering of content."""
@@ -261,7 +268,7 @@ class CenterWidget(Widget):
         :param w: widget to center
         :type w: Widget
         """
-        Widget.__init__(self)
+        super().__init__()
         self._w = w
 
     def render(self, width):
@@ -270,12 +277,14 @@ class CenterWidget(Widget):
         :param width: maximum width the widget should use
         :type width: int
         """
-        Widget.render(self, width)
+        super().render(width)
         self._w.render(width)
         # make sure col is an integer
         self.draw(self._w, col=(width - self._w.width) // 2)
 
+
 class ColumnWidget(Widget):
+
     def __init__(self, columns, spacing=0):
         """Create text columns
 
@@ -285,7 +294,7 @@ class ColumnWidget(Widget):
         :param spacing: number of spaces to use between columns
         :type spacing: int
         """
-        Widget.__init__(self)
+        super().__init__()
         self._spacing = spacing
         self._columns = columns
 
@@ -298,7 +307,7 @@ class ColumnWidget(Widget):
         :return: nothing
         :rtype: None
         """
-        Widget.render(self, width)
+        super().render(width)
 
         # the leftmost empty column
         x = 0
@@ -325,6 +334,7 @@ class ColumnWidget(Widget):
             # recompute the leftmost empty column
             x = max((x + col_width), self.width) + self._spacing
 
+
 class CheckboxWidget(Widget):
     """Widget to show checkbox with (un)checked box, name and description."""
 
@@ -342,7 +352,7 @@ class CheckboxWidget(Widget):
         :param completed: is the checkbox ticked or not?
         :type completed: True|False
         """
-        Widget.__init__(self)
+        super().__init__()
         self._key = key
         self._title = title
         self._text = text
@@ -353,7 +363,7 @@ class CheckboxWidget(Widget):
 
         It should be max width characters wide.
         """
-        Widget.render(self, width)
+        super().render(width)
 
         if self.completed:
             checkchar = self._key
@@ -395,4 +405,3 @@ class CheckboxWidget(Widget):
     def text(self):
         """Contains the description text from the second line."""
         return self._text
-

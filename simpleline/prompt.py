@@ -145,7 +145,8 @@ class Prompt(object):
             parts.append(self.message)
 
         if self.options:
-            opt_list = ["'%s' %s" % (key, self.options[key]) for key in sorted(self.options.keys())]
+            opt_list = ["'%s' %s" % (key, self.options[key])
+                        for key in sorted(self.options.keys())]
             opt_str = "[%s]" % ", ".join(opt_list)
             parts.append(opt_str)
 

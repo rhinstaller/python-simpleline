@@ -19,6 +19,7 @@
 import queue
 from simpleline.utils import lowerASCII, upperASCII
 
+
 class QueueFactory(object):
     """Constructs a new object wrapping a Queue.Queue, complete with constants
        and sending functions for each type of message that can be put into the
@@ -40,6 +41,7 @@ class QueueFactory(object):
 
        Reusing names within the same class is not allowed.
     """
+
     def __init__(self, name):
         self.name = name
 

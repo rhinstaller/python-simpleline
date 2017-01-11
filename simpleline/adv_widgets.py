@@ -23,6 +23,7 @@ from simpleline.prompt import Prompt
 from simpleline.utils.i18n import _, N_, C_
 from simpleline.base import UIScreen
 
+
 class ErrorDialog(UIScreen):
     """Dialog screen for reporting errors to user."""
 
@@ -36,12 +37,11 @@ class ErrorDialog(UIScreen):
         :param message: the message to show to the user
         :type message: str
         """
-
-        UIScreen.__init__(self, app)
+        super().__init__(app)
         self._message = message
 
     def refresh(self, args=None):
-        UIScreen.refresh(self, args)
+        super().refresh(args)
         text = widgets.TextWidget(self._message)
         self._window += [widgets.CenterWidget(text), ""]
         return True
@@ -56,6 +56,7 @@ class ErrorDialog(UIScreen):
         """
         sys.exit(1)
 
+
 class PasswordDialog(UIScreen):
     """Dialog screen for password input."""
 
@@ -69,12 +70,12 @@ class PasswordDialog(UIScreen):
         :param message: password prompt question
         :type message: string
         """
-        UIScreen.__init__(self, app)
+        super().__init__(app)
         self._message = message or "Enter your passphrase"
         self._password = None
 
     def refresh(self, args=None):
-        UIScreen.refresh(self, args)
+        super().refresh(args)
         text = widgets.TextWidget(self._message)
         self._window += [widgets.CenterWidget(text), ""]
         return True
@@ -103,6 +104,7 @@ class PasswordDialog(UIScreen):
         else:
             return False
 
+
 class YesNoDialog(UIScreen):
     """Dialog screen for Yes - No questions."""
 
@@ -116,13 +118,12 @@ class YesNoDialog(UIScreen):
         :param message: the message to show to the user
         :type message: unicode
         """
-
-        UIScreen.__init__(self, app)
+        super().__init__(app)
         self._message = message
         self._response = None
 
     def refresh(self, args=None):
-        UIScreen.refresh(self, args)
+        super().refresh(args)
         text = widgets.TextWidget(self._message)
         self._window += [widgets.CenterWidget(text), ""]
         return True
@@ -170,12 +171,12 @@ class HelpScreen(UIScreen):
         :param help_path: help file name
         :type help_path: str
         """
-        UIScreen.__init__(self, app)
+        super().__init__(app)
         self.help_path = help_path
 
     def refresh(self, args=None):
         """ Show the help. """
-        UIScreen.refresh(self, args)
+        super().refresh(args)
         help_message = _("The help is not available.")
 
         if self.help_path:
@@ -192,4 +193,3 @@ class HelpScreen(UIScreen):
 
     def prompt(self, args=None):
         return Prompt(_("Press %s to return") % Prompt.ENTER)
-

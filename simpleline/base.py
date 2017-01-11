@@ -602,7 +602,8 @@ class UIScreen(object):
         return True
 
     def _print_long_widget(self, widget):
-        """Prints a long widget (possibly longer than the screen height) with user interaction (when needed).
+        """Prints a long widget (possibly longer than the screen height) with user
+        interaction (when needed).
 
         :param widget: possibly long widget to print
         :type widget: Widget instance
@@ -636,7 +637,7 @@ class UIScreen(object):
         """Prepares all elements of self._window for output and then prints them on the screen."""
         for w in self._window:
             if hasattr(w, "render"):
-                w.render(self.app.width)                    # pylint: disable=no-member
+                w.render(self.app.width)  # pylint: disable=no-member
             if isinstance(w, Widget):
                 self._print_long_widget(w)
             elif isinstance(w, bytes):
@@ -697,4 +698,3 @@ class UIScreen(object):
     def closed(self):
         """Callback when this screen is closed."""
         pass
-

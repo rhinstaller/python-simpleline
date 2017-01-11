@@ -19,8 +19,9 @@
 #
 
 import sys
-import string # pylint: disable=deprecated-module
+import string  # pylint: disable=deprecated-module
 import unicodedata
+
 
 def ensure_str(str_or_bytes, keep_none=True):
     """
@@ -40,7 +41,8 @@ def ensure_str(str_or_bytes, keep_none=True):
     elif isinstance(str_or_bytes, bytes):
         return str_or_bytes.decode(sys.getdefaultencoding())
     else:
-        raise ValueError("str_or_bytes must be of type 'str' or 'bytes', not '%s'" % type(str_or_bytes))
+        raise ValueError(
+            "str_or_bytes must be of type 'str' or 'bytes', not '%s'" % type(str_or_bytes))
 
 
 # Define translations between ASCII uppercase and lowercase for
@@ -50,6 +52,7 @@ def ensure_str(str_or_bytes, keep_none=True):
 # raise a UnicodeDecodeError.
 _ASCIIlower_table = str.maketrans(string.ascii_uppercase, string.ascii_lowercase)
 _ASCIIupper_table = str.maketrans(string.ascii_lowercase, string.ascii_uppercase)
+
 
 def _toASCII(s):
     """Convert a unicode string to ASCII"""
@@ -89,4 +92,3 @@ def upperASCII(s):
     # out we expect this function to always return string even if given bytes.
     s = ensure_str(s)
     return str.translate(_toASCII(s), _ASCIIupper_table)
-

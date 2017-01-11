@@ -29,6 +29,8 @@ P_ = lambda x, y, z: gettext.translation("anaconda", fallback=True).ngettext(x, 
 # are not exported by Python, but all they really do is a stick a EOT
 # character between msgctxt and msgid and check that msgctxt isn't part
 # of the return value.
+
+
 def C_(msgctxt, msgid):
     ctxid = "%s\x04%s" % (msgctxt, msgid)
     translation = _(ctxid)
@@ -43,6 +45,8 @@ def C_(msgctxt, msgid):
 CN_ = lambda c, x: x
 
 # npgettext; i.e., gettext with plural form and context
+
+
 def CP_(msgctxt, msgid, msgid_plural, n):
     ctxid = "%s\x04%s" % (msgctxt, msgid)
     translation = P_(ctxid, msgid_plural, n)
