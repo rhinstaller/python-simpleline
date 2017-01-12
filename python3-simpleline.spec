@@ -24,13 +24,15 @@ BuildRequires: intltool
 BuildRequires: python3-pocketlint
 
 Requires: rpm-python3
-Requires: python3-meh
 
 %{?python_provide:%python_provide python3-%{srcname}}
 
 %description
-Simpleline package is a python library for creating simpleline but powerful
-text UI.
+Simpleline is a Python3 library for creating text UI.
+It is designed to be used with line-based machines
+and tools (e.g. serial console) so that every new line
+is appended to the bottom of the screen.
+Printed lines are never rewritten!
 
 %prep
 %setup -q -n python-%{srcname}-%{version}
@@ -51,7 +53,7 @@ rm -rf %{buildroot}
 
 %files -f python-%{srcname}.lang
 %license COPYING
-%doc ChangeLog README
+%doc ChangeLog README.md
 %{python3_sitelib}/*
 
 %changelog
