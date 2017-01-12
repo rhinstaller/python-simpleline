@@ -19,7 +19,7 @@
 # Author(s):  Vendula Poncova <vponcova@redhat.com>
 #
 
-from simpleline.utils.i18n import C_, N_
+from simpleline.utils.i18n import C_, N_, _
 
 import logging
 log = logging.getLogger("simpleline")
@@ -142,10 +142,10 @@ class Prompt(object):
         parts = []
 
         if self.message:
-            parts.append(self.message)
+            parts.append(_(self.message))
 
         if self.options:
-            opt_list = ["'%s' %s" % (key, self.options[key])
+            opt_list = ["'%s' %s" % (key, _(self.options[key]))
                         for key in sorted(self.options.keys())]
             opt_str = "[%s]" % ", ".join(opt_list)
             parts.append(opt_str)

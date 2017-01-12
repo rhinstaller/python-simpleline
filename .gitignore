@@ -6,7 +6,6 @@ python-simpleline*.tar.gz
 ChangeLog
 
 po/*.gmo
-po/*.mo
 po/*.po
 po/POTFILES
 

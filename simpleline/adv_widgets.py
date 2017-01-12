@@ -71,7 +71,7 @@ class PasswordDialog(UIScreen):
         :type message: string
         """
         super().__init__(app)
-        self._message = message or "Enter your passphrase"
+        self._message = message or _("Enter your passphrase")
         self._password = None
 
     def refresh(self, args=None):

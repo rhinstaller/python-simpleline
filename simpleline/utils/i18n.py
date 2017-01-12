@@ -22,8 +22,8 @@ __all__ = ["_", "N_", "P_", "C_", "CN_", "CP_"]
 import gettext
 
 N_ = lambda x: x
-_ = lambda x: gettext.translation("anaconda", fallback=True).gettext(x) if x != "" else ""
-P_ = lambda x, y, z: gettext.translation("anaconda", fallback=True).ngettext(x, y, z)
+_ = lambda x: gettext.translation("python-simpleline", fallback=True).gettext(x) if x != "" else ""
+P_ = lambda x, y, z: gettext.translation("python-simpleline", fallback=True).ngettext(x, y, z)
 
 # This is equivalent to "pgettext" in GNU gettext. The pgettext functions
 # are not exported by Python, but all they really do is a stick a EOT

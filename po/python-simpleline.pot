@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-03 11:31+0100\n"
+"POT-Creation-Date: 2017-01-12 19:22+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,13 +43,56 @@ msgstr ""
 msgid "to help"
 msgstr ""
 
-#: ../simpleline/base.py:94
+#: ../simpleline/base.py:97
 msgid "Do you really want to quit?"
 msgstr ""
 
-#: ../simpleline/base.py:612
+#: ../simpleline/base.py:633
 #, python-format
 msgid ""
 "\n"
 "Press %s to continue"
+msgstr ""
+
+#: ../simpleline/adv_widgets.py:30
+msgid "Error"
+msgstr ""
+
+#: ../simpleline/adv_widgets.py:50
+#, python-format
+msgid "Press %s to exit"
+msgstr ""
+
+#: ../simpleline/adv_widgets.py:63
+msgid "Password"
+msgstr ""
+
+#: ../simpleline/adv_widgets.py:74
+msgid "Enter your passphrase"
+msgstr ""
+
+#: ../simpleline/adv_widgets.py:84
+msgid "Passphrase: "
+msgstr ""
+
+#: ../simpleline/adv_widgets.py:111
+msgid "Question"
+msgstr ""
+
+#: ../simpleline/adv_widgets.py:132
+#, python-format
+msgid "Please respond '%(yes)s' or '%(no)s'"
+msgstr ""
+
+#: ../simpleline/adv_widgets.py:164
+msgid "Help"
+msgstr ""
+
+#: ../simpleline/adv_widgets.py:180
+msgid "The help is not available."
+msgstr ""
+
+#: ../simpleline/adv_widgets.py:195
+#, python-format
+msgid "Press %s to return"
 msgstr ""
