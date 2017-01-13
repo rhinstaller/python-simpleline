@@ -12,7 +12,7 @@ Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/simpleline
 #   cd simpleline && make archive
-Source0: https://github.com/rhinstaller/python-%{srcname}/archive/python-%{srcname}-%{version}.tar.gz
+Source0: https://github.com/rhinstaller/python-%{srcname}/archive/%{srcname}-%{version}.tar.gz
 
 License: GPLv2+
 Group: System Environment/Libraries
@@ -35,7 +35,7 @@ is appended to the bottom of the screen.
 Printed lines are never rewritten!
 
 %prep
-%setup -q -n python-%{srcname}-%{version}
+%setup -q -n %{srcname}-%{version}
 
 %build
 make

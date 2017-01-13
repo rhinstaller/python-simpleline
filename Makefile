@@ -1,8 +1,8 @@
-PKGNAME=python-simpleline
-SPECNAME=python3-simpleline
+PKGNAME=simpleline
+SPECNAME=python3-$(PKGNAME)
 VERSION=$(shell awk '/Version:/ { print $$2 }' $(SPECNAME).spec)
 RELEASE=$(shell awk '/Release:/ { print $$2 }' $(SPECNAME).spec | sed -e 's|%.*$$||g')
-TAG=simpleline-$(VERSION)-$(RELEASE)
+TAG=$(PKGNAME)-$(VERSION)
 
 PREFIX=/usr
 
@@ -53,7 +53,7 @@ archive: po-pull
 	gzip -9 $(PKGNAME)-$(VERSION).tar
 	rm -rf $(PKGNAME)-$(VERSION)
 	git checkout -- po/$(PKGNAME).pot
-	@echo "The archive is in $(PKGNAME)-$(VERSION).tar.gz"
+	@echo "The archive name is $(PKGNAME)-$(VERSION).tar.gz"
 
 local: po-pull
 	@rm -f ChangeLog
@@ -64,7 +64,7 @@ local: po-pull
 	@cd /tmp/$(PKGNAME)-$(VERSION) ; $(PYTHON) setup.py -q sdist
 	@cp /tmp/$(PKGNAME)-$(VERSION)/dist/$(PKGNAME)-$(VERSION).tar.gz .
 	@rm -rf /tmp/$(PKGNAME)-$(VERSION)
-	@echo "The archive is in $(PKGNAME)-$(VERSION).tar.gz"
+	@echo "The archive name is $(PKGNAME)-$(VERSION).tar.gz"
 
 rpmlog:
 	@git log --pretty="format:- %s (%ae)" $(TAG).. |sed -e 's/@.*)/)/'
