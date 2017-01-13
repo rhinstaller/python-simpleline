@@ -1,5 +1,5 @@
 %global srcname simpleline
-%global sum A python library for text UI framework
+%global sum A Python3 library for creating text UI
 
 Summary: %{sum}
 Name: python3-%{srcname}
