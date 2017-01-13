@@ -1,8 +1,9 @@
-PKGNAME=python-simpleline
-SPECNAME=python3-simpleline
+NAME=simpleline
+PKGNAME=python-$(NAME)
+SPECNAME=python3-$(NAME)
 VERSION=$(shell awk '/Version:/ { print $$2 }' $(SPECNAME).spec)
 RELEASE=$(shell awk '/Release:/ { print $$2 }' $(SPECNAME).spec | sed -e 's|%.*$$||g')
-TAG=simpleline-$(VERSION)-$(RELEASE)
+TAG=$(NAME)-$(VERSION)
 
 PREFIX=/usr
 
@@ -45,26 +46,26 @@ release: tag archive
 archive: po-pull
 	@rm -f ChangeLog
 	@make ChangeLog
-	git archive --format=tar --prefix=$(PKGNAME)-$(VERSION)/ $(TAG) > $(PKGNAME)-$(VERSION).tar
+	git archive --format=tar --prefix=$(NAME)-$(VERSION)/ $(TAG) > $(NAME)-$(VERSION).tar
 	mkdir $(PKGNAME)-$(VERSION)
 	cp -r po $(PKGNAME)-$(VERSION)
 	cp ChangeLog $(PKGNAME)-$(VERSION)/
-	tar -rf $(PKGNAME)-$(VERSION).tar $(PKGNAME)-$(VERSION)
-	gzip -9 $(PKGNAME)-$(VERSION).tar
+	tar -rf $(NAME)-$(VERSION).tar $(PKGNAME)-$(VERSION)
+	gzip -9 $(NAME)-$(VERSION).tar
 	rm -rf $(PKGNAME)-$(VERSION)
 	git checkout -- po/$(PKGNAME).pot
-	@echo "The archive is in $(PKGNAME)-$(VERSION).tar.gz"
+	@echo "The archive name is $(NAME)-$(VERSION).tar.gz"
 
 local: po-pull
 	@rm -f ChangeLog
 	@make ChangeLog
-	@rm -rf $(PKGNAME)-$(VERSION).tar.gz
+	@rm -rf $(NAME)-$(VERSION).tar.gz
 	@rm -rf /tmp/$(PKGNAME)-$(VERSION) /tmp/$(PKGNAME)
 	@dir=$$PWD; cp -a $$dir /tmp/$(PKGNAME)-$(VERSION)
 	@cd /tmp/$(PKGNAME)-$(VERSION) ; $(PYTHON) setup.py -q sdist
-	@cp /tmp/$(PKGNAME)-$(VERSION)/dist/$(PKGNAME)-$(VERSION).tar.gz .
+	@cp /tmp/$(PKGNAME)-$(VERSION)/dist/$(NAME)-$(VERSION).tar.gz .
 	@rm -rf /tmp/$(PKGNAME)-$(VERSION)
-	@echo "The archive is in $(PKGNAME)-$(VERSION).tar.gz"
+	@echo "The archive name is $(NAME)-$(VERSION).tar.gz"
 
 rpmlog:
 	@git log --pretty="format:- %s (%ae)" $(TAG).. |sed -e 's/@.*)/)/'
