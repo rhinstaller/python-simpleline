@@ -1,8 +1,7 @@
 %global srcname simpleline
-%global sum A Python3 library for creating text UI
 
-Summary: %{sum}
-Name: python3-%{srcname}
+Name: python-%{srcname}
+Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
 Version: 0.1
 Release: 2%{?dist}
@@ -22,11 +21,21 @@ BuildRequires: python3-setuptools
 BuildRequires: intltool
 BuildRequires: python3-pocketlint
 
+%description
+Simpleline is a Python library for creating text UI.
+It is designed to be used with line-based machines
+and tools (e.g. serial console) so that every new line
+is appended to the bottom of the screen.
+Printed lines are never rewritten!
+
+
+%package -n python3-%{srcname}
+Summary: A Python3 library for creating text UI
 Requires: rpm-python3
 
 %{?python_provide:%python_provide python3-%{srcname}}
 
-%description
+%description -n python3-%{srcname}
 Simpleline is a Python3 library for creating text UI.
 It is designed to be used with line-based machines
 and tools (e.g. serial console) so that every new line
@@ -41,13 +50,13 @@ Printed lines are never rewritten!
 
 %install
 make DESTDIR=%{buildroot} install
+%find_lang python-%{srcname}
 
 %check
 make test
 
-%find_lang python-%{srcname}
 
-%files -f python-%{srcname}.lang
+%files -n python3-%{srcname} -f python-%{srcname}.lang
 %license COPYING
 %doc ChangeLog README.md
 %{python3_sitelib}/*
@@ -58,6 +67,7 @@ make test
 - Drop Group, it is not needed
 - Use make_build macro
 - Reorder check and install sections
+- Rename package to python-simpleline but rpm will be python3-simpleline
 
 * Fri Dec 16 2016 Jiri Konecny <jkonecny@redhat.com> - 0.1-1
 - Initial package

@@ -1,5 +1,5 @@
 PKGNAME=simpleline
-SPECNAME=python3-$(PKGNAME)
+SPECNAME=python-$(PKGNAME)
 VERSION=$(shell awk '/Version:/ { print $$2 }' $(SPECNAME).spec)
 RELEASE=$(shell awk '/Release:/ { print $$2 }' $(SPECNAME).spec | sed -e 's|%.*$$||g')
 TAG=$(PKGNAME)-$(VERSION)
@@ -58,12 +58,12 @@ archive: po-pull
 local: po-pull
 	@rm -f ChangeLog
 	@make ChangeLog
-	@rm -rf $(PKGNAME)-$(VERSION).tar.gz
-	@rm -rf /tmp/$(PKGNAME)-$(VERSION) /tmp/$(PKGNAME)
-	@dir=$$PWD; cp -a $$dir /tmp/$(PKGNAME)-$(VERSION)
-	@cd /tmp/$(PKGNAME)-$(VERSION) ; $(PYTHON) setup.py -q sdist
-	@cp /tmp/$(PKGNAME)-$(VERSION)/dist/$(PKGNAME)-$(VERSION).tar.gz .
-	@rm -rf /tmp/$(PKGNAME)-$(VERSION)
+	rm -rf $(PKGNAME)-$(VERSION).tar.gz
+	rm -rf /tmp/$(PKGNAME)-$(VERSION) /tmp/$(PKGNAME)
+	dir=$$PWD; cp -a $$dir /tmp/$(PKGNAME)-$(VERSION)
+	cd /tmp/$(PKGNAME)-$(VERSION) ; $(PYTHON) setup.py -q sdist
+	cp /tmp/$(PKGNAME)-$(VERSION)/dist/$(PKGNAME)-$(VERSION).tar.gz .
+	rm -rf /tmp/$(PKGNAME)-$(VERSION)
 	@echo "The archive name is $(PKGNAME)-$(VERSION).tar.gz"
 
 rpmlog:
