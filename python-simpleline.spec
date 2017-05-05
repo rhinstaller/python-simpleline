@@ -4,13 +4,10 @@ Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
 Version: 0.1
-Release: 2%{?dist}
-# This is a Red Hat maintained package which is specific to
-# our distribution.  Thus the source is only available from
-# within this srpm.
+Release: 3%{?dist}
 # This tarball was created from upstream git:
-#   git clone https://github.com/rhinstaller/simpleline
-#   cd simpleline && make archive
+#   git clone https://github.com/rhinstaller/python-simpleline
+#   cd python-simpleline && make archive
 Source0: https://github.com/rhinstaller/python-%{srcname}/archive/%{srcname}-%{version}.tar.gz
 
 License: GPLv2+
@@ -62,6 +59,9 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Fri May 5 2017 Jiri Konecny <jkonecny@redhat.com> - 0.1-3
+- Modify comments in the spec file
+
 * Thu May 4 2017 Jiri Konecny <jkonecny@redhat.com> - 0.1-2
 - Drop clean section
 - Drop Group, it is not needed
