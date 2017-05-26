@@ -19,7 +19,6 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
-__all__ = ["App", "UIScreen"]
 
 import sys
 import queue
@@ -29,6 +28,9 @@ from simpleline.communication.communication import hubQ
 from simpleline.utils.i18n import _, N_
 from simpleline.widgets import Widget, TextWidget
 from simpleline.prompt import Prompt
+from simpleline.screen_stack import ScreenStack, ScreenData
+
+__all__ = ["App", "UIScreen"]
 
 RAW_INPUT_LOCK = threading.Lock()
 
@@ -107,14 +109,7 @@ class App(object):
         # value: list of tuples (callback, data)
         self._handlers = {}
 
-        # screen stack contains triplets
-        #  UIScreen to show
-        #  arguments for it's refresh and setup method
-        #  value indicating whether new mainloop is needed
-        #   - None = do nothing
-        #   - True = execute new loop
-        #   - False = already running loop, exit when window closes
-        self._screens = []
+        self._screen_stack = ScreenStack()
 
     def register_event_handler(self, event, callback, data=None):
         """This method registers a callback which will be called when message "event"
@@ -177,6 +172,30 @@ class App(object):
 
         queue_instance.put((hubQ.HUB_CODE_INPUT, [data]))
 
+    def schedule_screen(self, ui_screen):
+        """Add screen to the bottom of the stack.
+
+        This is mostly useful at the beginning to prepare the first screen hierarchy to display.
+
+        :param ui_screen: screen to show
+        :type ui_screen: UIScreen instance
+        """
+        screen = ScreenData(ui_screen, [])
+        self._screen_stack.add_first(screen)
+
+    def schedule_screen_with_args(self, ui_screen, args):
+        """Add screen to the bottom of the stack.
+
+        This is mostly useful at the beginning to prepare the first screen hierarchy to display.
+
+        :param ui_screen: screen to show
+        :type ui_screen: UIScreen instance
+        :param args: optional argument, please see switch_screen for details
+        :type args: anything
+        """
+        screen = ScreenData(ui_screen, args)
+        self._screen_stack.add_first(screen)
+
     def switch_screen(self, ui, args=None):
         """Schedules a screen to replace the current one.
 
@@ -187,12 +206,12 @@ class App(object):
                      (can be used to select what item should be displayed or so)
         :type args: anything
         """
-        # (oldscr, oldattr, oldloop)
-        oldloop = self._screens.pop()[2]
+        old_loop = self._screen_stack.pop().execute_loop
 
-        # we have to keep the oldloop value so we stop
+        # we have to keep the old_loop value so we stop
         # dialog's mainloop if it ever uses switch_screen
-        self._screens.append((ui, args, oldloop))
+        screen = ScreenData(ui, args, old_loop)
+        self._screen_stack.append(screen)
         self.redraw()
 
     def switch_screen_with_return(self, ui, args=None):
@@ -205,7 +224,8 @@ class App(object):
         :param args: optional argument, please see switch_screen for details
         :type args: anything
         """
-        self._screens.append((ui, args, self.NOP))
+        screen = ScreenData(ui, args, False)
+        self._screen_stack.append(screen)
 
         self.redraw()
 
@@ -222,48 +242,29 @@ class App(object):
         :param args: optional argument, please see switch_screen for details
         :type args: anything
         """
-        # set the third item to True so new loop gets started
-        self._screens.append((ui, args, self.START_MAINLOOP))
+        screen = ScreenData(ui, args, True)
+        self._screen_stack.append(screen)
         self._do_redraw()
 
-    def schedule_screen(self, ui, args=None):
-        """Add screen to the bottom of the stack.
-
-        This is mostly useful at the beginning to prepare the first screen hierarchy to display.
-
-        :param ui: screen to show
-        :type ui: UIScreen instance
-
-        :param args: optional argument, please see switch_screen for details
-        :type args: anything
-        """
-        self._screens.insert(0, (ui, args, self.NOP))
-
-    def close_screen(self, scr=None):
+    def close_screen(self):
         """Close the currently displayed screen and exit it's main loop if necessary.
 
         Next screen from the stack is then displayed.
-
-        :param scr: if an UIScreen instance is passed it is checked to be the screen
-                    we are trying to close.
-        :type scr: UIScreen instance
         """
-        oldscr, _oldattr, oldloop = self._screens.pop()
-        if scr is not None:
-            assert oldscr == scr
+        screen = self._screen_stack.pop()
 
         # User can react when screen is closing
-        oldscr.closed()
+        screen.ui_screen.closed()
 
         # this cannot happen, if we are closing the window,
         # the loop must have been running or not be there at all
-        assert oldloop != self.START_MAINLOOP
+        assert screen.execute_loop != self.START_MAINLOOP
 
         # we are in modal window, end it's loop
-        if oldloop == self.STOP_MAINLOOP:
+        if screen.execute_loop == self.STOP_MAINLOOP:
             raise ExitMainLoop()
 
-        if self._screens:
+        if not self._screen_stack.is_empty():
             self.redraw()
         else:
             raise ExitMainLoop()
@@ -276,19 +277,17 @@ class App(object):
         :return: this method returns True if user input processing is requested
         :rtype: bool
         """
-        # there is nothing to display, exit
-        if not self._screens:
+        if self._screen_stack.is_empty():
             raise ExitMainLoop()
 
-        # get the screen from the top of the stack
-        screen, args, newloop = self._screens[-1]
-        self.current_screen = screen
+        screen = self._screen_stack.pop(False)
+        self.current_screen = screen.ui_screen
 
         # new mainloop is requested
-        if newloop == self.START_MAINLOOP:
+        if screen.execute_loop == self.START_MAINLOOP:
             # change the record to indicate mainloop is running
-            self._screens.pop()
-            self._screens.append((screen, args, self.STOP_MAINLOOP))
+            self._screen_stack.pop()
+            self._screen_stack.append((screen.ui_screen, screen.args, self.STOP_MAINLOOP))
             # start the mainloop
             self._mainloop()
             # after the mainloop ends, set the redraw flag
@@ -298,8 +297,8 @@ class App(object):
         elif self._redraw:
             # get the widget tree from the screen and show it in the screen
             try:
-                input_needed = screen.refresh(args)
-                screen.show_all()
+                input_needed = screen.ui_screen.refresh(screen.args)
+                screen.ui_screen.show_all()
                 self._redraw = False
             except ExitMainLoop:
                 raise
@@ -336,7 +335,7 @@ class App(object):
         error_counter = 0
 
         # run until there is nothing else to display
-        while self._screens:
+        while not self._screen_stack.is_empty():
             # process asynchronous events
             self.process_events()
 
@@ -346,14 +345,15 @@ class App(object):
                 print(self._spacer)
 
             try:
+                active_screen = self._screen_stack.pop(False)
                 # draw the screen if redraw is needed or the screen changed
                 # (unlikely to happen separately, but just be sure)
-                if self._redraw or last_screen != self._screens[-1][0]:
+                if self._redraw or last_screen != active_screen.ui_screen:
                     # we have fresh screen
 
                     # this screen is used first time (call setup() method)
-                    if not self._screens[-1][0].ready:
-                        if not self._screens[-1][0].setup(self._screens[-1][1]):
+                    if not active_screen.ui_screen.ready:
+                        if not active_screen.ui_screen.setup(active_screen.args):
                             # skip if setup went wrong
                             continue
                     # reset error counter
@@ -362,11 +362,11 @@ class App(object):
                         # if no input processing is requested, go for another cycle
                         continue
 
-                last_screen = self._screens[-1][0]
+                last_screen = active_screen.ui_screen
 
                 # get the screen's prompt
                 try:
-                    prompt = last_screen.prompt(self._screens[-1][1])
+                    prompt = last_screen.prompt(active_screen.args)
                 except ExitMainLoop:
                     raise
                 except Exception:    # pylint: disable=broad-except
@@ -384,7 +384,7 @@ class App(object):
 
                 # process the input, if it wasn't processed (valid)
                 # increment the error counter
-                if not self.input(self._screens[-1][1], c):
+                if not self.input(active_screen.args, c):
                     error_counter += 1
                 else:
                     # input was successfully processed, but no other screen was
@@ -467,9 +467,9 @@ class App(object):
         :rtype: True|False
         """
         # delegate the handling to active screen first
-        if self._screens:
+        if not self._screen_stack.is_empty():
             try:
-                key = self._screens[-1][0].input(args, key)
+                key = self._screen_stack.pop(False).ui_screen.input(args, key)
                 if key is None:
                     return True
             except ExitMainLoop:
@@ -479,17 +479,17 @@ class App(object):
                 return False
 
         # global refresh command
-        if self._screens and (key == Prompt.REFRESH):
+        if not self._screen_stack.is_empty() and (key == Prompt.REFRESH):
             self._do_redraw()
             return True
 
         # global close command
-        if self._screens and (key == Prompt.CONTINUE):
+        if not self._screen_stack.is_empty() and (key == Prompt.CONTINUE):
             self.close_screen()
             return True
 
         # global quit command
-        elif self._screens and (key == Prompt.QUIT):
+        elif not self._screen_stack.is_empty() and (key == Prompt.QUIT):
             if self.quit_screen:
                 d = self.quit_screen(self, _(self.quit_message))
                 self.switch_screen_modal(d)
