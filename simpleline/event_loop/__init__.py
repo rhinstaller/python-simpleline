@@ -21,7 +21,7 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
-from abc import ABCMeta, abstractmethod, abstractclassmethod
+from abc import ABCMeta, abstractmethod
 
 
 class ExitMainLoop(Exception):
@@ -40,7 +40,7 @@ class ExitAllMainLoops(ExitMainLoop):
 class AbstractEventLoop(metaclass=ABCMeta):
 
     @abstractmethod
-    def register_event_handler(self, event, callback, data=None):
+    def register_signal_handler(self, signal, callback, data=None):
         """Register a callback which will be called when message "event"
         is encountered during process_events.
 
@@ -48,8 +48,8 @@ class AbstractEventLoop(metaclass=ABCMeta):
         - the received message in the form of (type, [arguments])
         - the data registered with the handler
 
-        :param event: the id of the event we want to react on
-        :type event: number|string
+        :param signal: signal class we want to react on
+        :type signal: class based on the simpleline.event_loop.AbstractSignal class
 
         :param callback: the callback function
         :type callback: func(event_message, data)
@@ -60,11 +60,11 @@ class AbstractEventLoop(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def enqueue_event(self, event):
+    def enqueue_signal(self, signal):
         """Enqueue new event for processing.
 
-        :param event: event which you want to add to the event queue for processing
-        :type event: instance based on AbstractEvent class
+        :param signal: signal which you want to add to the event queue for processing
+        :type signal: instance based on AbstractEvent class
         """
         pass
 
@@ -74,7 +74,7 @@ class AbstractEventLoop(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def process_events(self, return_at=None):
+    def process_signals(self, return_at=None):
         """Processes incoming async messages and returns when a specific message is encountered
         or when the queue_instance is empty.
 
@@ -86,27 +86,32 @@ class AbstractEventLoop(metaclass=ABCMeta):
         """
         pass
 
+    def execute_new_loop(self):
+        """Execute new main loop inside of existing main loop"""
+        self._mainloop()
 
-class AbstractEvent(metaclass=ABCMeta):
-    """This class is base Event class.
 
-    You need to implement `id` property which contains event ID.
-    """
+class AbstractSignal(metaclass=ABCMeta):
+    """This class is base class for signals."""
 
-    @classmethod
-    @abstractclassmethod
-    def id(cls):
-        """This is main identifier of the Event.
+    def __init__(self, source, priority=0):
+        self._source = source
+        self._priority = priority
 
-        The event.id must be unique.
-        """
-        return "EventName"
+    def __eq__(self, other):
+        """Signal classes are all equal to disable sorting inside of priority queue."""
+        return True
 
     @property
     def priority(self):
-        """Priority in the event queue.
+        """Priority of this event.
 
         Values less than 0 denote higher priorities. Values greater than 0 denote lower priorities.
         Events from high priority sources are always processed before events from lower priority sources.
         """
-        return 0
+        return self._priority
+
+    @property
+    def source(self):
+        """Source which emitted this event."""
+        return self._source
