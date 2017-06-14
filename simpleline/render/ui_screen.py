@@ -19,6 +19,9 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
+from simpleline.base import App
+from simpleline.prompt import Prompt
+
 
 class UIScreen(object):
     """Base class representing one TUI Screen.
@@ -29,15 +32,12 @@ class UIScreen(object):
     # title line of the screen
     title = u"Screen.."
 
-    def __init__(self, app, screen_height=25):
+    def __init__(self, screen_height=25):
         """ Constructor of the TUI screen.
         
-        :param app: reference to application main class
-        :type app: instance of class App
         :param screen_height: height of the screen (useful for printing long widgets)
         :type screen_height: int
         """
-        self._app = app
         self._screen_height = screen_height
         self._ready = False
 
@@ -102,14 +102,14 @@ class UIScreen(object):
                 # print part with a prompt to continue
                 for line in lines[pos:(pos + self._screen_height - 2)]:
                     print(line)
-                self._app.raw_input(Prompt(_("\nPress %s to continue") % Prompt.ENTER))
+                App.renderer().raw_input(Prompt(_("\nPress %s to continue") % Prompt.ENTER))
                 pos += self._screen_height - 1
 
     def show_all(self):
         """Prepares all elements of self._window for output and then prints them on the screen."""
         for w in self._window:
             if hasattr(w, "render"):
-                w.render(self.app.width)  # pylint: disable=no-member
+                w.render(App.renderer().width)  # pylint: disable=no-member
             if isinstance(w, Widget):
                 self._print_long_widget(w)
             elif isinstance(w, bytes):
@@ -148,11 +148,6 @@ class UIScreen(object):
         return prompt
 
     @property
-    def app(self):
-        """The reference to this Screen's assigned App instance."""
-        return self._app
-
-    @property
     def ready(self):
         """This screen is ready for use.
 
@@ -162,7 +157,7 @@ class UIScreen(object):
 
     def close(self):
         """Close the current screen."""
-        self.app.close_screen(self)
+        App.renderer().close_screen(self)
 
     def closed(self):
         """Callback when this screen is closed."""
