@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from simpleline.prompt import Prompt
+
+from simpleline.render.prompt import Prompt
 
 
 class Prompt_TestCase(unittest.TestCase):

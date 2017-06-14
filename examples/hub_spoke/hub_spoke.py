@@ -1,10 +1,10 @@
 #!/bin/python3
 
 from simpleline import INPUT_PROCESSED
-from simpleline.base import UIScreen, App
-from simpleline.widgets import TextWidget, ColumnWidget, CenterWidget
-from simpleline.prompt import Prompt
 from simpleline.adv_widgets import PasswordDialog
+from simpleline.base import UIScreen, App
+from simpleline.render.prompt import Prompt
+from simpleline.widgets import TextWidget, ColumnWidget, CenterWidget
 
 
 class Hub(UIScreen):

@@ -20,7 +20,8 @@
 #
 
 from simpleline.base import App
-from simpleline.prompt import Prompt
+from simpleline.render.prompt import Prompt
+from simpleline.utils.i18n import _
 
 
 class UIScreen(object):
