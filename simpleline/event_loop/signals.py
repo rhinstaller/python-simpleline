@@ -45,3 +45,10 @@ class ExceptionSignal(AbstractSignal):
             self.exception_info = exception_info
         else:
             self.exception_info = exc_info()
+
+
+class InputReadySignal(AbstractSignal):
+    """Input from user is ready for processing."""
+
+    def __init__(self, source):
+        self.source = source
