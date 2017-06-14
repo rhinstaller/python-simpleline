@@ -67,6 +67,8 @@ class MainLoop(AbstractEventLoop):
         """
         try:
             self._mainloop()
+            if self._quit_callback:
+                self._quit_callback()
             return True
         except ExitAllMainLoops:
             return False

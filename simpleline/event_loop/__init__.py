@@ -39,6 +39,10 @@ class ExitAllMainLoops(ExitMainLoop):
 
 class AbstractEventLoop(metaclass=ABCMeta):
 
+    def __init__(self):
+        self._quit_callback = None
+        super().__init__()
+
     @abstractmethod
     def register_signal_handler(self, signal, callback, data=None):
         """Register a callback which will be called when message "event"
@@ -86,9 +90,14 @@ class AbstractEventLoop(metaclass=ABCMeta):
         """
         pass
 
+    @abstractmethod
     def execute_new_loop(self):
         """Execute new main loop inside of existing main loop"""
-        self._mainloop()
+        pass
+
+    def event_loop_quit_callback(self, callback):
+        """Call this callback when event loop quits."""
+        self._quit_callback = callback
 
 
 class AbstractSignal(metaclass=ABCMeta):
