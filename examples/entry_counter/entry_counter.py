@@ -2,7 +2,7 @@
 
 from simpleline import INPUT_PROCESSED
 from simpleline.base import UIScreen, App
-from simpleline.widgets import TextWidget, CenterWidget
+from simpleline.render.widgets import TextWidget, CenterWidget
 
 
 class Hub(UIScreen):

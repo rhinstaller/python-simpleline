@@ -28,8 +28,8 @@ from simpleline.event_loop import ExitMainLoop, ExitAllMainLoops
 from simpleline.event_loop.signals import ExceptionSignal, InputReadySignal
 from simpleline.render import RendererUnexpectedError
 from simpleline.render.prompt import Prompt
+from simpleline.render.widgets import TextWidget
 from simpleline.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
-from simpleline.widgets import TextWidget
 
 RAW_INPUT_LOCK = threading.Lock()
 

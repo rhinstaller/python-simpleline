@@ -4,7 +4,7 @@ from simpleline import INPUT_PROCESSED
 from simpleline.adv_widgets import PasswordDialog
 from simpleline.base import UIScreen, App
 from simpleline.render.prompt import Prompt
-from simpleline.widgets import TextWidget, ColumnWidget, CenterWidget
+from simpleline.render.widgets import TextWidget, ColumnWidget, CenterWidget
 
 
 class Hub(UIScreen):

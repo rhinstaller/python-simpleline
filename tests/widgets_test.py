@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from simpleline.widgets import TextWidget, ColumnWidget
+
+from simpleline.render.widgets import TextWidget, ColumnWidget
 
 
 class Widgets_TestCase(unittest.TestCase):

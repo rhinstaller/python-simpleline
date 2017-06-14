@@ -21,6 +21,7 @@
 
 from simpleline.base import App
 from simpleline.render.prompt import Prompt
+from simpleline.render.widgets import Widget
 from simpleline.utils.i18n import _
 
 
