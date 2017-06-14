@@ -22,24 +22,24 @@
 import unittest
 from unittest import mock
 
-from simpleline.render.__init__ import Renderer
+from simpleline.render.renderer import Renderer
 from simpleline.render.ui_screen import UIScreen
 from simpleline.screen_stack import ScreenStack, ScreenStackEmptyException
-from simpleline.base import App
+from simpleline.event_loop.main_loop import MainLoop
 
 class Renderer_TestCase(unittest.TestCase):
 
-    DO_NOT_TEST="DO_NOT_TEST"
+    DO_NOT_TEST = "DO_NOT_TEST"
 
     def create_renderer_with_stack(self):
         self.stack = ScreenStack()
-        self.renderer = Renderer(app=App("title"), renderer_stack=self.stack)
+        self.renderer = Renderer(event_loop=MainLoop(), renderer_stack=self.stack)
 
     def pop_last_item(self, remove=True):
         return self.stack.pop(remove)
 
     def test_create_renderer(self):
-        renderer = Renderer(app=App("title"))
+        renderer = Renderer(MainLoop())
         self.assertTrue(type(renderer._screen_stack) is ScreenStack)
 
     def test_nothing_to_render(self):
@@ -137,7 +137,8 @@ class Renderer_TestCase(unittest.TestCase):
         self.assertEqual(self.pop_last_item(False).ui_screen, screen)
         self.assertEqual(self.pop_last_item().args, "test")
 
-    def test_switch_screen_modal_empty_stack(self):
+    @mock.patch('simpleline.render.renderer.Renderer._do_redraw')
+    def test_switch_screen_modal_empty_stack(self, _):
         self.create_renderer_with_stack()
 
         screen = UIScreen(None)
@@ -158,7 +159,8 @@ class Renderer_TestCase(unittest.TestCase):
         self.assertEqual(test_screen.args, [])
         self.assertEqual(test_screen.execute_loop, True)
 
-    def test_switch_screen_modal_with_args(self):
+    @mock.patch('simpleline.render.renderer.Renderer._do_redraw')
+    def test_switch_screen_modal_with_args(self, _):
         self.create_renderer_with_stack()
 
         screen = UIScreen(None)
