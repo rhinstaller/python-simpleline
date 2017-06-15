@@ -1,4 +1,5 @@
 import unittest
+from unittest import mock
 from simpleline.base import App
 from simpleline.render.renderer import Renderer
 from simpleline.event_loop.main_loop import MainLoop
@@ -34,6 +35,12 @@ class App_TestCase(unittest.TestCase):
 
         App.initialize("app_name_test2", event_loop=event_loop2, renderer=renderer2)
         self._check_app_settings("app_name_test2", event_loop2, renderer2)
+
+    @mock.patch('simpleline.event_loop.main_loop.MainLoop.run')
+    def test_run_shortcut(self, run_mock):
+        App.initialize("init")
+        App.run()
+        self.assertTrue(run_mock.called)
 
     def _check_app_settings(self, header, event_loop, renderer):
         self.assertEqual(App.header(), header)

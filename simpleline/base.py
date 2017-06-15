@@ -87,3 +87,11 @@ class App(object):
     def event_loop(cls):
         """Get instance of class responsible for processing asynchronous events."""
         return cls.__app.event_loop
+
+    @classmethod
+    def run(cls):
+        """Run event loop.
+
+        This is shortcut to `App.event_loop().run()`.
+        """
+        App.event_loop().run()
