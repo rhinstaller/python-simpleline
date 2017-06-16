@@ -129,7 +129,7 @@ class UIScreen(object):
         :type args: anything
         :return: return True or INPUT_PROCESSED (None) if key was handled,
                  INPUT_DISCARDED (False) if the screen should not process input
-                 on the App and key if you want it to.
+                 on the renderer and key if you want it to.
         :rtype: True|False|None|str
         """
         return key
@@ -159,7 +159,7 @@ class UIScreen(object):
 
     def close(self):
         """Close the current screen."""
-        App.renderer().close_screen(self)
+        App.renderer().close_screen()
 
     def closed(self):
         """Callback when this screen is closed."""

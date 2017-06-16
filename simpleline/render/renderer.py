@@ -36,7 +36,7 @@ RAW_INPUT_LOCK = threading.Lock()
 
 class Renderer(object):
 
-    def __init__(self, event_loop, renderer_stack=None, width=80):
+    def __init__(self, event_loop, renderer_stack=None):
         """Constructor where you can pass your own renderer stack.
 
         The ScreenStack will be used automatically if renderer stack will be None.
@@ -45,15 +45,13 @@ class Renderer(object):
         :type event_loop: Class based on `simpleline.event_loop.AbstractEventLoop`.
         :param renderer_stack: Input your own renderer stack if you need to.
         :type renderer_stack: `simpleline.screen_stack.ScreenStack` based class.
-        :param width: Width of the screen
-        :type width: unsigned int in range <0;screen size>
         """
         self._quit_screen = None
         self._quit_message = ""
         self._event_loop = event_loop
         self._redraw = False
-        self._spacer = "\n".join(2 * [width * "="])
-        self._width = width
+        self._width = 0
+        self._spacer = ""
         self._input_error_counter = 0
         self._input_thread = None
         if renderer_stack:
@@ -62,11 +60,17 @@ class Renderer(object):
             self._screen_stack = ScreenStack()
 
         self._event_loop.register_signal_handler(RenderScreenSignal, self._do_redraw)
+        self.width = 80
         self.redraw()
 
     @property
     def width(self):
         return self._width
+
+    @width.setter
+    def width(self, width):
+        self._width = width
+        self._spacer = "\n".join(2 * [width * "="])
 
     @property
     def quit_screen(self):
@@ -222,25 +226,23 @@ class Renderer(object):
 
             # get the widget tree from the screen and show it in the screen
             try:
+                self._redraw = False
                 input_needed = top_screen.ui_screen.refresh(top_screen.args)
                 top_screen.ui_screen.show_all()
-                self._redraw = False
             except ExitMainLoop:
                 raise
             except Exception:    # pylint: disable=broad-except
                 self._event_loop.enqueue_signal(ExceptionSignal(self))
                 return False
-
         else:
             # this can happen only in case there was invalid input and prompt
             # should be shown again
             input_needed = True
 
         if input_needed:
-            self._process_input()
+            self._process_input(top_screen)
 
-    def _process_input(self):
-        active_screen = self._screen_stack.pop(remove=False)
+    def _process_input(self, active_screen):
         last_screen = active_screen.ui_screen
         # get the screen's prompt
         try:
@@ -251,8 +253,7 @@ class Renderer(object):
             self._event_loop.enqueue_signal(ExceptionSignal(self))
             return
 
-        # None means prompt handled the input by itself
-        # ask for redraw and continue
+        # None means prompt handled the input by itself -> continue
         if prompt is None:
             self.redraw()
             return
@@ -316,7 +317,7 @@ class Renderer(object):
 
         # global refresh command
         if not self._screen_stack.is_empty() and (key == Prompt.REFRESH):
-            self._do_redraw()
+            self.do_redraw()
             return True
 
         # global close command

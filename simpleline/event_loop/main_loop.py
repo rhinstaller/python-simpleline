@@ -33,6 +33,7 @@ class MainLoop(AbstractEventLoop):
     """
 
     def __init__(self):
+        super().__init__()
         self._handlers = {}
         self._queue_instance = PriorityQueue()
         # handle all exceptions in the _raised_exception() method
