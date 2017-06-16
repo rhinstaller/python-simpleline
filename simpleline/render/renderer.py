@@ -160,7 +160,7 @@ class Renderer(object):
         self._screen_stack.append(screen)
         self._do_redraw()
 
-    def close_screen(self):
+    def close_screen(self, closed_from=None):
         """Close the currently displayed screen and exit it's main loop if necessary.
 
         Next screen from the stack is then displayed.
@@ -174,6 +174,10 @@ class Renderer(object):
         # the loop must have been running or not be there at all
         if screen.execute_loop:
             raise RendererUnexpectedError("New main loop is requested when closing window!")
+
+        if closed_from is not screen.ui_screen:
+            raise RendererUnexpectedError("You are trying to close screen %s from screen %s! "
+                                          "Most probably this is not intentional." % (closed_from, screen.ui_screen))
 
         # we are in modal window, end it's loop
         if screen.end_loop:
