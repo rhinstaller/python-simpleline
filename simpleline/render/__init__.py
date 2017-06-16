@@ -19,6 +19,9 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
+INPUT_PROCESSED = True
+INPUT_DISCARDED = False
+
 
 class RendererError(Exception):
     pass

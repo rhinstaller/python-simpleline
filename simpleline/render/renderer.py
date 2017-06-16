@@ -26,7 +26,7 @@ import threading
 
 from simpleline.event_loop import ExitMainLoop, ExitAllMainLoops
 from simpleline.event_loop.signals import ExceptionSignal, InputReadySignal, RenderScreenSignal
-from simpleline.render import RendererUnexpectedError
+from simpleline.render import RendererUnexpectedError, INPUT_PROCESSED, INPUT_DISCARDED
 from simpleline.render.prompt import Prompt
 from simpleline.render.widgets import TextWidget
 from simpleline.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
@@ -307,8 +307,10 @@ class Renderer(object):
         if not self._screen_stack.is_empty():
             try:
                 key = self._screen_stack.pop(False).ui_screen.input(args, key)
-                if key is None:
+                if key == INPUT_PROCESSED:
                     return True
+                elif key == INPUT_DISCARDED:
+                    return False
             except ExitMainLoop:
                 raise
             except Exception:    # pylint: disable=broad-except
