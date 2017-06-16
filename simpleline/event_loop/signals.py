@@ -52,3 +52,8 @@ class InputReadySignal(AbstractSignal):
 
     def __init__(self, source):
         self.source = source
+
+
+class RenderScreenSignal(AbstractSignal):
+    """Render UIScreen to terminal."""
+    pass

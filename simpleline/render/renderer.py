@@ -25,7 +25,7 @@ import sys
 import threading
 
 from simpleline.event_loop import ExitMainLoop, ExitAllMainLoops
-from simpleline.event_loop.signals import ExceptionSignal, InputReadySignal
+from simpleline.event_loop.signals import ExceptionSignal, InputReadySignal, RenderScreenSignal
 from simpleline.render import RendererUnexpectedError
 from simpleline.render.prompt import Prompt
 from simpleline.render.widgets import TextWidget
@@ -51,7 +51,7 @@ class Renderer(object):
         self._quit_screen = None
         self._quit_message = ""
         self._event_loop = event_loop
-        self._redraw = True
+        self._redraw = False
         self._spacer = "\n".join(2 * [width * "="])
         self._width = width
         self._input_error_counter = 0
@@ -60,6 +60,9 @@ class Renderer(object):
             self._screen_stack = renderer_stack
         else:
             self._screen_stack = ScreenStack()
+
+        self._event_loop.register_signal_handler(RenderScreenSignal, self._do_redraw)
+        self.redraw()
 
     @property
     def width(self):
@@ -180,8 +183,9 @@ class Renderer(object):
     def redraw(self):
         """Set the redraw flag so the screen is refreshed as soon as possible."""
         self._redraw = True
+        self._event_loop.enqueue_signal(RenderScreenSignal(self))
 
-    def _do_redraw(self):
+    def _do_redraw(self, signal=None, data=None):
         """Draws the current screen and returns True if user input is requested.
 
         If modal screen is requested, starts a new loop and initiates redraw after it ends.
@@ -281,7 +285,7 @@ class Renderer(object):
                                               args=(input_queue, prompt, hidden))
         self._input_thread.daemon = True
         self._input_thread.start()
-        self._event_loop.process_events(return_after=InputReadySignal)
+        self._event_loop.process_signals(return_after=InputReadySignal)
         return input_queue.get()  # return the user input
 
     def input(self, args, key):
