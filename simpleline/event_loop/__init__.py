@@ -25,15 +25,7 @@ from abc import ABCMeta, abstractmethod
 
 
 class ExitMainLoop(Exception):
-    """This exception ends the outermost mainloop. Used internally when dialogs close."""
-    pass
-
-
-class ExitAllMainLoops(ExitMainLoop):
-    """This exception ends the whole App mainloop structure.
-
-    App.run() returns False after the exception is processed.
-    """
+    """This exception ends the whole event loop."""
     pass
 
 
@@ -88,11 +80,6 @@ class AbstractEventLoop(metaclass=ABCMeta):
         If the message does not fit return_at, but handlers are defined then it processes all handlers for
         this message.
         """
-        pass
-
-    @abstractmethod
-    def execute_new_loop(self):
-        """Execute new main loop inside of existing main loop"""
         pass
 
     def event_loop_quit_callback(self, callback):

@@ -22,7 +22,7 @@
 #
 
 from queue import PriorityQueue
-from simpleline.event_loop import AbstractEventLoop, ExitAllMainLoops, ExitMainLoop
+from simpleline.event_loop import AbstractEventLoop, ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal
 
 
@@ -71,7 +71,7 @@ class MainLoop(AbstractEventLoop):
             if self._quit_callback:
                 self._quit_callback()
             return True
-        except ExitAllMainLoops:
+        except ExitMainLoop:
             return False
 
     def enqueue_signal(self, signal):
@@ -82,10 +82,6 @@ class MainLoop(AbstractEventLoop):
         """
         self._queue_instance.put((signal.priority, signal))
 
-    def execute_new_loop(self):
-        """Execute new main loop inside of existing main loop"""
-        self._mainloop()
-
     def _mainloop(self):
         """Single mainloop. Do not use directly, start the application using run()."""
         # run infinite loop
@@ -93,12 +89,6 @@ class MainLoop(AbstractEventLoop):
         while True:
             try:
                 self.process_signals()
-            # propagate higher to end all loops
-            # not really needed here, but we might need
-            # more processing in the future
-            except ExitAllMainLoops:
-                raise
-
             # end just this loop
             except ExitMainLoop:
                 break
@@ -124,7 +114,7 @@ class MainLoop(AbstractEventLoop):
                 return
 
     def _raise_exception(self, signal, data):
-        raise signal.exception_info[0] from signal.exception_info[1]
+        raise ExitMainLoop() from signal.exception_info[1]
 
 
 class EventHandler(object):

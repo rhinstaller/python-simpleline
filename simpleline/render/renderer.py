@@ -24,7 +24,7 @@ import queue
 import sys
 import threading
 
-from simpleline.event_loop import ExitMainLoop, ExitAllMainLoops
+from simpleline.event_loop import ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal, InputReadySignal, RenderScreenSignal
 from simpleline.render import RendererUnexpectedError, INPUT_PROCESSED, INPUT_DISCARDED
 from simpleline.render.prompt import Prompt
@@ -121,7 +121,7 @@ class Renderer(object):
         :type args: anything
         """
         try:
-            old_loop = self._screen_stack.pop().execute_loop
+            old_loop = self._screen_stack.pop().draw_immediately
         except ScreenStackEmptyException:
             raise ScreenStackEmptyException("Switch screen is not possible when there is no screen scheduled!")
 
@@ -158,6 +158,7 @@ class Renderer(object):
         """
         screen = ScreenData(ui, args, True)
         self._screen_stack.append(screen)
+        self._redraw = True
         self._do_redraw()
 
     def close_screen(self, closed_from=None):
@@ -172,16 +173,12 @@ class Renderer(object):
 
         # this cannot happen, if we are closing the window,
         # the loop must have been running or not be there at all
-        if screen.execute_loop:
+        if screen.draw_immediately:
             raise RendererUnexpectedError("New main loop is requested when closing window!")
 
         if closed_from is not screen.ui_screen:
             raise RendererUnexpectedError("You are trying to close screen %s from screen %s! "
-                                          "Most probably this is not intentional." % (closed_from, screen.ui_screen))
-
-        # we are in modal window, end it's loop
-        if screen.end_loop:
-            raise ExitMainLoop()
+                                          "This is most probably not intentional." % (closed_from, screen.ui_screen))
 
         if not self._screen_stack.is_empty():
             self.redraw()
@@ -202,6 +199,7 @@ class Renderer(object):
             raise ExitMainLoop()
 
         top_screen = self._screen_stack.pop(False)
+        self._redraw_signal_processed = True
 
         # this screen is used first time (call setup() method)
         if not top_screen.ui_screen.ready:
@@ -210,14 +208,13 @@ class Renderer(object):
                 return
 
         # new mainloop is requested
-        if top_screen.execute_loop:
+        if top_screen.draw_immediately:
             # change the record to indicate mainloop is running
             self._screen_stack.pop()
             self.switch_screen(top_screen.ui_screen, top_screen.args)
-            # notify that this loop should be ended
-            top_screen.end_loop = True
-            # start the mainloop
-            self._event_loop.execute_new_loop()
+            # redraw this screen now
+            self._redraw = True
+            self._do_redraw()
             # after the mainloop ends, set the redraw flag
             # and skip the input processing once, to redisplay the screen first
             self.redraw()
@@ -323,7 +320,7 @@ class Renderer(object):
 
         # global refresh command
         if not self._screen_stack.is_empty() and (key == Prompt.REFRESH):
-            self.do_redraw()
+            self.redraw()
             return True
 
         # global close command
@@ -337,9 +334,9 @@ class Renderer(object):
                 d = self.quit_screen(self, self._quit_message)
                 self.switch_screen_modal(d)
                 if d.answer:
-                    raise ExitAllMainLoops()
+                    raise ExitMainLoop()
             else:
-                raise ExitAllMainLoops()
+                raise ExitMainLoop()
             return True
 
         return False
