@@ -66,13 +66,9 @@ class MainLoop(AbstractEventLoop):
         Do not use self.mainloop() directly as run() handles all the required exceptions
         needed to keep nested mainloop working.
         """
-        try:
-            self._mainloop()
-            if self._quit_callback:
-                self._quit_callback()
-            return True
-        except ExitMainLoop:
-            return False
+        self._mainloop()
+        if self._quit_callback:
+            self._quit_callback()
 
     def enqueue_signal(self, signal):
         """Enqueue new event for processing.
@@ -114,7 +110,7 @@ class MainLoop(AbstractEventLoop):
                 return
 
     def _raise_exception(self, signal, data):
-        raise ExitMainLoop() from signal.exception_info[1]
+        raise signal.exception_info[0] from signal.exception_info[1]
 
 
 class EventHandler(object):
