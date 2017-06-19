@@ -19,8 +19,8 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
-from simpleline.event_loop import AbstractSignal
 from sys import exc_info
+from simpleline.event_loop import AbstractSignal
 
 
 class ExceptionSignal(AbstractSignal):
@@ -39,8 +39,7 @@ class ExceptionSignal(AbstractSignal):
                                to create exception here it needs to be created inside of catch handler
         :type exception_info: output of `sys.exc_info()` method
         """
-        self.source = source
-        self.priority = -20
+        super().__init__(source, priority=-20)
         if exception_info:
             self.exception_info = exception_info
         else:
@@ -51,7 +50,7 @@ class InputReadySignal(AbstractSignal):
     """Input from user is ready for processing."""
 
     def __init__(self, source):
-        self.source = source
+        super().__init__(source)
 
 
 class RenderScreenSignal(AbstractSignal):
