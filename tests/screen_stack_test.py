@@ -106,36 +106,35 @@ class ScreenData_TestCase(unittest.TestCase):
     def _prepare(self):
         self.ui_screen = UIScreen()
 
-    def _screen_check(self, test_screen, ui_screen, args, execute_loop, end_loop):
+    def _screen_check(self, test_screen, ui_screen, args, draw_immediately):
         self._prepare()
         self.assertEqual(test_screen.ui_screen, ui_screen)
         self.assertEqual(test_screen.args, args)
-        self.assertEqual(test_screen.execute_loop, execute_loop)
-        self.assertEqual(test_screen.end_loop, end_loop)
+        self.assertEqual(test_screen.draw_immediately, draw_immediately)
 
     def test_screen_data(self):
         self._prepare()
         screen = ScreenData(self.ui_screen)
-        self._screen_check(screen, self.ui_screen, [], False, False)
+        self._screen_check(screen, self.ui_screen, [], False)
 
     def test_screen_data_with_args(self):
         self._prepare()
         screen = ScreenData(ui_screen=self.ui_screen, args=1)
-        self._screen_check(screen, self.ui_screen, 1, False, False)
+        self._screen_check(screen, self.ui_screen, 1, False)
 
         array = [2, "a"]
         screen2 = ScreenData(ui_screen=self.ui_screen, args=array)
-        self._screen_check(screen2, self.ui_screen, array, False, False)
+        self._screen_check(screen2, self.ui_screen, array, False)
 
     def test_screen_data_with_execute_loop(self):
         self._prepare()
-        screen = ScreenData(self.ui_screen, execute_loop=True)
-        self._screen_check(screen, self.ui_screen, [], True, False)
+        screen = ScreenData(self.ui_screen, draw_immediately=True)
+        self._screen_check(screen, self.ui_screen, [], True)
 
-        screen2 = ScreenData(self.ui_screen, execute_loop=False)
-        self._screen_check(screen2, self.ui_screen, [], False, False)
+        screen2 = ScreenData(self.ui_screen, draw_immediately=False)
+        self._screen_check(screen2, self.ui_screen, [], False)
 
     def test_screen_data_with_args_and_execute_loop(self):
         self._prepare()
         screen = ScreenData(self.ui_screen, "test", True)
-        self._screen_check(screen, self.ui_screen, "test", True, False)
+        self._screen_check(screen, self.ui_screen, "test", True)
