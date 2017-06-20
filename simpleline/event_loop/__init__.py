@@ -88,15 +88,23 @@ class AbstractEventLoop(metaclass=ABCMeta):
 
 
 class AbstractSignal(metaclass=ABCMeta):
-    """This class is base class for signals."""
+    """This class is base class for signals.
+
+    .. NOTE:
+    Ordering and equality is based on priority.
+    """
 
     def __init__(self, source, priority=0):
         self._source = source
         self._priority = priority
 
+    def __lt__(self, other):
+        """Order Signal classes by priority."""
+        return self._priority < other.priority
+
     def __eq__(self, other):
-        """Signal classes are all equal to disable sorting inside of priority queue."""
-        return True
+        """Order Signal classes by priority."""
+        return self._priority == other.priority
 
     @property
     def priority(self):

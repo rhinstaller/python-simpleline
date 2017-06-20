@@ -76,7 +76,7 @@ class MainLoop(AbstractEventLoop):
         :param signal: event which you want to add to the event queue for processing
         :type signal: instance based on AbstractEvent class
         """
-        self._queue_instance.put((signal.priority, signal))
+        self._queue_instance.put(signal)
 
     def _mainloop(self):
         """Single mainloop. Do not use directly, start the application using run()."""
@@ -98,8 +98,7 @@ class MainLoop(AbstractEventLoop):
         :type return_after: class of the signal we are waiting for
         """
         while not self._queue_instance.empty():
-            # ignore priority
-            (_, signal) = self._queue_instance.get()
+            signal = self._queue_instance.get()
             if type(signal) in self._handlers:
                 for handler_data in self._handlers[type(signal)]:
                     try:
