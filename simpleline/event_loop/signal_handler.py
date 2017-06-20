@@ -31,7 +31,7 @@ class SignalHandler(object):
         `emit()`          -- emit signal given signal
     """
 
-    def connect(self, signal, callback):
+    def connect(self, signal, callback, data=None):
         """Connect this class method with given signal.
 
         :param signal: signal class which you want to connect
@@ -39,8 +39,11 @@ class SignalHandler(object):
 
         :param callback: the callback function
         :type callback: func(event_message, data)
+
+        :param data: Data you want to pass to the callback
+        :type data: Anything
         """
-        App.event_loop().register_signal_handler(signal, self, callback)
+        App.event_loop().register_signal_handler(signal, callback, data)
 
     def create_signal(self, signal_class, priority=0):
         """Create signal instance usable in the emit method.
@@ -62,4 +65,4 @@ class SignalHandler(object):
         :param signal: signal to emit
         :type signal: instance of class based on `simpleline.event_loop.AbstractSignal`
         """
-        App.event_loop().enqueue_event(signal)
+        App.event_loop().enqueue_signal(signal)
