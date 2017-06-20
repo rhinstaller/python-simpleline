@@ -55,4 +55,12 @@ class InputReadySignal(AbstractSignal):
 
 class RenderScreenSignal(AbstractSignal):
     """Render UIScreen to terminal."""
-    pass
+
+    def __init__(self, source, input_only=False):
+        """
+        :param source: what caused emitting of this signal
+        :param input_only: ask for input only not for rendering
+        :return input_only: bool
+        """
+        super().__init__(source)
+        self.input_only = input_only

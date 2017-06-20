@@ -49,7 +49,6 @@ class Renderer(object):
         self._quit_screen = None
         self._quit_message = ""
         self._event_loop = event_loop
-        self._redraw = False
         self._width = 0
         self._spacer = ""
         self._input_error_counter = 0
@@ -59,7 +58,7 @@ class Renderer(object):
         else:
             self._screen_stack = ScreenStack()
 
-        self._event_loop.register_signal_handler(RenderScreenSignal, self._do_redraw)
+        self._event_loop.register_signal_handler(RenderScreenSignal, self._redraw_callback_if_no_rendering)
         self.width = 80
         self.redraw()
 
@@ -158,7 +157,6 @@ class Renderer(object):
         """
         screen = ScreenData(ui, args, True)
         self._screen_stack.append(screen)
-        self._redraw = True
         self._do_redraw()
 
     def close_screen(self, closed_from=None):
@@ -176,7 +174,7 @@ class Renderer(object):
         if screen.draw_immediately:
             raise RendererUnexpectedError("New main loop is requested when closing window!")
 
-        if closed_from is not screen.ui_screen:
+        if closed_from is not None and closed_from is not screen.ui_screen:
             raise RendererUnexpectedError("You are trying to close screen %s from screen %s! "
                                           "This is most probably not intentional." % (closed_from, screen.ui_screen))
 
@@ -185,12 +183,14 @@ class Renderer(object):
         else:
             raise ExitMainLoop()
 
-    def redraw(self):
+    def redraw(self, input_only=False):
         """Set the redraw flag so the screen is refreshed as soon as possible."""
-        self._redraw = True
-        self._event_loop.enqueue_signal(RenderScreenSignal(self))
+        self._event_loop.enqueue_signal(RenderScreenSignal(self, input_only))
 
-    def _do_redraw(self, signal=None, data=None):
+    def _redraw_callback_if_no_rendering(self, signal, data):
+        self._do_redraw(signal.input_only)
+
+    def _do_redraw(self, input_only=False):
         """Draws the current screen and returns True if user input is requested.
 
         If modal screen is requested, starts a new loop and initiates redraw after it ends.
@@ -199,12 +199,13 @@ class Renderer(object):
             raise ExitMainLoop()
 
         top_screen = self._screen_stack.pop(False)
-        self._redraw_signal_processed = True
 
         # this screen is used first time (call setup() method)
         if not top_screen.ui_screen.ready:
             if not top_screen.ui_screen.setup(top_screen.args):
-                # skip if setup went wrong
+                # remove the screen and skip if setup went wrong
+                self._screen_stack.pop()
+                self.redraw()
                 return
 
         # new mainloop is requested
@@ -213,13 +214,12 @@ class Renderer(object):
             self._screen_stack.pop()
             self.switch_screen(top_screen.ui_screen, top_screen.args)
             # redraw this screen now
-            self._redraw = True
             self._do_redraw()
             # after the mainloop ends, set the redraw flag
             # and skip the input processing once, to redisplay the screen first
             self.redraw()
             input_needed = False
-        elif self._redraw:
+        elif not input_only:
             # if redraw is needed, separate the content on the screen from the
             # stuff we are about to display now
             self._input_error_counter = 0
@@ -227,7 +227,6 @@ class Renderer(object):
 
             # get the widget tree from the screen and show it in the screen
             try:
-                self._redraw = False
                 input_needed = top_screen.ui_screen.refresh(top_screen.args)
                 top_screen.ui_screen.show_all()
             except ExitMainLoop:
@@ -266,13 +265,15 @@ class Renderer(object):
         # increment the error counter
         if not self.input(active_screen.args, c):
             self._input_error_counter += 1
+
+            # redraw the screen after 5 bad inputs
+            if self._input_error_counter >= 5:
+                self.redraw()
+            else:
+                self.redraw(input_only=True)
         else:
             # input was successfully processed, but no other screen was
             # scheduled, just redraw the screen to display current state
-            self.redraw()
-
-        # redraw the screen after 5 bad inputs
-        if self._input_error_counter >= 5:
             self.redraw()
 
     def raw_input(self, prompt, hidden=False):
@@ -364,19 +365,19 @@ class Renderer(object):
             lines = widget.get_lines()
             sys.stdout.write("\n".join(lines) + " ")
             sys.stdout.flush()
-            # XXX: only one raw_input can run at a time, don't schedule another
-            # one as it would cause weird behaviour and block other packages'
-            # raw_inputs
             if not RAW_INPUT_LOCK.acquire(False):
                 # raw_input is already running
                 return
             else:
                 # lock acquired, we can run raw_input
                 try:
-                    data = input()
+                    data = self._get_input()
                 except EOFError:
                     data = ""
                 finally:
                     RAW_INPUT_LOCK.release()
 
         queue_instance.put(data)
+
+    def _get_input(self):
+        return input()
