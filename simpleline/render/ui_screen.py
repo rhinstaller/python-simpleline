@@ -39,7 +39,7 @@ class UIScreen(SignalHandler):
         """ Constructor of the TUI screen.
         
         :param screen_height: height of the screen (useful for printing long widgets)
-        :type screen_height: int
+        :type screen_height: int (the value must be bigger than 4)
         """
         self._screen_height = screen_height
         self._ready = False
@@ -83,6 +83,7 @@ class UIScreen(SignalHandler):
         :param widget: possibly long widget to print
         :type widget: Widget instance
         """
+        # TODO: Work even for lower screen_height than 4
         pos = 0
         lines = widget.get_lines()
         num_lines = len(lines)

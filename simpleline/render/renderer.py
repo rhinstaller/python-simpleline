@@ -25,7 +25,7 @@ import sys
 import threading
 
 from simpleline.event_loop import ExitMainLoop
-from simpleline.event_loop.signals import ExceptionSignal, InputReadySignal, RenderScreenSignal
+from simpleline.event_loop.signals import ExceptionSignal, InputReadySignal, RenderScreenSignal, InputScreenSignal
 from simpleline.render import RendererUnexpectedError, INPUT_PROCESSED, INPUT_DISCARDED
 from simpleline.render.prompt import Prompt
 from simpleline.render.widgets import TextWidget
@@ -57,10 +57,14 @@ class Renderer(object):
             self._screen_stack = renderer_stack
         else:
             self._screen_stack = ScreenStack()
+        self._register_handlers()
 
-        self._event_loop.register_signal_handler(RenderScreenSignal, self._redraw_callback_if_no_rendering)
         self.width = 80
         self.redraw()
+
+    def _register_handlers(self):
+        self._event_loop.register_signal_handler(RenderScreenSignal, self._redraw_callback)
+        self._event_loop.register_signal_handler(InputScreenSignal, self._process_input_callback)
 
     @property
     def width(self):
@@ -184,21 +188,18 @@ class Renderer(object):
             raise ExitMainLoop()
 
     def redraw(self, input_only=False):
-        """Set the redraw flag so the screen is refreshed as soon as possible."""
+        """Register rendering to the event loop for processing."""
         self._event_loop.enqueue_signal(RenderScreenSignal(self, input_only))
 
-    def _redraw_callback_if_no_rendering(self, signal, data):
-        self._do_redraw(signal.input_only)
+    def _redraw_callback(self, signal, data):
+        self._do_redraw()
 
-    def _do_redraw(self, input_only=False):
+    def _do_redraw(self):
         """Draws the current screen and returns True if user input is requested.
 
         If modal screen is requested, starts a new loop and initiates redraw after it ends.
         """
-        if self._screen_stack.is_empty():
-            raise ExitMainLoop()
-
-        top_screen = self._screen_stack.pop(False)
+        top_screen = self._get_last_screen()
 
         # this screen is used first time (call setup() method)
         if not top_screen.ui_screen.ready:
@@ -218,8 +219,7 @@ class Renderer(object):
             # after the mainloop ends, set the redraw flag
             # and skip the input processing once, to redisplay the screen first
             self.redraw()
-            input_needed = False
-        elif not input_only:
+        else:
             # if redraw is needed, separate the content on the screen from the
             # stuff we are about to display now
             self._input_error_counter = 0
@@ -227,22 +227,35 @@ class Renderer(object):
 
             # get the widget tree from the screen and show it in the screen
             try:
-                input_needed = top_screen.ui_screen.refresh(top_screen.args)
+                input_required = top_screen.ui_screen.refresh(top_screen.args)
                 top_screen.ui_screen.show_all()
+                if input_required:
+                    self.input_required()
             except ExitMainLoop:
                 raise
             except Exception:    # pylint: disable=broad-except
                 self._event_loop.enqueue_signal(ExceptionSignal(self))
                 return False
-        else:
-            # this can happen only in case there was invalid input and prompt
-            # should be shown again
-            input_needed = True
 
-        if input_needed:
-            self._process_input(top_screen)
+    def _get_last_screen(self):
+        if self._screen_stack.is_empty():
+            raise ExitMainLoop()
 
-    def _process_input(self, active_screen):
+        return self._screen_stack.pop(False)
+
+    def input_required(self):
+        """Register user input to the event loop for processing."""
+        self._event_loop.enqueue_signal(InputScreenSignal(self))
+
+    def process_input(self):
+        self._process_input()
+
+    def _process_input_callback(self, signal, data):
+        self._process_input()
+
+    def _process_input(self):
+
+        active_screen = self._get_last_screen()
         last_screen = active_screen.ui_screen
         # get the screen's prompt
         try:
@@ -270,7 +283,7 @@ class Renderer(object):
             if self._input_error_counter >= 5:
                 self.redraw()
             else:
-                self.redraw(input_only=True)
+                self.input_required()
         else:
             # input was successfully processed, but no other screen was
             # scheduled, just redraw the screen to display current state
