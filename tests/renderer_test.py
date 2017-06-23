@@ -42,6 +42,27 @@ class Renderer_TestCase(unittest.TestCase):
         renderer = Renderer(MainLoop())
         self.assertTrue(type(renderer._screen_stack) is ScreenStack)
 
+    def test_renderer_width(self):
+        renderer = Renderer(MainLoop())
+        self.assertEqual(renderer.width, 80)
+        renderer.width = 90
+        self.assertEqual(renderer.width, 90)
+
+    def test_renderer_quit_screen(self):
+        def test_callback():
+            pass
+        renderer = Renderer(MainLoop())
+        self.assertEqual(renderer.quit_screen, None)
+        renderer.quit_screen = test_callback
+        self.assertEqual(renderer.quit_screen, test_callback)
+
+    def test_renderer_quit_message(self):
+        msg = "quit"
+        renderer = Renderer(MainLoop())
+        self.assertEqual(renderer.quit_message, "")
+        renderer.quit_message = msg
+        self.assertEqual(renderer.quit_message, msg)
+
     def test_nothing_to_render(self):
         self.create_renderer_with_stack()
 
