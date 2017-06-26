@@ -20,6 +20,7 @@
 #
 
 from simpleline.base import App
+from simpleline.event_loop.signals import RenderScreenSignal
 
 
 class SignalHandler(object):
@@ -65,4 +66,12 @@ class SignalHandler(object):
         :param signal: signal to emit
         :type signal: instance of class based on `simpleline.event_loop.AbstractSignal`
         """
+        App.event_loop().enqueue_signal(signal)
+
+    def emit_draw_signal(self):
+        """Emit signal to initiate draw.
+
+        Add RenderScreenSignal to the event loop.
+        """
+        signal = self.create_signal(RenderScreenSignal)
         App.event_loop().enqueue_signal(signal)
