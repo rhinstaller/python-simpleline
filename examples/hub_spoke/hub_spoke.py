@@ -1,9 +1,10 @@
 #!/bin/python3
 
-from simpleline import INPUT_PROCESSED
-from simpleline.adv_widgets import PasswordDialog
-from simpleline.base import UIScreen, App
+from simpleline.base import App
+from simpleline.render.renderer import INPUT_PROCESSED, INPUT_DISCARDED
+from simpleline.render.adv_widgets import PasswordDialog
 from simpleline.render.prompt import Prompt
+from simpleline.render.ui_screen import UIScreen
 from simpleline.render.widgets import TextWidget, ColumnWidget, CenterWidget
 
 
@@ -14,11 +15,11 @@ class Hub(UIScreen):
     KEY_SURNAME = "2"
     KEY_PASSWORD = "3"
 
-    def __init__(self, app):
-        super().__init__(app)
-        self._name_spoke = SetName(app, "First name", "John")
-        self._surname_spoke = SetName(app, "Surname", "Doe")
-        self._pass_spoke = PasswordDialog(app)
+    def __init__(self):
+        super().__init__()
+        self._name_spoke = SetNameScreen("First name", "John")
+        self._surname_spoke = SetNameScreen("Surname", "Doe")
+        self._pass_spoke = PasswordDialog()
 
     def refresh(self, args=None):
         super().refresh(args)
@@ -33,56 +34,55 @@ class Hub(UIScreen):
         right = [TextWidget("{}) Password".format(self.KEY_PASSWORD))]
 
         if self._pass_spoke.answer:
-            right.append(TextWidget("   Pasword is set"))
+            right.append(TextWidget("   Password is set"))
 
         col = ColumnWidget([(30, left), (30, right)], 5)
         self._window += [header, "", "", col, ""]
         return True
 
     def input(self, args, key):
-        """Run spokes based on the user choice"""
-        if key == self.KEY_USER: # set first name
-            self.app.switch_screen_with_return(self._name_spoke)
+        """Run spokes based on the user choice."""
+        if key == self.KEY_USER:  # set first name
+            App.renderer().switch_screen(self._name_spoke)
             return INPUT_PROCESSED
-        elif key == self.KEY_SURNAME: # set surname
-            self.app.switch_screen_with_return(self._surname_spoke)
+        elif key == self.KEY_SURNAME:  # set surname
+            App.renderer().switch_screen(self._surname_spoke)
             return INPUT_PROCESSED
-        elif key == self.KEY_PASSWORD: # set password
-            self.app.switch_screen_with_return(self._pass_spoke)
+        elif key == self.KEY_PASSWORD:  # set password
+            App.renderer().switch_screen(self._pass_spoke)
             return INPUT_PROCESSED
         elif key == Prompt.CONTINUE:
             if self._name_spoke and self._surname_spoke and self._pass_spoke.answer:
                 return key
-            else: # catch 'c' key if not everything set
-                return INPUT_PROCESSED
+            else:  # catch 'c' key if not everything set
+                return INPUT_DISCARDED
         else:
             return key
 
     def prompt(self, args=None):
-        """Add information to prompt for user"""
+        """Add information to prompt for user."""
         prompt = super().prompt(args)
         prompt.add_option("1,2,3", "to enter spokes")
         return prompt
 
 
-class SetName(UIScreen):
-    title = u"SetName"
+class SetNameScreen(UIScreen):
 
-    def __init__(self, app, message, def_value):
-        super().__init__(app)
+    def __init__(self, message, def_value):
+        super().__init__()
         self._value = def_value or ""
         self._message = message
 
     def refresh(self, args=None):
-        """Write message to user"""
+        """Write message to user."""
         super().refresh(args)
         w = TextWidget(self._message)
         self._window += [CenterWidget(w), ""]
         return True
 
     def prompt(self, args=None):
-        """Take user input"""
-        self._value = self.app.raw_input("Write your name: ")
+        """Take user input."""
+        self._value = App.renderer().raw_input("Write your name: ")
         self.close()
 
     @property
@@ -91,7 +91,7 @@ class SetName(UIScreen):
 
 
 if __name__ == "__main__":
-    a = App("Hubs and Spokes")
-    s = Hub(a)
-    a.schedule_screen(s)
-    a.run()
+    App.initialize("Hubs and Spokes")
+    s = Hub()
+    App.renderer().schedule_screen(s)
+    App.run()
