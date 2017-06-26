@@ -254,7 +254,6 @@ class Renderer(object):
         self._process_input()
 
     def _process_input(self):
-
         active_screen = self._get_last_screen()
         last_screen = active_screen.ui_screen
         # get the screen's prompt
@@ -268,7 +267,6 @@ class Renderer(object):
 
         # None means prompt handled the input by itself -> continue
         if prompt is None:
-            self.redraw()
             return
 
         # get the input from user
@@ -378,7 +376,7 @@ class Renderer(object):
                 # raw_input is already running
                 return
             else:
-                # lock acquired, we can run raw_input
+                # lock acquired, we can run input
                 try:
                     data = self._get_input()
                 except EOFError:
