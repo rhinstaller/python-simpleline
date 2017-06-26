@@ -16,7 +16,3 @@
 # License and may only be used or replicated with the express permission of
 # Red Hat, Inc.
 #
-
-# Make the return calls from the UIScreen input() function more clear
-INPUT_PROCESSED = None
-INPUT_DISCARDED = False

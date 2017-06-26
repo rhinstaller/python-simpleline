@@ -19,12 +19,11 @@
 
 import sys
 
-from simpleline import INPUT_PROCESSED
+from simpleline.base import App
 from simpleline.render.ui_screen import UIScreen
-from simpleline.render import widgets
+from simpleline.render import widgets, INPUT_PROCESSED
 from simpleline.render.prompt import Prompt
 from simpleline.utils.i18n import _, N_, C_
-from simpleline.base import App
 
 
 class ErrorDialog(UIScreen):
