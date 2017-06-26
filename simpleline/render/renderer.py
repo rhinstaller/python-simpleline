@@ -140,7 +140,7 @@ class Renderer(object):
 
         :param ui: screen to show
         :type ui: UIScreen instance
-        :param args: optional argument, please see switch_screen for details
+        :param args: optional argument
         :type args: anything
         """
         screen = ScreenData(ui, args, False)
@@ -187,9 +187,9 @@ class Renderer(object):
         else:
             raise ExitMainLoop()
 
-    def redraw(self, input_only=False):
+    def redraw(self):
         """Register rendering to the event loop for processing."""
-        self._event_loop.enqueue_signal(RenderScreenSignal(self, input_only))
+        self._event_loop.enqueue_signal(RenderScreenSignal(self))
 
     def _redraw_callback(self, signal, data):
         self._do_redraw()
@@ -284,10 +284,6 @@ class Renderer(object):
                 self.redraw()
             else:
                 self.input_required()
-        else:
-            # input was successfully processed, but no other screen was
-            # scheduled, just redraw the screen to display current state
-            self.redraw()
 
     def raw_input(self, prompt, hidden=False):
         """This method reads one input from user. Its basic form has only one
