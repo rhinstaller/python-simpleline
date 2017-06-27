@@ -21,9 +21,8 @@
 
 
 import unittest
-from simpleline.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
-from simpleline.base import App
 from simpleline.render.ui_screen import UIScreen
+from simpleline.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
 
 
 class ScreenStack_TestCase(unittest.TestCase):
@@ -102,6 +101,9 @@ class ScreenStack_TestCase(unittest.TestCase):
 
 
 class ScreenData_TestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.ui_screen = None
 
     def _prepare(self):
         self.ui_screen = UIScreen()

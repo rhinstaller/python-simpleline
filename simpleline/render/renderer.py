@@ -338,8 +338,9 @@ class Renderer(object):
 
         # global quit command
         elif not self._screen_stack.is_empty() and (key == Prompt.QUIT):
-            if self._quit_screen:
-                d = self.quit_screen(self, self._quit_message)
+            if self.quit_screen:
+                quit_screen = self.quit_screen
+                d = quit_screen(self, self._quit_message)
                 self.switch_screen_modal(d)
                 if d.answer:
                     raise ExitMainLoop()

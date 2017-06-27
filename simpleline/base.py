@@ -22,7 +22,7 @@
 from simpleline.render.renderer import Renderer
 from simpleline.event_loop.main_loop import MainLoop
 
-__all__ = ["App", "UIScreen"]
+__all__ = ["App"]
 
 
 class App(object):

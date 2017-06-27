@@ -46,6 +46,12 @@ class EventLoopHandler_TestCase(unittest.TestCase):
 
 class ProcessEvents_TestCase(unittest.TestCase):
 
+    def setUp(self):
+        self.signal_counter = 0
+        self.signal_counter2 = 0
+        self.signal_counter_copied = 0
+        self.callback_called = False
+
     def test_simple_register_handler(self):
         self.callback_called = False
         loop = MainLoop()

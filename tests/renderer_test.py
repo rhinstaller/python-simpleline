@@ -31,6 +31,10 @@ class Renderer_TestCase(unittest.TestCase):
 
     DO_NOT_TEST = "DO_NOT_TEST"
 
+    def setUp(self):
+        self.stack = None
+        self.renderer = None
+
     def create_renderer_with_stack(self):
         self.stack = ScreenStack()
         self.renderer = Renderer(event_loop=MainLoop(), renderer_stack=self.stack)
