@@ -84,15 +84,6 @@ class Renderer(object):
         self._quit_screen = quit_screen
 
     @property
-    def quit_message(self):
-        """This message will be send to quit_screen."""
-        return self._quit_message
-
-    @quit_message.setter
-    def quit_message(self, msg):
-        """This message will be send to quit_screen."""
-        self._quit_message = msg
-
     def nothing_to_render(self):
         """Is something for rendering in the renderer stack?
 
@@ -124,13 +115,13 @@ class Renderer(object):
         :type args: anything
         """
         try:
-            old_loop = self._screen_stack.pop().draw_immediately
+            should_draw_immediately = self._screen_stack.pop().draw_immediately
         except ScreenStackEmptyException:
             raise ScreenStackEmptyException("Switch screen is not possible when there is no screen scheduled!")
 
         # we have to keep the old_loop value so we stop
         # dialog's mainloop if it ever uses switch_screen
-        screen = ScreenData(ui, args, old_loop)
+        screen = ScreenData(ui, args, should_draw_immediately)
         self._screen_stack.append(screen)
         self.redraw()
 

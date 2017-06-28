@@ -135,7 +135,7 @@ class WidgetProcessing_TestCase(unittest.TestCase):
         widget_text = "Test"
         screen = ScreenWithWidget(widget_text)
 
-        App.initialize("Test")
+        App.initialize()
         App.renderer().schedule_screen(screen)
         App.run()
 
@@ -145,7 +145,7 @@ class WidgetProcessing_TestCase(unittest.TestCase):
         widget_text = "Testing output\n\n\nAgain..."
         screen = ScreenWithWidget(widget_text)
 
-        App.initialize("Test")
+        App.initialize()
         App.renderer().schedule_screen(screen)
         App.run()
 
@@ -157,7 +157,7 @@ class WidgetProcessing_TestCase(unittest.TestCase):
         in_mock.side_effect = lambda: print('\n')
         screen = ScreenWithWidget(widget_text, height=4)
 
-        App.initialize("Test")
+        App.initialize()
         App.renderer().schedule_screen(screen)
         App.run()
 

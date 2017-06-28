@@ -34,7 +34,7 @@ def _calculate_separator(width):
 
 
 def _schedule_screen_and_run(screen):
-    App.initialize("Test")
+    App.initialize()
     App.renderer().schedule_screen(screen)
     App.run()
 
@@ -57,7 +57,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
         ui_screen = EmptyScreen()
         width = 60
 
-        App.initialize("Test")
+        App.initialize()
         App.renderer().width = width
         App.renderer().schedule_screen(ui_screen)
         App.run()
@@ -68,7 +68,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
         ui_screen = EmptyScreen()
         width = 0
 
-        App.initialize("Test")
+        App.initialize()
         App.renderer().width = width
         App.renderer().schedule_screen(ui_screen)
         App.run()
@@ -81,7 +81,7 @@ class SimpleUIScreenFeatures_TestCase(unittest.TestCase):
     def test_close_screen(self):
         screen = UIScreen()
 
-        App.initialize("TestApp")
+        App.initialize()
         App.renderer().schedule_screen(screen)
         # Program will quit in close_screen when stack is empty
         App.renderer().schedule_screen(UIScreen())
@@ -90,7 +90,7 @@ class SimpleUIScreenFeatures_TestCase(unittest.TestCase):
     def test_close_screen_closed_from_other_source_error(self):
         screen = EmptyScreen()
 
-        App.initialize("TestApp")
+        App.initialize()
         App.renderer().schedule_screen(UIScreen())
         with self.assertRaises(RendererUnexpectedError):
             screen.close()
@@ -98,7 +98,7 @@ class SimpleUIScreenFeatures_TestCase(unittest.TestCase):
     def test_failed_screen_setup(self):
         screen = FailedSetupScreen()
 
-        App.initialize("Test")
+        App.initialize()
         App.renderer().schedule_screen(screen)
         App.run()
 
@@ -117,14 +117,14 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase):
         self.assertTrue(ui_screen.is_closed)
 
     def test_running_empty_loop(self, _):
-        App.initialize("Test")
+        App.initialize()
         App.run()
 
     def test_screen_event_loop_processing_with_two_screens(self, _):
         first_screen = EmptyScreen()
         screen = EmptyScreen()
 
-        App.initialize("Test")
+        App.initialize()
         App.renderer().schedule_screen(first_screen)
         App.renderer().schedule_screen(screen)
         App.run()
@@ -239,7 +239,7 @@ class InputProcessing_TestCase(unittest.TestCase):
         mock_stdin.return_value = "q"
         screen = UIScreen()
 
-        App.initialize("Test")
+        App.initialize()
         App.renderer().schedule_screen(screen)
         App.run()
 
@@ -248,7 +248,7 @@ class InputProcessing_TestCase(unittest.TestCase):
         screen = UIScreen()
         screen2 = EmptyScreen()
 
-        App.initialize("Test")
+        App.initialize()
         App.renderer().schedule_screen(screen)
         App.renderer().schedule_screen(screen2)
         App.run()
@@ -260,7 +260,7 @@ class InputProcessing_TestCase(unittest.TestCase):
         mock_stdin.return_value = "r"
         screen = RefreshTestScreen()
 
-        App.initialize("Test")
+        App.initialize()
         App.renderer().schedule_screen(screen)
         App.run()
 
@@ -270,7 +270,7 @@ class InputProcessing_TestCase(unittest.TestCase):
         mock_stdin.return_value = "q"
         screen = InputErrorTestScreen()
 
-        App.initialize("Test")
+        App.initialize()
         App.renderer().schedule_screen(screen)
         App.run()
 

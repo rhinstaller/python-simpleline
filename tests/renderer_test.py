@@ -60,21 +60,14 @@ class Renderer_TestCase(unittest.TestCase):
         renderer.quit_screen = test_callback
         self.assertEqual(renderer.quit_screen, test_callback)
 
-    def test_renderer_quit_message(self):
-        msg = "quit"
-        renderer = Renderer(MainLoop())
-        self.assertEqual(renderer.quit_message, "")
-        renderer.quit_message = msg
-        self.assertEqual(renderer.quit_message, msg)
-
     def test_nothing_to_render(self):
         self.create_renderer_with_stack()
 
-        self.assertTrue(self.renderer.nothing_to_render())
+        self.assertTrue(self.renderer.nothing_to_render)
         self.assertTrue(self.stack.is_empty())
 
         self.renderer.schedule_screen(UIScreen())
-        self.assertFalse(self.renderer.nothing_to_render())
+        self.assertFalse(self.renderer.nothing_to_render)
         self.assertFalse(self.stack.is_empty())
 
     def test_schedule_screen(self):

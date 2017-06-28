@@ -91,7 +91,7 @@ class SetNameScreen(UIScreen):
 
 
 if __name__ == "__main__":
-    App.initialize("Hubs and Spokes")
-    s = Hub()
-    App.renderer().schedule_screen(s)
+    App.initialize()
+    screen = Hub()
+    App.renderer().schedule_screen(screen)
     App.run()

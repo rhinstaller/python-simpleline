@@ -38,8 +38,7 @@ class App(object):
 
     class AppPimpl(object):
 
-        def __init__(self, title, renderer, event_loop):
-            self.header = title
+        def __init__(self, renderer, event_loop):
             self.event_loop = event_loop
             self.renderer = renderer
 
@@ -51,13 +50,10 @@ class App(object):
         super().__init__()
 
     @classmethod
-    def initialize(cls, title, renderer=None, event_loop=None):
+    def initialize(cls, renderer=None, event_loop=None):
         """Create app instance inside of this class.
 
         This method can be called multiple times to reset App settings.
-
-        :param title: application title for whenever we need to display app name
-        :type title: str
 
         :param renderer: renderer used for rendering screens; if not specified use `simpleline.render.renderer.Renderer`
         :type renderer: instance of `simpleline.render.renderer.Renderer`
@@ -71,12 +67,7 @@ class App(object):
         if renderer is None:
             renderer = Renderer(event_loop)
 
-        cls.__app = cls.AppPimpl(title, renderer, event_loop)
-
-    @classmethod
-    def header(cls):
-        """Application title."""
-        return cls.__app.header
+        cls.__app = cls.AppPimpl(renderer, event_loop)
 
     @classmethod
     def renderer(cls):

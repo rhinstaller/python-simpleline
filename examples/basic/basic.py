@@ -15,7 +15,7 @@ class HelloWorld(UIScreen):
 
 
 if __name__ == "__main__":
-    App.initialize("Hello World")
-    s = HelloWorld()
-    App.renderer().schedule_screen(s)
+    App.initialize()
+    screen = HelloWorld()
+    App.renderer().schedule_screen(screen)
     App.run()

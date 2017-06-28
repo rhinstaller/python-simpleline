@@ -64,7 +64,7 @@ class CounterScreen(UIScreen):
 
 
 if __name__ == "__main__":
-    App.initialize("Hubs and Spokes")
+    App.initialize()
     hub = Hub()
     App.renderer().schedule_screen(hub)
     App.run()

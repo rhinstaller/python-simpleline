@@ -40,7 +40,7 @@ class SignalHandler_TestCase(unittest.TestCase):
     def test_basic_connect(self):
         connect_screen = UIScreen()
 
-        App.initialize("TestApp", renderer=MagicMock())
+        App.initialize(renderer=MagicMock())
         connect_screen.connect(TestSignal, self._callback)
         App.event_loop().enqueue_signal(TestSignal(self))
         App.event_loop().process_signals()
@@ -50,7 +50,7 @@ class SignalHandler_TestCase(unittest.TestCase):
     def test_create_signal(self):
         connect_screen = UIScreen()
 
-        App.initialize("TestApp", renderer=MagicMock())
+        App.initialize(renderer=MagicMock())
         signal = connect_screen.create_signal(TestSignal, priority=20)
 
         self.assertEqual(signal.priority, 20)
@@ -61,7 +61,7 @@ class SignalHandler_TestCase(unittest.TestCase):
     def test_emit(self):
         connect_screen = UIScreen()
 
-        App.initialize("TestApp", renderer=MagicMock())
+        App.initialize(renderer=MagicMock())
         connect_screen.connect(TestSignal, self._callback)
         connect_screen.emit(TestSignal(self))
         App.event_loop().process_signals()
@@ -73,7 +73,7 @@ class SignalHandler_TestCase(unittest.TestCase):
         connect_test_screen = TestRenderConnectHandler()
         screen2 = EmptyScreen()
 
-        App.initialize("Test")
+        App.initialize()
         App.renderer().schedule_screen(connect_test_screen)
         App.renderer().schedule_screen(screen2)
         App.run()
