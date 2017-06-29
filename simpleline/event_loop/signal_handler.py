@@ -52,7 +52,7 @@ class SignalHandler(object):
         :param signal_class: signal you want to use
         :type signal_class: class based on `simpleline.event_loop.AbstractSignal`
 
-        :param priority: priority of the signal; please look on the `simpleline.event_loop.AbstractSignal.priority for
+        :param priority: priority of the signal; please look on the `simpleline.event_loop.AbstractSignal.priority` for
                          further info
         :type priority: int
         """

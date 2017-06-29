@@ -28,7 +28,7 @@ __all__ = ["App"]
 class App(object):
     """This is the main class for Simpleline library.
 
-    It giving you access to the renderer and event loop. You can have only one instance of this
+    It is giving you access to the renderer and event loop. You can have only one instance of this
     class in your application.
 
     To create this instance call `App.initialize()` method. This method can also be used to

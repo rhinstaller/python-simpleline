@@ -1,4 +1,4 @@
-# Screen stack classes for manipulating stack which are in a view stack.
+# Classes implementation for storing and manipulating Screen stack.
 #
 # Copyright (C) 2017  Red Hat, Inc.
 #
@@ -36,11 +36,8 @@ class ScreenStack(object):
     def __init__(self):
         self._screens = []
 
-    def is_empty(self):
-        if not self._screens:
-            return True
-        else:
-            return False
+    def empty(self):
+        return not self._screens
 
     def size(self):
         return len(self._screens)

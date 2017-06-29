@@ -24,9 +24,9 @@ from simpleline.event_loop import AbstractSignal
 
 
 class ExceptionSignal(AbstractSignal):
-    """Emit this signal when exception raised.
+    """Emit this signal when exception is raised.
 
-    This class must be created inside of catch handler or `exception_info` must be specified in creation process.
+    This class must be created inside of exception handler or `exception_info` must be specified in creation process.
     """
 
     def __init__(self, source, exception_info=None):
@@ -36,7 +36,7 @@ class ExceptionSignal(AbstractSignal):
         :type source: class which emits this signal
 
         :param exception_info: if specified raise your exception, otherwise create exception here;
-                               to create exception here it needs to be created inside of catch handler
+                               to create exception here it needs to be created inside of exception handler
         :type exception_info: output of `sys.exc_info()` method
         """
         super().__init__(source, priority=-20)

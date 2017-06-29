@@ -1,4 +1,4 @@
-# Base class for text window screen.
+# Base class for text window screens.
 #
 # Copyright (C) 2017  Red Hat, Inc.
 #
@@ -76,11 +76,10 @@ class UIScreen(SignalHandler):
         self._window = [_(self.title), u""]
         return True
 
-    def _print_long_widget(self, widget):
-        """Prints a long widget (possibly longer than the screen height) with user
-        interaction (when needed).
+    def _print_widget(self, widget):
+        """Prints a widget (could be longer than the screen height) with user interaction (when needed).
 
-        :param widget: possibly long widget to print
+        :param widget: widget to print
         :type widget: Widget instance
         """
         # TODO: Work even for lower screen_height than 4
@@ -115,7 +114,7 @@ class UIScreen(SignalHandler):
             if hasattr(w, "render"):
                 w.render(App.renderer().width)  # pylint: disable=no-member
             if isinstance(w, Widget):
-                self._print_long_widget(w)
+                self._print_widget(w)
             elif isinstance(w, bytes):
                 print(w)
             else:

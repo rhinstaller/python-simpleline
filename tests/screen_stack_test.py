@@ -34,9 +34,9 @@ class ScreenStack_TestCase(unittest.TestCase):
 
     def test_is_empty(self):
         stack = ScreenStack()
-        self.assertTrue(stack.is_empty())
+        self.assertTrue(stack.empty())
         stack.append(ScreenData(None))
-        self.assertFalse(stack.is_empty())
+        self.assertFalse(stack.empty())
 
     def test_pop(self):
         stack = ScreenStack()

@@ -65,11 +65,11 @@ class Renderer_TestCase(unittest.TestCase):
         self.create_renderer_with_stack()
 
         self.assertTrue(self.renderer.nothing_to_render)
-        self.assertTrue(self.stack.is_empty())
+        self.assertTrue(self.stack.empty())
 
         self.renderer.schedule_screen(UIScreen())
         self.assertFalse(self.renderer.nothing_to_render)
-        self.assertFalse(self.stack.is_empty())
+        self.assertFalse(self.stack.empty())
 
     def test_schedule_screen(self):
         self.create_renderer_with_stack()
@@ -108,7 +108,7 @@ class Renderer_TestCase(unittest.TestCase):
         self.renderer.replace_screen(new_screen)
         self.assertEqual(self.pop_last_item().ui_screen, new_screen)
         # The old_screen was replaced so the stack is empty now
-        self.assertTrue(self.stack.is_empty())
+        self.assertTrue(self.stack.empty())
 
     def test_replace_screen_with_args(self):
         self.create_renderer_with_stack()
@@ -121,7 +121,7 @@ class Renderer_TestCase(unittest.TestCase):
         self.assertEqual(test_screen.ui_screen, screen)
         self.assertEqual(test_screen.args, "test")
         # The old_screen was replaced so the stack is empty now
-        self.assertTrue(self.stack.is_empty())
+        self.assertTrue(self.stack.empty())
 
     def test_switch_screen_with_empty_stack(self):
         self.create_renderer_with_stack()
@@ -146,7 +146,7 @@ class Renderer_TestCase(unittest.TestCase):
 
         # We popped the new_screen so the old screen should stay here
         self.assertEqual(self.pop_last_item().ui_screen, screen)
-        self.assertTrue(self.stack.is_empty())
+        self.assertTrue(self.stack.empty())
 
     def test_switch_screen_with_args(self):
         self.create_renderer_with_stack()

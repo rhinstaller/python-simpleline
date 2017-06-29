@@ -43,7 +43,7 @@ class Renderer(object):
 
         :param event_loop: Event loop used for the renderer.
         :type event_loop: Class based on `simpleline.event_loop.AbstractEventLoop`.
-        :param renderer_stack: Input your own renderer stack if you need to.
+        :param renderer_stack: Use custom renderer stack if you need to.
         :type renderer_stack: `simpleline.screen_stack.ScreenStack` based class.
         """
         self._quit_screen = None
@@ -90,7 +90,7 @@ class Renderer(object):
         :return: True if the rendering stack is empty
         :rtype: bool
         """
-        return self._screen_stack.is_empty()
+        return self._screen_stack.empty()
 
     def schedule_screen(self, ui_screen, args=None):
         """Add screen to the bottom of the stack.
@@ -173,7 +173,7 @@ class Renderer(object):
             raise RendererUnexpectedError("You are trying to close screen %s from screen %s! "
                                           "This is most probably not intentional." % (closed_from, screen.ui_screen))
 
-        if not self._screen_stack.is_empty():
+        if not self._screen_stack.empty():
             self.redraw()
         else:
             raise ExitMainLoop()
@@ -216,7 +216,7 @@ class Renderer(object):
             self._input_error_counter = 0
             print(self._spacer)
 
-            # get the widget tree from the screen and show it in the screen
+            # refresh the screen and print its content
             try:
                 input_required = top_screen.ui_screen.refresh(top_screen.args)
                 top_screen.ui_screen.show_all()
@@ -229,7 +229,7 @@ class Renderer(object):
                 return False
 
     def _get_last_screen(self):
-        if self._screen_stack.is_empty():
+        if self._screen_stack.empty():
             raise ExitMainLoop()
 
         return self._screen_stack.pop(False)
@@ -301,10 +301,10 @@ class Renderer(object):
         :type key: str
 
         :return: True if key was processed, False if it was not recognized
-        :rtype: True|False
+        :rtype: bool
         """
         # delegate the handling to active screen first
-        if not self._screen_stack.is_empty():
+        if not self._screen_stack.empty():
             try:
                 key = self._screen_stack.pop(False).ui_screen.input(args, key)
                 if key == INPUT_PROCESSED:
@@ -317,27 +317,27 @@ class Renderer(object):
                 self._event_loop.enqueue_signal(ExceptionSignal(self))
                 return False
 
-        # global refresh command
-        if not self._screen_stack.is_empty() and (key == Prompt.REFRESH):
-            self.redraw()
-            return True
+            # global refresh command
+            if key == Prompt.REFRESH:
+                self.redraw()
+                return True
 
-        # global close command
-        if not self._screen_stack.is_empty() and (key == Prompt.CONTINUE):
-            self.close_screen()
-            return True
+            # global close command
+            if key == Prompt.CONTINUE:
+                self.close_screen()
+                return True
 
-        # global quit command
-        elif not self._screen_stack.is_empty() and (key == Prompt.QUIT):
-            if self.quit_screen:
-                quit_screen = self.quit_screen
-                d = quit_screen(self, self._quit_message)
-                self.switch_screen_modal(d)
-                if d.answer:
+            # global quit command
+            if key == Prompt.QUIT:
+                if self.quit_screen:
+                    quit_screen = self.quit_screen
+                    d = quit_screen(self, self._quit_message)
+                    self.switch_screen_modal(d)
+                    if d.answer:
+                        raise ExitMainLoop()
+                else:
                     raise ExitMainLoop()
-            else:
-                raise ExitMainLoop()
-            return True
+                return True
 
         return False
 
