@@ -22,10 +22,11 @@
 import unittest
 from unittest import mock
 
-from simpleline.render.renderer import Renderer
-from simpleline.render.ui_screen import UIScreen
-from simpleline.screen_stack import ScreenStack, ScreenStackEmptyException
 from simpleline.event_loop.main_loop import MainLoop
+from simpleline.render.renderer import Renderer
+from simpleline.render.screen_stack import ScreenStack, ScreenStackEmptyException
+from simpleline.render.ui_screen import UIScreen
+
 
 class Renderer_TestCase(unittest.TestCase):
 
