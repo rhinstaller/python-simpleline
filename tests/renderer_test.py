@@ -30,8 +30,6 @@ from simpleline.render.ui_screen import UIScreen
 
 class Renderer_TestCase(unittest.TestCase):
 
-    DO_NOT_TEST = "DO_NOT_TEST"
-
     def setUp(self):
         self.stack = None
         self.renderer = None
