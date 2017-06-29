@@ -20,7 +20,10 @@
 #
 
 
-class ScreenStackException(Exception):
+from simpleline import SimplelineError
+
+
+class ScreenStackException(SimplelineError):
     pass
 
 

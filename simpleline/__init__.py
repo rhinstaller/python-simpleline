@@ -16,3 +16,7 @@
 # License and may only be used or replicated with the express permission of
 # Red Hat, Inc.
 #
+
+
+class SimplelineError(Exception):
+    pass

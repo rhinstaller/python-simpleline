@@ -22,8 +22,10 @@
 INPUT_PROCESSED = True
 INPUT_DISCARDED = False
 
+from simpleline import SimplelineError
 
-class RendererError(Exception):
+
+class RendererError(SimplelineError):
     pass
 
 

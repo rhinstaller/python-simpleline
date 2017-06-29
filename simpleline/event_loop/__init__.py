@@ -22,9 +22,10 @@
 #
 
 from abc import ABCMeta, abstractmethod
+from simpleline import SimplelineError
 
 
-class ExitMainLoop(Exception):
+class ExitMainLoop(SimplelineError):
     """This exception ends the whole event loop."""
     pass
 
