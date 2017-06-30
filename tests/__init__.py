@@ -26,6 +26,15 @@ def calculate_separator(width=80):
     return separator
 
 
+def create_output_with_separators(screens_text):
+    msg = ""
+    for screen_txt in screens_text:
+        msg += calculate_separator()
+        msg += screen_txt + "\n\n"
+
+    return msg
+
+
 def schedule_screen_and_run(screen):
     App.initialize()
     App.renderer().schedule_screen(screen)

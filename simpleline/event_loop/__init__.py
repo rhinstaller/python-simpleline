@@ -57,6 +57,15 @@ class AbstractEventLoop(metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    def register_signal_source(self, signal_source):
+        """Register source of signal for actual event queue.
+
+        :param signal_source: Source for future signals.
+        :type signal_source: `simpleline.render.ui_screen.UIScreen`
+        """
+        pass
+
+    @abstractmethod
     def enqueue_signal(self, signal):
         """Enqueue new event for processing.
 
@@ -68,6 +77,25 @@ class AbstractEventLoop(metaclass=ABCMeta):
     @abstractmethod
     def run(self):
         """Starts the event loop."""
+        pass
+
+    @abstractmethod
+    def execute_new_loop(self, signal):
+        """Starts the new event loop and pass `signal` in it.
+
+        This is required for processing a modal screens.
+
+        :param signal: signal passed to the new event loop
+        :type signal: `AbstractSignal` based class
+        """
+        pass
+
+    @abstractmethod
+    def close_loop(self):
+        """Close active event loop.
+
+        Close an event loop created by the `execute_new_loop()` method.
+        """
         pass
 
     @abstractmethod

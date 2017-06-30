@@ -36,7 +36,7 @@ class Renderer_TestCase(unittest.TestCase):
 
     def create_renderer_with_stack(self):
         self.stack = ScreenStack()
-        self.renderer = Renderer(event_loop=MainLoop(), renderer_stack=self.stack)
+        self.renderer = Renderer(event_loop=mock.MagicMock(), renderer_stack=self.stack)
 
     def pop_last_item(self, remove=True):
         return self.stack.pop(remove)
@@ -76,8 +76,8 @@ class Renderer_TestCase(unittest.TestCase):
         self.renderer.schedule_screen(screen)
         test_screen = self.pop_last_item(False)
         self.assertEqual(test_screen.ui_screen, screen)
-        self.assertEqual(len(test_screen.args), 0) # empty field - no arguments
-        self.assertFalse(test_screen.draw_immediately)
+        self.assertEqual(len(test_screen.args), 0)  # empty field - no arguments
+        self.assertFalse(test_screen.execute_new_loop)
 
         # Schedule another screen, new one will be added to the bottom of the stack
         new_screen = UIScreen()
@@ -140,7 +140,7 @@ class Renderer_TestCase(unittest.TestCase):
         test_screen = self.pop_last_item()
         self.assertEqual(test_screen.ui_screen, new_screen)
         self.assertEqual(test_screen.args, [])
-        self.assertEqual(test_screen.draw_immediately, False)
+        self.assertEqual(test_screen.execute_new_loop, False)
 
         # We popped the new_screen so the old screen should stay here
         self.assertEqual(self.pop_last_item().ui_screen, screen)
@@ -174,7 +174,7 @@ class Renderer_TestCase(unittest.TestCase):
         test_screen = self.pop_last_item()
         self.assertEqual(test_screen.ui_screen, new_screen)
         self.assertEqual(test_screen.args, [])
-        self.assertEqual(test_screen.draw_immediately, True)
+        self.assertEqual(test_screen.execute_new_loop, True)
 
     @mock.patch('simpleline.render.renderer.Renderer._do_redraw')
     def test_switch_screen_modal_with_args(self, _):

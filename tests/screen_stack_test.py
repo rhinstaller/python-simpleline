@@ -109,11 +109,11 @@ class ScreenData_TestCase(unittest.TestCase):
     def _prepare(self):
         self.ui_screen = UIScreen()
 
-    def _screen_check(self, test_screen, ui_screen, args, draw_immediately):
+    def _screen_check(self, test_screen, ui_screen, args, execute_new_loop):
         self._prepare()
         self.assertEqual(test_screen.ui_screen, ui_screen)
         self.assertEqual(test_screen.args, args)
-        self.assertEqual(test_screen.draw_immediately, draw_immediately)
+        self.assertEqual(test_screen.execute_new_loop, execute_new_loop)
 
     def test_screen_data(self):
         self._prepare()
@@ -131,10 +131,10 @@ class ScreenData_TestCase(unittest.TestCase):
 
     def test_screen_data_with_execute_loop(self):
         self._prepare()
-        screen = ScreenData(self.ui_screen, draw_immediately=True)
+        screen = ScreenData(self.ui_screen, execute_new_loop=True)
         self._screen_check(screen, self.ui_screen, [], True)
 
-        screen2 = ScreenData(self.ui_screen, draw_immediately=False)
+        screen2 = ScreenData(self.ui_screen, execute_new_loop=False)
         self._screen_check(screen2, self.ui_screen, [], False)
 
     def test_screen_data_with_args_and_execute_loop(self):

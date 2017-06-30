@@ -22,7 +22,7 @@ from unittest import mock
 from io import StringIO
 from simpleline.base import App
 from simpleline.render.ui_screen import UIScreen
-from tests import schedule_screen_and_run
+from tests import schedule_screen_and_run, create_output_with_separators
 
 
 @mock.patch('sys.stdout', new_callable=StringIO)
@@ -80,12 +80,27 @@ class ScreenScheduler_TestCase(unittest.TestCase):
         modal_render_outer = ModalTestScreen(modal_screen_render=modal_render_inner)
         screen = ModalTestScreen(modal_screen_render=modal_render_outer)
 
-        _schedule_screen_and_run(screen)
+        schedule_screen_and_run(screen)
 
         self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_START_RENDER)
         # outer modal screen has AFTER_MODAL_START_RENDER because it was set before by inner loop
         self.assertEqual(modal_render_outer.copied_modal_counter, ModalTestScreen.AFTER_MODAL_START_RENDER)
         self.assertEqual(modal_render_inner.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_START_RENDER)
+
+
+    @mock.patch('simpleline.render.renderer.Renderer.raw_input')
+    def test_switch_screen_modal_input_order(self, mock_input, mock_stdout):
+        modal_screen = InputAndDrawScreen("Modal")
+        parent_screen = EmitDrawThenCreateModal(modal_screen, msg="Parent")
+        mock_input.return_value = "c"
+        expected = ["Modal",  # modal needs to be printed first
+                    "Parent",   # draw enqueued draw signal -- manually registered in refresh()
+                    "Parent"]   # draw because modal screen was closed
+
+        schedule_screen_and_run(parent_screen)
+
+        self.maxDiff = None
+        self.assertEqual(create_output_with_separators(expected), mock_stdout.getvalue())
 
 
 class ShowedCounterScreen(UIScreen):
@@ -156,3 +171,30 @@ class ModalTestScreen(UIScreen):
 
         self.copied_modal_counter = ModalTestScreen.modal_counter
         self.close()
+
+
+class EmitDrawThenCreateModal(UIScreen):
+
+    def __init__(self, refresh_screen, msg):
+        super().__init__()
+        self._refresh_screen = refresh_screen
+        self.title = msg
+
+    def refresh(self, args=None):
+        super().refresh(args)
+        self.emit_draw_signal()
+        if self._refresh_screen:
+            App.renderer().switch_screen_modal(self._refresh_screen)
+            self._refresh_screen = None
+        return True
+
+
+class InputAndDrawScreen(UIScreen):
+
+    def __init__(self, msg):
+        super().__init__()
+        self.title = msg
+
+    def refresh(self, args=None):
+        super().refresh(args)
+        return True

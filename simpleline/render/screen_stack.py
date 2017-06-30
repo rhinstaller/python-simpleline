@@ -60,17 +60,17 @@ class ScreenStack(object):
 
 class ScreenData(object):
 
-    def __init__(self, ui_screen, args=None, draw_immediately=False):
+    def __init__(self, ui_screen, args=None, execute_new_loop=False):
         self.ui_screen = ui_screen
         if args is None:
             self.args = []
         else:
             self.args = args
-        self.draw_immediately = draw_immediately
+        self.execute_new_loop = execute_new_loop
 
     def __str__(self):
         msg = self.__class__.__name__
         msg += "("
-        msg += ",".join((str(self.ui_screen), str(self.args), str(self.draw_immediately)))
+        msg += ",".join((str(self.ui_screen), str(self.args), str(self.execute_new_loop)))
         msg += ")"
         return msg
