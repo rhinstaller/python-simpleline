@@ -40,7 +40,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
 
         schedule_screen_and_run(ui_screen)
 
-        self.assertEqual(stdout_mock.getvalue(), calculate_separator(80))
+        self.assertEqual(calculate_separator(), stdout_mock.getvalue())
 
     def test_other_width_separator(self, stdout_mock):
         ui_screen = EmptyScreen()
@@ -51,7 +51,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
         App.renderer().schedule_screen(ui_screen)
         App.run()
 
-        self.assertEqual(stdout_mock.getvalue(), calculate_separator(width))
+        self.assertEqual(calculate_separator(width), stdout_mock.getvalue())
 
     def test_no_separator(self, stdout_mock):
         ui_screen = EmptyScreen()
@@ -62,7 +62,16 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
         App.renderer().schedule_screen(ui_screen)
         App.run()
 
-        self.assertEqual(stdout_mock.getvalue(), "\n\n")
+        self.assertEqual("\n\n", stdout_mock.getvalue())
+
+    def test_no_separator_when_closed_in_refresh(self, stdout_mock):
+        ui_screen = EmptyScreenCloseBeforePrint()
+
+        App.initialize()
+        App.renderer().schedule_screen(ui_screen)
+        App.run()
+
+        self.assertEqual("", stdout_mock.getvalue())
 
 
 class SimpleUIScreenFeatures_TestCase(unittest.TestCase):
@@ -130,6 +139,19 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase):
         out = self._default_separator
         out += "TestTitle\n\n"
         self.assertEqual(stdout_mock.getvalue(), out)
+
+    def test_screen_closed_in_refresh_wont_print_separator(self, stdout_mock):
+        screen_refresh_close = EmptyScreenCloseBeforePrint()
+        empty_screen = EmptyScreen()
+
+        App.initialize()
+        App.renderer().schedule_screen(screen_refresh_close)  # top of the stack
+        App.renderer().schedule_screen(empty_screen)          # bottom of the stack
+        App.run()
+
+        # only one separator will be printed because the other screen is closed before show_all()
+        self.assertEqual(stdout_mock.getvalue(), calculate_separator())
+
 
     @mock.patch('simpleline.render.renderer.Renderer.raw_input')
     def test_basic_input(self, input_mock, _):
@@ -211,15 +233,26 @@ class EmptyScreen(UIScreen):
     def __init__(self):
         super().__init__()
         self.is_closed = False
+        EmptyScreen.title = ""
+
+    def refresh(self, args=None):
+        super().refresh(args)
+        # Do not ask for input
+        return False
+
+    def show_all(self):
+        self.close()
+
+    def closed(self):
+        self.is_closed = True
+
+
+class EmptyScreenCloseBeforePrint(UIScreen):
 
     def refresh(self, args=None):
         super().refresh(args)
         self.close()
-        # Do not ask for input
         return False
-
-    def closed(self):
-        self.is_closed = True
 
 
 class InputErrorTestScreen(UIScreen):

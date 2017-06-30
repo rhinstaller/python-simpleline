@@ -20,7 +20,7 @@
 from simpleline.base import App
 
 
-def calculate_separator(width):
+def calculate_separator(width=80):
     separator = "\n".join(2 * [width * "="])
     separator += "\n"  # print adds another newline
     return separator

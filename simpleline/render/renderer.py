@@ -211,14 +211,21 @@ class Renderer(object):
             # and skip the input processing once, to redisplay the screen first
             self.redraw()
         else:
-            # if redraw is needed, separate the content on the screen from the
-            # stuff we are about to display now
-            self._input_error_counter = 0
-            print(self._spacer)
+            # redraw is demanded
 
             # refresh the screen and print its content
             try:
+                # refresh screen content
                 input_required = top_screen.ui_screen.refresh(top_screen.args)
+
+                # Screen was closed in the refresh method
+                if top_screen != self._get_last_screen():
+                    return
+
+                # separate the content on the screen from the stuff we are about to display now
+                self._input_error_counter = 0
+                print(self._spacer)
+
                 top_screen.ui_screen.show_all()
                 if input_required:
                     self.input_required()
