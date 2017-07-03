@@ -19,14 +19,14 @@
 # Red Hat, Inc.
 #
 
-__all__ = ["Widget", "TextWidget", "ColumnWidget","CheckboxWidget",
-           "CenterWidget"]
-
 
 import functools
 from textwrap import wrap
 from simpleline.utils.i18n import _
 from simpleline.utils import ensure_str
+
+__all__ = ["Widget", "TextWidget", "ColumnWidget", "CheckboxWidget",
+           "CenterWidget"]
 
 
 class Widget(object):
@@ -227,7 +227,7 @@ class Widget(object):
 
             # shift to the next char
             y += 1
-            if not width is None and y >= col + width:
+            if width is not None and y >= col + width:
                 x += 1
                 if block:
                     y = col

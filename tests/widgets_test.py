@@ -1,7 +1,31 @@
-# -*- coding: utf-8 -*-
+# Widgets test classes.
+#
+# Copyright (C) 2017  Red Hat, Inc.
+#
+# This copyrighted material is made available to anyone wishing to use,
+# modify, copy, or redistribute it subject to the terms and conditions of
+# the GNU General Public License v.2, or (at your option) any later version.
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY expressed or implied, including the implied warranties of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.  You should have received a copy of the
+# GNU General Public License along with this program; if not, write to the
+# Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+# 02110-1301, USA.  Any Red Hat trademarks that are incorporated in the
+# source code or documentation are not subject to the GNU General Public
+# License and may only be used or replicated with the express permission of
+# Red Hat, Inc.
+#
+
 
 import unittest
-from simpleline.widgets import TextWidget, ColumnWidget
+from unittest.mock import patch
+from io import StringIO
+
+from simpleline.base import App
+from simpleline.render.ui_screen import UIScreen
+from simpleline.render.widgets import TextWidget, ColumnWidget
+from simpleline.render.prompt import Prompt
 
 
 class Widgets_TestCase(unittest.TestCase):
@@ -89,3 +113,68 @@ class Widgets_TestCase(unittest.TestCase):
 
         self.evaluate_result(res_lines, expected_result)
 
+
+@patch('simpleline.render.renderer.Renderer._get_input')
+@patch('sys.stdout', new_callable=StringIO)
+class WidgetProcessing_TestCase(unittest.TestCase):
+
+    def _calculate_spacer(self):
+        # this calculation is taken from renderer for default width '80'
+        return '\n'.join(2 * [80 * '='])
+
+    def _expected_output(self, text, widget_height=20):
+        text = text + '\n'
+        lines = text.split('\n')
+        if len(lines) >= widget_height:
+            lines.insert(widget_height - 1, "Press %s to continue: \n" % Prompt.ENTER)
+        msg = self._calculate_spacer() + '\n'
+        msg += "\n".join(lines)
+        return msg
+
+    def test_draw_simple_widget(self, out_mock, in_mock):
+        widget_text = "Test"
+        screen = ScreenWithWidget(widget_text)
+
+        App.initialize()
+        App.renderer().schedule_screen(screen)
+        App.run()
+
+        self.assertEqual(out_mock.getvalue(), self._expected_output(widget_text))
+
+    def test_widget_multiline(self, out_mock, in_mock):
+        widget_text = "Testing output\n\n\nAgain..."
+        screen = ScreenWithWidget(widget_text)
+
+        App.initialize()
+        App.renderer().schedule_screen(screen)
+        App.run()
+
+        self.assertEqual(out_mock.getvalue(), self._expected_output(widget_text))
+
+    def test_widget_too_high(self, out_mock, in_mock):
+        widget_text = "Testing\n\n\nWhy not?"
+        in_mock.return_value = "\n"
+        in_mock.side_effect = lambda: print('\n')
+        screen = ScreenWithWidget(widget_text, height=4)
+
+        App.initialize()
+        App.renderer().schedule_screen(screen)
+        App.run()
+
+        self.assertEqual(out_mock.getvalue(), self._expected_output(widget_text, 4))
+
+
+class ScreenWithWidget(UIScreen):
+
+    def __init__(self, msg, height=25):
+        super().__init__(screen_height=height)
+        self._msg = msg
+
+    def refresh(self, args=None):
+        super().refresh(args)
+        self._window = [TextWidget(self._msg)]
+        return False
+
+    def show_all(self):
+        super().show_all()
+        self.close()

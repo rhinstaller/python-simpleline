@@ -1,6 +1,6 @@
-# Library containing the Text UI framework.
+# Module with classes to handle rendering.
 #
-# Copyright (C) 2016  Red Hat, Inc.
+# Copyright (C) 2017  Red Hat, Inc.
 #
 # This copyrighted material is made available to anyone wishing to use,
 # modify, copy, or redistribute it subject to the terms and conditions of
@@ -16,7 +16,20 @@
 # License and may only be used or replicated with the express permission of
 # Red Hat, Inc.
 #
+# Author(s): Jiri Konecny <jkonecny@redhat.com>
+#
+
+INPUT_PROCESSED = True
+INPUT_DISCARDED = False
+
+from simpleline import SimplelineError
 
 
-class SimplelineError(Exception):
+class RendererError(SimplelineError):
     pass
+
+
+class RendererUnexpectedError(RendererError):
+    pass
+
+

@@ -1,4 +1,4 @@
-# base TUIObject for Anaconda TUI
+# Advanced widgets
 #
 # Copyright (C) 2012  Red Hat, Inc.
 #
@@ -16,12 +16,14 @@
 # License and may only be used or replicated with the express permission of
 # Red Hat, Inc.
 #
+
 import sys
-from simpleline import INPUT_PROCESSED
-from simpleline import widgets
-from simpleline.prompt import Prompt
+
+from simpleline.base import App
+from simpleline.render.ui_screen import UIScreen
+from simpleline.render import widgets, INPUT_PROCESSED
+from simpleline.render.prompt import Prompt
 from simpleline.utils.i18n import _, N_, C_
-from simpleline.base import UIScreen
 
 
 class ErrorDialog(UIScreen):
@@ -29,15 +31,12 @@ class ErrorDialog(UIScreen):
 
     title = N_("Error")
 
-    def __init__(self, app, message):
+    def __init__(self, message):
         """
-        :param app: the running application reference
-        :type app: instance of App class
-
         :param message: the message to show to the user
         :type message: str
         """
-        super().__init__(app)
+        super().__init__()
         self._message = message
 
     def refresh(self, args=None):
@@ -62,15 +61,12 @@ class PasswordDialog(UIScreen):
 
     title = N_("Password")
 
-    def __init__(self, app, message=None):
+    def __init__(self, message=None):
         """
-        :param app: the running application reference
-        :type app: instance of App class
-
         :param message: password prompt question
         :type message: string
         """
-        super().__init__(app)
+        super().__init__()
         self._message = message or _("Enter your passphrase")
         self._password = None
 
@@ -81,7 +77,7 @@ class PasswordDialog(UIScreen):
         return True
 
     def prompt(self, args=None):
-        self._password = self.app.raw_input(_("Passphrase: "), hidden=True)
+        self._password = App.renderer().raw_input(_("Passphrase: "), hidden=True)
         if not self._password:
             return None
         else:
@@ -110,15 +106,12 @@ class YesNoDialog(UIScreen):
 
     title = N_("Question")
 
-    def __init__(self, app, message):
+    def __init__(self, message):
         """
-        :param app: the running application reference
-        :type app: instance of App class
-
         :param message: the message to show to the user
         :type message: unicode
         """
-        super().__init__(app)
+        super().__init__()
         self._message = message
         self._response = None
 
@@ -163,15 +156,12 @@ class HelpScreen(UIScreen):
 
     title = N_("Help")
 
-    def __init__(self, app, help_path):
+    def __init__(self, help_path):
         """
-        :param app: the running application reference
-        :type app: instance of App class
-
         :param help_path: help file name
         :type help_path: str
         """
-        super().__init__(app)
+        super().__init__()
         self.help_path = help_path
 
     def refresh(self, args=None):
