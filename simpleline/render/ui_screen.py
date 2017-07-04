@@ -159,10 +159,6 @@ class UIScreen(SignalHandler):
         """
         return self._ready
 
-    def close(self):
-        """Close the current (visible) screen."""
-        App.renderer().close_screen(closed_from=self)
-
     def closed(self):
         """Callback when this screen is closed."""
         pass

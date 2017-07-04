@@ -20,7 +20,7 @@
 #
 
 from simpleline.base import App
-from simpleline.event_loop.signals import RenderScreenSignal
+from simpleline.event_loop.signals import RenderScreenSignal, CloseScreenSignal
 
 
 class SignalHandler(object):
@@ -74,4 +74,12 @@ class SignalHandler(object):
         Add RenderScreenSignal to the event loop.
         """
         signal = self.create_signal(RenderScreenSignal)
+        App.event_loop().enqueue_signal(signal)
+
+    def close(self):
+        """Emit signal to close this screen.
+
+        Add CloseScreenSignal to the event loop.
+        """
+        signal = self.create_signal(CloseScreenSignal)
         App.event_loop().enqueue_signal(signal)
