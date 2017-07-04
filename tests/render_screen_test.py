@@ -64,8 +64,8 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
 
         self.assertEqual("\n\n", stdout_mock.getvalue())
 
-    def test_no_separator_when_closed_in_refresh(self, stdout_mock):
-        ui_screen = EmptyScreenCloseBeforePrint()
+    def test_no_separator_when_screen_setup_fails(self, stdout_mock):
+        ui_screen = TestScreenSetupFail()
 
         App.initialize()
         App.renderer().schedule_screen(ui_screen)
@@ -86,12 +86,10 @@ class SimpleUIScreenFeatures_TestCase(unittest.TestCase):
         screen.close()
 
     def test_close_screen_closed_from_other_source_error(self):
-        screen = EmptyScreen()
-
         App.initialize()
         App.renderer().schedule_screen(UIScreen())
         with self.assertRaises(RendererUnexpectedError):
-            screen.close()
+            App.renderer().close_screen(closed_from=mock.MagicMock())
 
     def test_failed_screen_setup(self):
         screen = FailedSetupScreen()
@@ -139,19 +137,6 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase):
         out = self._default_separator
         out += "TestTitle\n\n"
         self.assertEqual(stdout_mock.getvalue(), out)
-
-    def test_screen_closed_in_refresh_wont_print_separator(self, stdout_mock):
-        screen_refresh_close = EmptyScreenCloseBeforePrint()
-        empty_screen = EmptyScreen()
-
-        App.initialize()
-        App.renderer().schedule_screen(screen_refresh_close)  # top of the stack
-        App.renderer().schedule_screen(empty_screen)          # bottom of the stack
-        App.run()
-
-        # only one separator will be printed because the other screen is closed before show_all()
-        self.assertEqual(stdout_mock.getvalue(), calculate_separator())
-
 
     @mock.patch('simpleline.render.renderer.Renderer.raw_input')
     def test_basic_input(self, input_mock, _):
@@ -247,11 +232,14 @@ class EmptyScreen(UIScreen):
         self.is_closed = True
 
 
-class EmptyScreenCloseBeforePrint(UIScreen):
+class TestScreenSetupFail(UIScreen):
+
+    def setup(self, args):
+        super().setup(args)
+        return False
 
     def refresh(self, args=None):
         super().refresh(args)
-        self.close()
         return False
 
 
