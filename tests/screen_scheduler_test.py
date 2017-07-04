@@ -182,7 +182,7 @@ class EmitDrawThenCreateModal(UIScreen):
 
     def refresh(self, args=None):
         super().refresh(args)
-        self.emit_draw_signal()
+        self.redraw()
         if self._refresh_screen:
             App.renderer().switch_screen_modal(self._refresh_screen)
             self._refresh_screen = None

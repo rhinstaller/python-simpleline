@@ -30,7 +30,7 @@ class InfiniteScreen(UIScreen):
         """Catch 'c' keys for continue and increase counter"""
         if key == Prompt.CONTINUE:
             self.continue_count += 1
-            self.emit_draw_signal()
+            self.redraw()
             return INPUT_PROCESSED
 
         return key

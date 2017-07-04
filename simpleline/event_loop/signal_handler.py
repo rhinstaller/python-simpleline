@@ -68,7 +68,7 @@ class SignalHandler(object):
         """
         App.event_loop().enqueue_signal(signal)
 
-    def emit_draw_signal(self):
+    def redraw(self):
         """Emit signal to initiate draw.
 
         Add RenderScreenSignal to the event loop.
