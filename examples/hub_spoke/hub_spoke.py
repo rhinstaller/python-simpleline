@@ -1,7 +1,7 @@
 #!/bin/python3
 
 from simpleline.base import App
-from simpleline.render.renderer import INPUT_PROCESSED, INPUT_DISCARDED
+from simpleline.render.screen_scheduler import INPUT_PROCESSED, INPUT_DISCARDED
 from simpleline.render.adv_widgets import PasswordDialog
 from simpleline.render.prompt import Prompt
 from simpleline.render.ui_screen import UIScreen

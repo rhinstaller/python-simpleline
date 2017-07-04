@@ -19,7 +19,7 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
-from simpleline.render.renderer import Renderer
+from simpleline.render.screen_scheduler import ScreenScheduler
 from simpleline.event_loop.main_loop import MainLoop
 
 __all__ = ["App"]
@@ -55,17 +55,18 @@ class App(object):
 
         This method can be called multiple times to reset App settings.
 
-        :param renderer: renderer used for rendering screens; if not specified use `simpleline.render.renderer.Renderer`
-        :type renderer: instance of `simpleline.render.renderer.Renderer`
+        :param renderer: renderer used for rendering screens; if not specified use
+                         `simpleline.render.screen_scheduler.ScreenScheduler`.
+        :type renderer: instance of `simpleline.render.screen_scheduler.ScreenScheduler`.
 
         :param event_loop: event loop used for asynchronous tasks;
-                           if not specified use `simpleline.event_loop.main_loop.MainLoop`
-        :type event_loop: object based on class `simpleline.event_loop.AbstractEventLoop`
+                           if not specified use `simpleline.event_loop.main_loop.MainLoop`.
+        :type event_loop: object based on class `simpleline.event_loop.AbstractEventLoop`.
         """
         if event_loop is None:
             event_loop = MainLoop()
         if renderer is None:
-            renderer = Renderer(event_loop)
+            renderer = ScreenScheduler(event_loop)
 
         cls.__app = cls.AppPimpl(renderer, event_loop)
 

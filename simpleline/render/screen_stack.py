@@ -34,7 +34,7 @@ class ScreenStackEmptyException(ScreenStackException):
 
 
 class ScreenStack(object):
-    """Managing screen stack used in `Renderer`."""
+    """Managing screen stack used in `ScreenScheduler`."""
 
     def __init__(self):
         self._screens = []

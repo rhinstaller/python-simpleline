@@ -27,7 +27,7 @@ import threading
 from simpleline.event_loop import ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal, InputReadySignal, RenderScreenSignal, InputScreenSignal, \
                                           CloseScreenSignal
-from simpleline.render import RendererUnexpectedError, INPUT_PROCESSED, INPUT_DISCARDED
+from simpleline.render import RenderUnexpectedError, INPUT_PROCESSED, INPUT_DISCARDED
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
 from simpleline.render.widgets import TextWidget
@@ -35,7 +35,7 @@ from simpleline.render.widgets import TextWidget
 RAW_INPUT_LOCK = threading.Lock()
 
 
-class Renderer(object):
+class ScreenScheduler(object):
 
     def __init__(self, event_loop, renderer_stack=None):
         """Constructor where you can pass your own renderer stack.
@@ -172,7 +172,7 @@ class Renderer(object):
         screen.ui_screen.closed()
 
         if closed_from is not None and closed_from is not screen.ui_screen:
-            raise RendererUnexpectedError("You are trying to close screen %s from screen %s! "
+            raise RenderUnexpectedError("You are trying to close screen %s from screen %s! "
                                           "This is most probably not intentional." % (closed_from, screen.ui_screen))
 
         if screen.execute_new_loop:

@@ -24,7 +24,7 @@ from io import StringIO
 
 from simpleline.base import App
 from simpleline.render.ui_screen import UIScreen
-from simpleline.render import INPUT_PROCESSED, INPUT_DISCARDED, RendererUnexpectedError
+from simpleline.render import INPUT_PROCESSED, INPUT_DISCARDED, RenderUnexpectedError
 from tests import schedule_screen_and_run, calculate_separator
 
 
@@ -88,7 +88,7 @@ class SimpleUIScreenFeatures_TestCase(unittest.TestCase):
     def test_close_screen_closed_from_other_source_error(self):
         App.initialize()
         App.renderer().schedule_screen(UIScreen())
-        with self.assertRaises(RendererUnexpectedError):
+        with self.assertRaises(RenderUnexpectedError):
             App.renderer().close_screen(closed_from=mock.MagicMock())
 
     def test_failed_screen_setup(self):
@@ -138,7 +138,7 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase):
         out += "TestTitle\n\n"
         self.assertEqual(stdout_mock.getvalue(), out)
 
-    @mock.patch('simpleline.render.renderer.Renderer.raw_input')
+    @mock.patch('simpleline.render.screen_scheduler.ScreenScheduler.raw_input')
     def test_basic_input(self, input_mock, _):
         input_mock.return_value = "a"
         screen = InputScreen()
@@ -165,7 +165,7 @@ class ScreenException_TestCase(unittest.TestCase):
 
 
 @mock.patch('sys.stdout')
-@mock.patch('simpleline.render.renderer.Renderer._get_input')
+@mock.patch('simpleline.render.screen_scheduler.ScreenScheduler._get_input')
 class InputProcessing_TestCase(unittest.TestCase):
 
     def test_quit_input(self, mock_stdin, mock_stdout):

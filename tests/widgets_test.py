@@ -114,7 +114,7 @@ class Widgets_TestCase(unittest.TestCase):
         self.evaluate_result(res_lines, expected_result)
 
 
-@patch('simpleline.render.renderer.Renderer._get_input')
+@patch('simpleline.render.screen_scheduler.ScreenScheduler._get_input')
 @patch('sys.stdout', new_callable=StringIO)
 class WidgetProcessing_TestCase(unittest.TestCase):
 

@@ -1,4 +1,4 @@
-# Module with classes to handle rendering.
+# Module with classes to handle rendering and input.
 #
 # Copyright (C) 2017  Red Hat, Inc.
 #
@@ -25,11 +25,11 @@ INPUT_DISCARDED = False
 from simpleline import SimplelineError
 
 
-class RendererError(SimplelineError):
+class RenderError(SimplelineError):
     pass
 
 
-class RendererUnexpectedError(RendererError):
+class RenderUnexpectedError(RenderError):
     pass
 
 
