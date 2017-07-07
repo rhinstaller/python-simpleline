@@ -119,7 +119,7 @@ class Widgets_TestCase(unittest.TestCase):
 class WidgetProcessing_TestCase(unittest.TestCase):
 
     def _calculate_spacer(self):
-        # this calculation is taken from renderer for default width '80'
+        # this calculation is taken from scheduler for default width '80'
         return '\n'.join(2 * [80 * '='])
 
     def _expected_output(self, text, widget_height=20):
@@ -136,7 +136,7 @@ class WidgetProcessing_TestCase(unittest.TestCase):
         screen = ScreenWithWidget(widget_text)
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
         self.assertEqual(self._expected_output(widget_text), out_mock.getvalue())
@@ -146,7 +146,7 @@ class WidgetProcessing_TestCase(unittest.TestCase):
         screen = ScreenWithWidget(widget_text)
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
         self.assertEqual(self._expected_output(widget_text), out_mock.getvalue())
@@ -158,7 +158,7 @@ class WidgetProcessing_TestCase(unittest.TestCase):
         screen = ScreenWithWidget(widget_text, height=4)
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
         self.assertEqual(self._expected_output(widget_text, 4), out_mock.getvalue())

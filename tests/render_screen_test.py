@@ -47,8 +47,8 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
         width = 60
 
         App.initialize()
-        App.renderer().io_manager.width = width
-        App.renderer().schedule_screen(ui_screen)
+        App.get_scheduler().io_manager.width = width
+        App.get_scheduler().schedule_screen(ui_screen)
         App.run()
 
         self.assertEqual(calculate_separator(width), stdout_mock.getvalue())
@@ -58,8 +58,8 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
         width = 0
 
         App.initialize()
-        App.renderer().io_manager.width = width
-        App.renderer().schedule_screen(ui_screen)
+        App.get_scheduler().io_manager.width = width
+        App.get_scheduler().schedule_screen(ui_screen)
         App.run()
 
         self.assertEqual("\n\n", stdout_mock.getvalue())
@@ -68,7 +68,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
         ui_screen = TestScreenSetupFail()
 
         App.initialize()
-        App.renderer().schedule_screen(ui_screen)
+        App.get_scheduler().schedule_screen(ui_screen)
         App.run()
 
         self.assertEqual("", stdout_mock.getvalue())
@@ -80,22 +80,22 @@ class SimpleUIScreenFeatures_TestCase(unittest.TestCase):
         screen = UIScreen()
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         # Program will quit in close_screen when stack is empty
-        App.renderer().schedule_screen(UIScreen())
+        App.get_scheduler().schedule_screen(UIScreen())
         screen.close()
 
     def test_close_screen_closed_from_other_source_error(self):
         App.initialize()
-        App.renderer().schedule_screen(UIScreen())
+        App.get_scheduler().schedule_screen(UIScreen())
         with self.assertRaises(RenderUnexpectedError):
-            App.renderer().close_screen(closed_from=mock.MagicMock())
+            App.get_scheduler().close_screen(closed_from=mock.MagicMock())
 
     def test_failed_screen_setup(self):
         screen = FailedSetupScreen()
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
 
@@ -121,8 +121,8 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase):
         screen = EmptyScreen()
 
         App.initialize()
-        App.renderer().schedule_screen(first_screen)
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(first_screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
         self.assertTrue(first_screen)
@@ -177,7 +177,7 @@ class InputProcessing_TestCase(unittest.TestCase):
         screen = UIScreen()
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
     def test_continue_input(self, mock_stdin, mock_stdout):
@@ -186,8 +186,8 @@ class InputProcessing_TestCase(unittest.TestCase):
         screen2 = EmptyScreen()
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
-        App.renderer().schedule_screen(screen2)
+        App.get_scheduler().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen2)
         App.run()
 
         self.assertTrue(screen.ready)
@@ -198,7 +198,7 @@ class InputProcessing_TestCase(unittest.TestCase):
         screen = RefreshTestScreen()
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
         self.assertTrue(screen.input_processed)
@@ -209,7 +209,7 @@ class InputProcessing_TestCase(unittest.TestCase):
         screen = InputErrorTestScreen(threshold)
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
         self.assertEqual(screen.render_counter, 2)
@@ -221,7 +221,7 @@ class InputProcessing_TestCase(unittest.TestCase):
         screen = InputErrorTestScreen(threshold)
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
         self.assertEqual(screen.render_counter, 3)
@@ -231,8 +231,8 @@ class InputProcessing_TestCase(unittest.TestCase):
     def test_custom_getpass(self, mock_stdin, mock_stdout, process_signals):
         prompt = mock.MagicMock()
         App.initialize()
-        App.renderer().io_manager.set_pass_func(self._test_getpass)
-        App.renderer().io_manager.get_user_input(prompt=prompt, hidden=True)
+        App.get_scheduler().io_manager.set_pass_func(self._test_getpass)
+        App.get_scheduler().io_manager.get_user_input(prompt=prompt, hidden=True)
 
         self.assertTrue(self.pass_called)
         self.assertEqual(self.pass_prompt, prompt)

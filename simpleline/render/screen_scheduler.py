@@ -33,22 +33,22 @@ RAW_INPUT_LOCK = threading.Lock()
 
 class ScreenScheduler(object):
 
-    def __init__(self, event_loop, renderer_stack=None):
-        """Constructor where you can pass your own renderer stack.
+    def __init__(self, event_loop, scheduler_stack=None):
+        """Constructor where you can pass your own scheduler stack.
 
-        The ScreenStack will be used automatically if renderer stack will be None.
+        The ScreenStack will be used automatically if scheduler stack will be None.
 
-        :param event_loop: Event loop used for the renderer.
+        :param event_loop: Event loop used for the scheduler.
         :type event_loop: Class based on `simpleline.event_loop.AbstractEventLoop`.
-        :param renderer_stack: Use custom renderer stack if you need to.
-        :type renderer_stack: `simpleline.screen_stack.ScreenStack` based class.
+        :param scheduler_stack: Use custom scheduler stack if you need to.
+        :type scheduler_stack: `simpleline.screen_stack.ScreenStack` based class.
         """
         self._quit_screen = None
         self._quit_message = ""
         self._event_loop = event_loop
         self._io_manager = InOutManager(self._event_loop)
-        if renderer_stack:
-            self._screen_stack = renderer_stack
+        if scheduler_stack:
+            self._screen_stack = scheduler_stack
         else:
             self._screen_stack = ScreenStack()
         self._register_handlers()
@@ -78,7 +78,7 @@ class ScreenScheduler(object):
 
     @property
     def nothing_to_render(self):
-        """Is something for rendering in the renderer stack?
+        """Is something for rendering in the scheduler stack?
 
         :return: True if the rendering stack is empty
         :rtype: bool

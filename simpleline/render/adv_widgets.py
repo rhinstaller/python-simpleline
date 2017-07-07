@@ -75,7 +75,7 @@ class PasswordDialog(UIScreen):
         self.window += [widgets.CenterWidget(text), ""]
 
     def prompt(self, args=None):
-        self._password = App.renderer().raw_input(_("Passphrase: "), hidden=True)
+        self._password = App.get_scheduler().io_manager.get_user_input(_("Passphrase: "), hidden=True)
         if not self._password:
             return None
         else:

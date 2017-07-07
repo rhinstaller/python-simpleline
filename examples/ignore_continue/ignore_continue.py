@@ -38,5 +38,5 @@ class InfiniteScreen(UIScreen):
 if __name__ == "__main__":
     App.initialize()
     screen = InfiniteScreen()
-    App.renderer().schedule_screen(screen)
+    App.get_scheduler().schedule_screen(screen)
     App.run()

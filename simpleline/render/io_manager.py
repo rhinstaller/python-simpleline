@@ -42,7 +42,7 @@ class InOutManager(object):
     def __init__(self, event_loop):
         """Processor for common user input and output.
 
-        :param event_loop: Event loop used for the renderer.
+        :param event_loop: Event loop used for the scheduler.
         :type event_loop: Class based on `simpleline.event_loop.AbstractEventLoop`.
         """
         super().__init__()

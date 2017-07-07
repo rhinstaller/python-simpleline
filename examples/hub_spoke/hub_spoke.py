@@ -42,13 +42,13 @@ class Hub(UIScreen):
     def input(self, args, key):
         """Run spokes based on the user choice."""
         if key == self.KEY_USER:  # set first name
-            App.renderer().push_screen(self._name_spoke)
+            App.get_scheduler().push_screen(self._name_spoke)
             return INPUT_PROCESSED
         elif key == self.KEY_SURNAME:  # set surname
-            App.renderer().push_screen(self._surname_spoke)
+            App.get_scheduler().push_screen(self._surname_spoke)
             return INPUT_PROCESSED
         elif key == self.KEY_PASSWORD:  # set password
-            App.renderer().push_screen(self._pass_spoke)
+            App.get_scheduler().push_screen(self._pass_spoke)
             return INPUT_PROCESSED
         elif key == Prompt.CONTINUE:
             if self._name_spoke and self._surname_spoke and self._pass_spoke.answer:
@@ -81,7 +81,7 @@ class SetNameScreen(UIScreen):
 
     def prompt(self, args=None):
         """Take user input."""
-        self._value = App.renderer().raw_input("Write your name: ")
+        self._value = App.get_scheduler().raw_input("Write your name: ")
         self.close()
 
     @property
@@ -92,5 +92,5 @@ class SetNameScreen(UIScreen):
 if __name__ == "__main__":
     App.initialize()
     screen = Hub()
-    App.renderer().schedule_screen(screen)
+    App.get_scheduler().schedule_screen(screen)
     App.run()

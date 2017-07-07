@@ -23,7 +23,7 @@ class Hub(UIScreen):
     def input(self, args, key):
         """Run spokes based on the user choice"""
         if key == "1":
-            App.renderer().push_screen(self._counter_spoke)
+            App.get_scheduler().push_screen(self._counter_spoke)
             return INPUT_PROCESSED
         else:
             return key
@@ -64,5 +64,5 @@ class CounterScreen(UIScreen):
 if __name__ == "__main__":
     App.initialize()
     hub = Hub()
-    App.renderer().schedule_screen(hub)
+    App.get_scheduler().schedule_screen(hub)
     App.run()

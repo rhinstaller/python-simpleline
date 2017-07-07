@@ -32,49 +32,49 @@ class Scheduler_TestCase(unittest.TestCase):
 
     def setUp(self):
         self.stack = None
-        self.renderer = None
+        self.scheduler = None
 
-    def create_renderer_with_stack(self):
+    def create_scheduler_with_stack(self):
         self.stack = ScreenStack()
-        self.renderer = ScreenScheduler(event_loop=mock.MagicMock(), renderer_stack=self.stack)
+        self.scheduler = ScreenScheduler(event_loop=mock.MagicMock(), scheduler_stack=self.stack)
 
     def pop_last_item(self, remove=True):
         return self.stack.pop(remove)
 
-    def test_create_renderer(self):
-        renderer = ScreenScheduler(MainLoop())
-        self.assertTrue(type(renderer._screen_stack) is ScreenStack)
+    def test_create_scheduler(self):
+        scheduler = ScreenScheduler(MainLoop())
+        self.assertTrue(type(scheduler._screen_stack) is ScreenStack)
 
-    def test_renderer_width(self):
-        renderer = ScreenScheduler(MainLoop())
-        io_manager = renderer.io_manager
+    def test_scheduler_width(self):
+        scheduler = ScreenScheduler(MainLoop())
+        io_manager = scheduler.io_manager
         self.assertEqual(io_manager.width, 80)
         io_manager.width = 90
         self.assertEqual(io_manager.width, 90)
 
-    def test_renderer_quit_screen(self):
+    def test_scheduler_quit_screen(self):
         def test_callback():
             pass
-        renderer = ScreenScheduler(MainLoop())
-        self.assertEqual(renderer.quit_screen, None)
-        renderer.quit_screen = test_callback
-        self.assertEqual(renderer.quit_screen, test_callback)
+        scheduler = ScreenScheduler(MainLoop())
+        self.assertEqual(scheduler.quit_screen, None)
+        scheduler.quit_screen = test_callback
+        self.assertEqual(scheduler.quit_screen, test_callback)
 
     def test_nothing_to_render(self):
-        self.create_renderer_with_stack()
+        self.create_scheduler_with_stack()
 
-        self.assertTrue(self.renderer.nothing_to_render)
+        self.assertTrue(self.scheduler.nothing_to_render)
         self.assertTrue(self.stack.empty())
 
-        self.renderer.schedule_screen(UIScreen())
-        self.assertFalse(self.renderer.nothing_to_render)
+        self.scheduler.schedule_screen(UIScreen())
+        self.assertFalse(self.scheduler.nothing_to_render)
         self.assertFalse(self.stack.empty())
 
     def test_schedule_screen(self):
-        self.create_renderer_with_stack()
+        self.create_scheduler_with_stack()
 
         screen = UIScreen()
-        self.renderer.schedule_screen(screen)
+        self.scheduler.schedule_screen(screen)
         test_screen = self.pop_last_item(False)
         self.assertEqual(test_screen.ui_screen, screen)
         self.assertEqual(len(test_screen.args), 0)  # empty field - no arguments
@@ -82,40 +82,40 @@ class Scheduler_TestCase(unittest.TestCase):
 
         # Schedule another screen, new one will be added to the bottom of the stack
         new_screen = UIScreen()
-        self.renderer.schedule_screen(new_screen)
+        self.scheduler.schedule_screen(new_screen)
         # Here should still be the old screen
         self.assertEqual(self.pop_last_item().ui_screen, screen)
         # After removing the first we would find the second screen
         self.assertEqual(self.pop_last_item().ui_screen, new_screen)
 
     def test_replace_screen_with_empty_stack(self):
-        self.create_renderer_with_stack()
+        self.create_scheduler_with_stack()
 
         with self.assertRaises(ScreenStackEmptyException):
-            self.renderer.replace_screen(UIScreen())
+            self.scheduler.replace_screen(UIScreen())
 
     def test_replace_screen(self):
-        self.create_renderer_with_stack()
+        self.create_scheduler_with_stack()
 
         old_screen = UIScreen()
         screen = UIScreen()
-        self.renderer.schedule_screen(old_screen)
-        self.renderer.replace_screen(screen)
+        self.scheduler.schedule_screen(old_screen)
+        self.scheduler.replace_screen(screen)
         self.assertEqual(self.pop_last_item(False).ui_screen, screen)
 
         new_screen = UIScreen()
-        self.renderer.replace_screen(new_screen)
+        self.scheduler.replace_screen(new_screen)
         self.assertEqual(self.pop_last_item().ui_screen, new_screen)
         # The old_screen was replaced so the stack is empty now
         self.assertTrue(self.stack.empty())
 
     def test_replace_screen_with_args(self):
-        self.create_renderer_with_stack()
+        self.create_scheduler_with_stack()
 
         old_screen = UIScreen()
         screen = UIScreen()
-        self.renderer.schedule_screen(old_screen)
-        self.renderer.replace_screen(screen, "test")
+        self.scheduler.schedule_screen(old_screen)
+        self.scheduler.replace_screen(screen, "test")
         test_screen = self.pop_last_item()
         self.assertEqual(test_screen.ui_screen, screen)
         self.assertEqual(test_screen.args, "test")
@@ -123,20 +123,20 @@ class Scheduler_TestCase(unittest.TestCase):
         self.assertTrue(self.stack.empty())
 
     def test_switch_screen_with_empty_stack(self):
-        self.create_renderer_with_stack()
+        self.create_scheduler_with_stack()
 
         screen = UIScreen()
-        self.renderer.push_screen(screen)
+        self.scheduler.push_screen(screen)
         self.assertEqual(self.pop_last_item().ui_screen, screen)
 
     def test_switch_screen(self):
-        self.create_renderer_with_stack()
+        self.create_scheduler_with_stack()
 
         screen = UIScreen()
         new_screen = UIScreen()
 
-        self.renderer.schedule_screen(screen)
-        self.renderer.push_screen(new_screen)
+        self.scheduler.schedule_screen(screen)
+        self.scheduler.push_screen(new_screen)
 
         test_screen = self.pop_last_item()
         self.assertEqual(test_screen.ui_screen, new_screen)
@@ -148,29 +148,29 @@ class Scheduler_TestCase(unittest.TestCase):
         self.assertTrue(self.stack.empty())
 
     def test_switch_screen_with_args(self):
-        self.create_renderer_with_stack()
+        self.create_scheduler_with_stack()
 
         screen = UIScreen()
-        self.renderer.push_screen(screen, args="test")
+        self.scheduler.push_screen(screen, args="test")
         self.assertEqual(self.pop_last_item(False).ui_screen, screen)
         self.assertEqual(self.pop_last_item().args, "test")
 
     @mock.patch('simpleline.render.io_manager.InOutManager.draw')
     def test_switch_screen_modal_empty_stack(self, _):
-        self.create_renderer_with_stack()
+        self.create_scheduler_with_stack()
 
         screen = UIScreen()
-        self.renderer.push_screen_modal(screen)
+        self.scheduler.push_screen_modal(screen)
         self.assertEqual(self.pop_last_item().ui_screen, screen)
 
     @mock.patch('simpleline.render.io_manager.InOutManager.draw')
     def test_switch_screen_modal(self, _):
-        self.create_renderer_with_stack()
+        self.create_scheduler_with_stack()
 
         screen = UIScreen()
         new_screen = UIScreen()
-        self.renderer.schedule_screen(screen)
-        self.renderer.push_screen_modal(new_screen)
+        self.scheduler.schedule_screen(screen)
+        self.scheduler.push_screen_modal(new_screen)
 
         test_screen = self.pop_last_item()
         self.assertEqual(test_screen.ui_screen, new_screen)
@@ -179,8 +179,8 @@ class Scheduler_TestCase(unittest.TestCase):
 
     @mock.patch('simpleline.render.io_manager.InOutManager.draw')
     def test_switch_screen_modal_with_args(self, _):
-        self.create_renderer_with_stack()
+        self.create_scheduler_with_stack()
 
         screen = UIScreen()
-        self.renderer.push_screen_modal(screen, args="test")
+        self.scheduler.push_screen_modal(screen, args="test")
         self.assertEqual(self.pop_last_item(False).ui_screen, screen)

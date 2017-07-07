@@ -96,7 +96,7 @@ class UIScreen(SignalHandler, SchedulerHandler):
         :rtype: bool
         """
         self._ready = True
-        App.event_loop().register_signal_source(self)
+        App.get_event_loop().register_signal_source(self)
         return True
 
     def refresh(self, args=None):
@@ -138,14 +138,14 @@ class UIScreen(SignalHandler, SchedulerHandler):
                 for line in lines[pos:(pos + self._screen_height - 2)]:
                     print(line)
                 custom_prompt = Prompt(_("\nPress %s to continue") % Prompt.ENTER)
-                App.renderer().io_manager.get_user_input(custom_prompt)
+                App.get_scheduler().io_manager.get_user_input(custom_prompt)
                 pos += self._screen_height - 1
 
     def show_all(self):
         """Prepares all elements of self.window for output and then prints them on the screen."""
         for w in self.window:
             if hasattr(w, "render"):
-                w.render(App.renderer().io_manager.width)  # pylint: disable=no-member
+                w.render(App.get_scheduler().io_manager.width)  # pylint: disable=no-member
             if isinstance(w, Widget):
                 self._print_widget(w)
             elif isinstance(w, bytes):
@@ -162,7 +162,7 @@ class UIScreen(SignalHandler, SchedulerHandler):
         :param args: optional argument passed from switch_screen calls
         :type args: anything
         :return: return INPUT_PROCESSED if key was handled,
-                 INPUT_DISCARDED if the screen should not process input on the renderer and
+                 INPUT_DISCARDED if the screen should not process input on the scheduler and
                  key if you want it to.
         :rtype: `simpleline.render.INPUT_PROCESSED`|`simpleline.render.INPUT_DISCARDED`|str
         """

@@ -25,13 +25,13 @@ from simpleline.base import App
 class SchedulerHandler(object):
 
     def schedule_screen(self):
-        App.renderer().schedule_screen(self)
+        App.get_scheduler().schedule_screen(self)
 
     def replace_screen(self):
-        App.renderer().replace_screen(self)
+        App.get_scheduler().replace_screen(self)
 
     def push_screen(self):
-        App.renderer().push_screen(self)
+        App.get_scheduler().push_screen(self)
 
     def push_screen_modal(self):
-        App.renderer().push_screen_modal(self)
+        App.get_scheduler().push_screen_modal(self)
