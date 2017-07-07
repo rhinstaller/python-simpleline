@@ -114,7 +114,7 @@ class Widgets_TestCase(unittest.TestCase):
         self.evaluate_result(res_lines, expected_result)
 
 
-@patch('simpleline.render.screen_scheduler.ScreenScheduler._get_input')
+@patch('simpleline.render.io_manager.InOutManager._get_input')
 @patch('sys.stdout', new_callable=StringIO)
 class WidgetProcessing_TestCase(unittest.TestCase):
 
@@ -139,7 +139,7 @@ class WidgetProcessing_TestCase(unittest.TestCase):
         App.renderer().schedule_screen(screen)
         App.run()
 
-        self.assertEqual(out_mock.getvalue(), self._expected_output(widget_text))
+        self.assertEqual(self._expected_output(widget_text), out_mock.getvalue())
 
     def test_widget_multiline(self, out_mock, in_mock):
         widget_text = "Testing output\n\n\nAgain..."
@@ -149,7 +149,7 @@ class WidgetProcessing_TestCase(unittest.TestCase):
         App.renderer().schedule_screen(screen)
         App.run()
 
-        self.assertEqual(out_mock.getvalue(), self._expected_output(widget_text))
+        self.assertEqual(self._expected_output(widget_text), out_mock.getvalue())
 
     def test_widget_too_high(self, out_mock, in_mock):
         widget_text = "Testing\n\n\nWhy not?"
@@ -161,7 +161,7 @@ class WidgetProcessing_TestCase(unittest.TestCase):
         App.renderer().schedule_screen(screen)
         App.run()
 
-        self.assertEqual(out_mock.getvalue(), self._expected_output(widget_text, 4))
+        self.assertEqual(self._expected_output(widget_text, 4), out_mock.getvalue())
 
 
 class ScreenWithWidget(UIScreen):

@@ -19,18 +19,14 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
-import getpass
-import queue
-import sys
 import threading
 
 from simpleline.event_loop import ExitMainLoop
-from simpleline.event_loop.signals import ExceptionSignal, InputReadySignal, RenderScreenSignal, InputScreenSignal, \
+from simpleline.event_loop.signals import ExceptionSignal, RenderScreenSignal, InputScreenSignal, \
                                           CloseScreenSignal
-from simpleline.render import RenderUnexpectedError, INPUT_PROCESSED, INPUT_DISCARDED
-from simpleline.render.prompt import Prompt
+from simpleline.render import RenderUnexpectedError
+from simpleline.render.io_manager import InOutManager, UserInputResult
 from simpleline.render.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
-from simpleline.render.widgets import TextWidget
 
 RAW_INPUT_LOCK = threading.Lock()
 
@@ -50,10 +46,10 @@ class ScreenScheduler(object):
         self._quit_screen = None
         self._quit_message = ""
         self._event_loop = event_loop
-        self._width = 0
         self._spacer = ""
         self._input_error_counter = 0
         self._input_thread = None
+        self._io_manager = InOutManager(self._event_loop)
         if renderer_stack:
             self._screen_stack = renderer_stack
         else:
@@ -70,12 +66,20 @@ class ScreenScheduler(object):
 
     @property
     def width(self):
-        return self._width
+        return self._io_manager.width
 
     @width.setter
     def width(self, width):
-        self._width = width
+        self._io_manager.width = width
         self._spacer = "\n".join(2 * [width * "="])
+
+    @property
+    def io_manager(self):
+        return self._io_manager
+
+    @io_manager.setter
+    def io_manager(self, io_manager):
+        self._io_manager = io_manager
 
     @property
     def quit_screen(self):
@@ -173,7 +177,7 @@ class ScreenScheduler(object):
 
         if closed_from is not None and closed_from is not screen.ui_screen:
             raise RenderUnexpectedError("You are trying to close screen %s from screen %s! "
-                                          "This is most probably not intentional." % (closed_from, screen.ui_screen))
+                                        "This is most probably not intentional." % (closed_from, screen.ui_screen))
 
         if screen.execute_new_loop:
             self._event_loop.close_loop()
@@ -237,97 +241,33 @@ class ScreenScheduler(object):
         """Register user input to the event loop for processing."""
         self._event_loop.enqueue_signal(InputScreenSignal(self))
 
-    def process_input(self):
-        self._process_input()
-
     def _process_input_callback(self, signal, data):
         self._process_input()
 
     def _process_input(self):
         active_screen = self._get_last_screen()
-        last_screen = active_screen.ui_screen
-        # get the screen's prompt
+
         try:
-            prompt = last_screen.prompt(active_screen.args)
+            input_result = self._io_manager.process_input(active_screen)
         except ExitMainLoop:
             raise
         except Exception:    # pylint: disable=broad-except
             self._event_loop.enqueue_signal(ExceptionSignal(self))
             return
 
-        # None means prompt handled the input by itself -> continue
-        if prompt is None:
-            return
-
-        # get the input from user
-        c = self.raw_input(prompt)
-
-        # process the input, if it wasn't processed (valid)
-        # increment the error counter
-        if not self.input(active_screen.args, c):
-            self._input_error_counter += 1
-
-            # redraw the screen after 5 bad inputs
-            if self._input_error_counter >= 5:
+        if not input_result.was_successful():
+            if self._io_manager.input_error_threshold_exceeded:
                 self.redraw()
             else:
                 self.input_required()
-
-    def raw_input(self, prompt, hidden=False):
-        """This method reads one input from user. Its basic form has only one
-        line, but we might need to override it for more complex apps or testing.
-        """
-        if self._input_thread is not None and self._input_thread.is_alive():
-            raise KeyError("Can't run multiple input threads at the same time!")
-
-        input_queue = queue.Queue()
-        self._input_thread = threading.Thread(target=self._thread_input, name="InputThread",
-                                              args=(input_queue, prompt, hidden))
-        self._input_thread.daemon = True
-        self._input_thread.start()
-        self._event_loop.process_signals(return_after=InputReadySignal)
-        return input_queue.get()  # return the user input
-
-    def input(self, args, key):
-        """Method called internally to process unhandled input key presses.
-
-        Also handles the main quit and close commands.
-
-        :param args: optional argument passed from switch_screen calls
-        :type args: anything
-
-        :param key: the string entered by user
-        :type key: str
-
-        :return: True if key was processed, False if it was not recognized
-        :rtype: bool
-        """
-        # delegate the handling to active screen first
-        if not self._screen_stack.empty():
-            try:
-                key = self._screen_stack.pop(False).ui_screen.input(args, key)
-                if key == INPUT_PROCESSED:
-                    return True
-                elif key == INPUT_DISCARDED:
-                    return False
-            except ExitMainLoop:
-                raise
-            except Exception:    # pylint: disable=broad-except
-                self._event_loop.enqueue_signal(ExceptionSignal(self))
-                return False
-
-            # global refresh command
-            if key == Prompt.REFRESH:
+        else:
+            if input_result == UserInputResult.PROCESSED:
+                return
+            elif input_result == UserInputResult.REFRESH:
                 self.redraw()
-                return True
-
-            # global close command
-            if key == Prompt.CONTINUE:
+            elif input_result == UserInputResult.CONTINUE:
                 self.close_screen()
-                return True
-
-            # global quit command
-            if key == Prompt.QUIT:
+            elif input_result == UserInputResult.QUIT:
                 if self.quit_screen:
                     quit_screen = self.quit_screen
                     d = quit_screen(self, self._quit_message)
@@ -336,46 +276,3 @@ class ScreenScheduler(object):
                         raise ExitMainLoop()
                 else:
                     raise ExitMainLoop()
-                return True
-
-        return False
-
-    def _thread_input(self, queue_instance, prompt, hidden):
-        """This method is responsible for interruptable user input.
-
-        It is expected to be used in a thread started on demand
-        and returns the input via the communication Queue.
-
-        :param queue_instance: communication queue_instance to be used
-        :type queue_instance: queue.Queue instance
-
-        :param prompt: prompt to be displayed
-        :type prompt: Prompt instance
-
-        :param hidden: whether typed characters should be echoed or not
-        :type hidden: bool
-        """
-        if hidden:
-            data = getpass.getpass(prompt)
-        else:
-            widget = TextWidget(str(prompt))
-            widget.render(self._width)
-            lines = widget.get_lines()
-            sys.stdout.write("\n".join(lines) + " ")
-            sys.stdout.flush()
-            if not RAW_INPUT_LOCK.acquire(False):
-                # raw_input is already running
-                return
-            else:
-                # lock acquired, we can run input
-                try:
-                    data = self._get_input()
-                except EOFError:
-                    data = ""
-                finally:
-                    RAW_INPUT_LOCK.release()
-
-        queue_instance.put(data)
-
-    def _get_input(self):
-        return input()

@@ -88,7 +88,7 @@ class ScreenScheduler_TestCase(unittest.TestCase):
         self.assertEqual(modal_render_outer.copied_modal_counter, ModalTestScreen.AFTER_MODAL_START_RENDER)
         self.assertEqual(modal_render_inner.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_START_RENDER)
 
-    @mock.patch('simpleline.render.screen_scheduler.ScreenScheduler.raw_input')
+    @mock.patch('simpleline.render.io_manager.InOutManager.get_user_input')
     def test_switch_screen_modal_input_order(self, mock_input, mock_stdout):
         modal_screen = InputAndDrawScreen("Modal")
         parent_screen = EmitDrawThenCreateModal(modal_screen, msg="Parent")

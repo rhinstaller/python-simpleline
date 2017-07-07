@@ -106,7 +106,8 @@ class UIScreen(SignalHandler):
                 # print part with a prompt to continue
                 for line in lines[pos:(pos + self._screen_height - 2)]:
                     print(line)
-                App.renderer().raw_input(Prompt(_("\nPress %s to continue") % Prompt.ENTER))
+                custom_prompt = Prompt(_("\nPress %s to continue") % Prompt.ENTER)
+                App.renderer().io_manager.get_user_input(custom_prompt)
                 pos += self._screen_height - 1
 
     def show_all(self):

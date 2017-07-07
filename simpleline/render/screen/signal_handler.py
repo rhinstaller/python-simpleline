@@ -68,6 +68,14 @@ class SignalHandler(object):
         """
         App.event_loop().enqueue_signal(signal)
 
+    def create_and_emit(self, signal):
+        """Create the signal and emit it.
+
+        This is basically shortcut for calling `self.create_signal` and `self.emit`.
+        """
+        created_signal = self.create_signal(signal)
+        self.emit(created_signal)
+
     def redraw(self):
         """Emit signal to initiate draw.
 
