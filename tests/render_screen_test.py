@@ -25,18 +25,7 @@ from io import StringIO
 from simpleline.base import App
 from simpleline.render.ui_screen import UIScreen
 from simpleline.render import INPUT_PROCESSED, INPUT_DISCARDED, RendererUnexpectedError
-
-
-def _calculate_separator(width):
-    separator = "\n".join(2 * [width * "="])
-    separator += "\n"  # print adds another newline
-    return separator
-
-
-def _schedule_screen_and_run(screen):
-    App.initialize()
-    App.renderer().schedule_screen(screen)
-    App.run()
+from tests import schedule_screen_and_run, calculate_separator
 
 
 def _fake_input(queue_instance, prompt, hidden):
@@ -49,9 +38,9 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
     def test_separator(self, stdout_mock):
         ui_screen = EmptyScreen()
 
-        _schedule_screen_and_run(ui_screen)
+        schedule_screen_and_run(ui_screen)
 
-        self.assertEqual(stdout_mock.getvalue(), _calculate_separator(80))
+        self.assertEqual(calculate_separator(), stdout_mock.getvalue())
 
     def test_other_width_separator(self, stdout_mock):
         ui_screen = EmptyScreen()
@@ -62,7 +51,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
         App.renderer().schedule_screen(ui_screen)
         App.run()
 
-        self.assertEqual(stdout_mock.getvalue(), _calculate_separator(width))
+        self.assertEqual(calculate_separator(width), stdout_mock.getvalue())
 
     def test_no_separator(self, stdout_mock):
         ui_screen = EmptyScreen()
@@ -73,7 +62,16 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
         App.renderer().schedule_screen(ui_screen)
         App.run()
 
-        self.assertEqual(stdout_mock.getvalue(), "\n\n")
+        self.assertEqual("\n\n", stdout_mock.getvalue())
+
+    def test_no_separator_when_closed_in_refresh(self, stdout_mock):
+        ui_screen = EmptyScreenCloseBeforePrint()
+
+        App.initialize()
+        App.renderer().schedule_screen(ui_screen)
+        App.run()
+
+        self.assertEqual("", stdout_mock.getvalue())
 
 
 class SimpleUIScreenFeatures_TestCase(unittest.TestCase):
@@ -107,12 +105,12 @@ class SimpleUIScreenFeatures_TestCase(unittest.TestCase):
 class SimpleUIScreenProcessing_TestCase(unittest.TestCase):
 
     def setUp(self):
-        self._default_separator = _calculate_separator(80)
+        self._default_separator = calculate_separator(80)
 
     def test_screen_event_loop_processing(self, _):
         ui_screen = EmptyScreen()
 
-        _schedule_screen_and_run(ui_screen)
+        schedule_screen_and_run(ui_screen)
 
         self.assertTrue(ui_screen.is_closed)
 
@@ -136,83 +134,33 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase):
         screen = NoInputScreen()
         screen.title = u"TestTitle"
 
-        _schedule_screen_and_run(screen)
+        schedule_screen_and_run(screen)
 
         out = self._default_separator
         out += "TestTitle\n\n"
         self.assertEqual(stdout_mock.getvalue(), out)
+
+    def test_screen_closed_in_refresh_wont_print_separator(self, stdout_mock):
+        screen_refresh_close = EmptyScreenCloseBeforePrint()
+        empty_screen = EmptyScreen()
+
+        App.initialize()
+        App.renderer().schedule_screen(screen_refresh_close)  # top of the stack
+        App.renderer().schedule_screen(empty_screen)          # bottom of the stack
+        App.run()
+
+        # only one separator will be printed because the other screen is closed before show_all()
+        self.assertEqual(stdout_mock.getvalue(), calculate_separator())
+
 
     @mock.patch('simpleline.render.renderer.Renderer.raw_input')
     def test_basic_input(self, input_mock, _):
         input_mock.return_value = "a"
         screen = InputScreen()
 
-        _schedule_screen_and_run(screen)
+        schedule_screen_and_run(screen)
 
         self.assertTrue(screen.input_processed)
-
-
-@mock.patch('sys.stdout', new_callable=StringIO)
-class ScreenScheduler_TestCase(unittest.TestCase):
-
-    def test_replace_screen(self, _):
-        replace_screen = ShowedCounterScreen()
-        screen = ShowedCounterScreen(replace_screen=replace_screen)
-
-        _schedule_screen_and_run(screen)
-
-        self.assertEqual(screen.counter, 1)
-        self.assertEqual(replace_screen.counter, 1)
-
-    def test_switch_screen(self, _):
-        switched_screen = ShowedCounterScreen()
-        screen = ShowedCounterScreen(switched_screen)
-
-        _schedule_screen_and_run(screen)
-
-        self.assertEqual(screen.counter, 2)
-        self.assertEqual(switched_screen.counter, 1)
-
-    def test_switch_screen_modal_in_render(self, _):
-        modal_screen = ModalTestScreen()
-        screen = ModalTestScreen(modal_screen_render=modal_screen)
-
-        _schedule_screen_and_run(screen)
-
-        self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_START_RENDER)
-        self.assertEqual(modal_screen.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_START_RENDER)
-
-    def test_switch_screen_modal_in_refresh(self, _):
-        modal_screen = ModalTestScreen()
-        screen = ModalTestScreen(modal_screen_refresh=modal_screen)
-
-        _schedule_screen_and_run(screen)
-
-        self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_START_REFRESH)
-        self.assertEqual(modal_screen.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_START_REFRESH)
-
-    def test_switch_screen_modal_refresh_and_render(self, _):
-        modal_refresh = ModalTestScreen()
-        modal_render = ModalTestScreen()
-        screen = ModalTestScreen(modal_screen_refresh=modal_refresh, modal_screen_render=modal_render)
-
-        _schedule_screen_and_run(screen)
-
-        self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_START_RENDER)
-        self.assertEqual(modal_refresh.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_START_REFRESH)
-        self.assertEqual(modal_render.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_START_RENDER)
-
-    def test_switch_screen_modal_render_recursive(self, _):
-        modal_render_inner = ModalTestScreen()
-        modal_render_outer = ModalTestScreen(modal_screen_render=modal_render_inner)
-        screen = ModalTestScreen(modal_screen_render=modal_render_outer)
-
-        _schedule_screen_and_run(screen)
-
-        self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_START_RENDER)
-        # outer modal screen has AFTER_MODAL_START_RENDER because it was set before by inner loop
-        self.assertEqual(modal_render_outer.copied_modal_counter, ModalTestScreen.AFTER_MODAL_START_RENDER)
-        self.assertEqual(modal_render_inner.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_START_RENDER)
 
 
 @mock.patch('sys.stdout', new_callable=StringIO)
@@ -222,13 +170,13 @@ class ScreenException_TestCase(unittest.TestCase):
         screen = ExceptionTestScreen(ExceptionTestScreen.REFRESH)
 
         with self.assertRaises(TestRefreshException):
-            _schedule_screen_and_run(screen)
+            schedule_screen_and_run(screen)
 
     def test_raise_exception_in_rendering(self, _):
         screen = ExceptionTestScreen(ExceptionTestScreen.REDRAW)
 
         with self.assertRaises(TestRedrawException):
-            _schedule_screen_and_run(screen)
+            schedule_screen_and_run(screen)
 
 
 @mock.patch('sys.stdout')
@@ -285,15 +233,26 @@ class EmptyScreen(UIScreen):
     def __init__(self):
         super().__init__()
         self.is_closed = False
+        EmptyScreen.title = ""
+
+    def refresh(self, args=None):
+        super().refresh(args)
+        # Do not ask for input
+        return False
+
+    def show_all(self):
+        self.close()
+
+    def closed(self):
+        self.is_closed = True
+
+
+class EmptyScreenCloseBeforePrint(UIScreen):
 
     def refresh(self, args=None):
         super().refresh(args)
         self.close()
-        # Do not ask for input
         return False
-
-    def closed(self):
-        self.is_closed = True
 
 
 class InputErrorTestScreen(UIScreen):
@@ -367,76 +326,6 @@ class InputScreen(UIScreen):
             self.input_processed = True
         self.close()
         return INPUT_PROCESSED
-
-
-class ShowedCounterScreen(UIScreen):
-
-    def __init__(self, switch_to_screen=None, replace_screen=None):
-        super().__init__()
-        self._switch_to_screen = switch_to_screen
-        self._replace_screen = replace_screen
-        self.counter = 0
-
-    def refresh(self, args=None):
-        super().refresh(args)
-        return False
-
-    def show_all(self):
-        super().show_all()
-        self.counter += 1
-        if self._switch_to_screen is not None:
-            App.renderer().switch_screen(self._switch_to_screen)
-            self._switch_to_screen = None
-        elif self._replace_screen is not None:
-            App.renderer().replace_screen(self._replace_screen)
-            self._replace_screen = None
-        else:
-            self.close()
-
-
-class ModalTestScreen(UIScreen):
-    """Test if the modal screen is really modal and stops the execution in a place where we start the modal screen.
-
-    This class have checkpoints which increment class variable counter. This counter is copied in the modal instance
-    to the local variable self.copied_modal_counter.
-    In the end we should check if the instance modal counter have the correct value, which is before the
-    modal screen was started (1).
-    """
-
-    INIT = 0
-    BEFORE_MODAL_START_REFRESH = 1
-    AFTER_MODAL_START_REFRESH = 2
-    BEFORE_MODAL_START_RENDER = 3
-    AFTER_MODAL_START_RENDER = 4
-
-    modal_counter = 0
-
-    def __init__(self, modal_screen_render=None, modal_screen_refresh=None):
-        super().__init__()
-        self._modal_screen_render = modal_screen_render
-        self._modal_screen_refresh = modal_screen_refresh
-        self.copied_modal_counter = 0
-        ModalTestScreen.modal_counter = self.INIT
-
-    def refresh(self, args=None):
-        super().refresh(args)
-        if self._modal_screen_refresh is not None:
-            # Start a new modal screen
-            ModalTestScreen.modal_counter = self.BEFORE_MODAL_START_REFRESH
-            App.renderer().switch_screen_modal(self._modal_screen_refresh)
-            ModalTestScreen.modal_counter = self.AFTER_MODAL_START_REFRESH
-        return False
-
-    def show_all(self):
-        super().show_all()
-        if self._modal_screen_render is not None:
-            # Start new modal screen
-            ModalTestScreen.modal_counter = self.BEFORE_MODAL_START_RENDER
-            App.renderer().switch_screen_modal(self._modal_screen_render)
-            ModalTestScreen.modal_counter = self.AFTER_MODAL_START_RENDER
-
-        self.copied_modal_counter = ModalTestScreen.modal_counter
-        self.close()
 
 
 class ExceptionTestScreen(UIScreen):

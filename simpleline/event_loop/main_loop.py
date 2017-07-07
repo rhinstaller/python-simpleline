@@ -1,7 +1,5 @@
 # Default event loop for Simpleline application.
 #
-# This class can be overridden to use any existing event loop of your program.
-#
 # Copyright (C) 2017  Red Hat, Inc.
 #
 # This copyrighted material is made available to anyone wishing to use,
@@ -21,21 +19,22 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
-from queue import PriorityQueue
 from simpleline.event_loop import AbstractEventLoop, ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal
+from simpleline.event_loop.event_queue import EventQueue
 
 
 class MainLoop(AbstractEventLoop):
     """Default main event loop for the Simpleline.
 
-    This event loop can be replaced by your event loop by implementing simpleline.event_loop.AbstractEventLoop class.
+    This event loop can be replaced by your event loop by implementing `simpleline.event_loop.AbstractEventLoop` class.
     """
 
     def __init__(self):
         super().__init__()
         self._handlers = {}
-        self._queue_instance = PriorityQueue()
+        self._active_queue = EventQueue()
+        self._event_queues = [self._active_queue]
         # handle all exceptions in the _raised_exception() method
         self.register_signal_handler(ExceptionSignal, self._raise_exception)
 
@@ -60,6 +59,14 @@ class MainLoop(AbstractEventLoop):
             self._handlers[signal] = []
         self._handlers[signal].append(EventHandler(callback, data))
 
+    def register_signal_source(self, signal_source):
+        """Register source of signal for actual event queue.
+
+        :param signal_source: Source for future signals.
+        :type signal_source: `simpleline.render.ui_screen.UIScreen`
+        """
+        self._active_queue.add_source(signal_source)
+
     def run(self):
         """This methods starts the application.
 
@@ -70,13 +77,46 @@ class MainLoop(AbstractEventLoop):
         if self._quit_callback:
             self._quit_callback()
 
+    def execute_new_loop(self, signal):
+        """Starts the new event loop and pass `signal` in it.
+
+        This is required for processing a modal screens.
+
+        :param signal: signal passed to the new event loop
+        :type signal: `AbstractSignal` based class
+        """
+        self._active_queue = EventQueue()
+        self._event_queues.append(self._active_queue)
+        self.enqueue_signal(signal)
+        self._mainloop()
+
+    def close_loop(self):
+        """Close active event loop.
+
+        Close an event loop created by the `execute_new_loop()` method.
+        """
+        self.process_signals()
+        self._event_queues.pop()
+        try:
+            self._active_queue = self._event_queues[-1]
+        except IndexError:
+            raise ExitMainLoop()
+
+        raise ExitMainLoop()
+
     def enqueue_signal(self, signal):
         """Enqueue new event for processing.
+
+        Enqueue signal to the most inner queue (nearest to the active queue) where the `signal.source` belongs.
+        If it belongs nowhere enqueue it to the active one.
 
         :param signal: event which you want to add to the event queue for processing
         :type signal: instance based on AbstractEvent class
         """
-        self._queue_instance.put(signal)
+        for queue in reversed(self._event_queues):
+            if queue.enqueue_if_source_belongs(signal, signal.source):
+                return
+        self._active_queue.enqueue(signal)
 
     def _mainloop(self):
         """Single mainloop. Do not use directly, start the application using run()."""
@@ -97,8 +137,8 @@ class MainLoop(AbstractEventLoop):
         :param return_after: return after the signal was processed
         :type return_after: class of the signal we are waiting for
         """
-        while not self._queue_instance.empty():
-            signal = self._queue_instance.get()
+        while not self._active_queue.empty():
+            signal = self._active_queue.get()
             if type(signal) in self._handlers:
                 for handler_data in self._handlers[type(signal)]:
                     try:

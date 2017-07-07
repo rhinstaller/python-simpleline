@@ -115,13 +115,13 @@ class Renderer(object):
         :type args: anything
         """
         try:
-            should_draw_immediately = self._screen_stack.pop().draw_immediately
+            execute_new_loop = self._screen_stack.pop().execute_new_loop
         except ScreenStackEmptyException:
             raise ScreenStackEmptyException("Switch screen is not possible when there is no screen scheduled!")
 
         # we have to keep the old_loop value so we stop
         # dialog's mainloop if it ever uses switch_screen
-        screen = ScreenData(ui, args, should_draw_immediately)
+        screen = ScreenData(ui, args, execute_new_loop)
         self._screen_stack.append(screen)
         self.redraw()
 
@@ -152,7 +152,9 @@ class Renderer(object):
         """
         screen = ScreenData(ui, args, True)
         self._screen_stack.append(screen)
-        self._do_redraw()
+        # only new events will be processed now
+        # the old one will wait after this event loop will be closed
+        self._event_loop.execute_new_loop(RenderScreenSignal(self))
 
     def close_screen(self, closed_from=None):
         """Close the currently displayed screen and exit it's main loop if necessary.
@@ -164,14 +166,12 @@ class Renderer(object):
         # User can react when screen is closing
         screen.ui_screen.closed()
 
-        # this cannot happen, if we are closing the window,
-        # the loop must have been running or not be there at all
-        if screen.draw_immediately:
-            raise RendererUnexpectedError("New main loop is requested when closing window!")
-
         if closed_from is not None and closed_from is not screen.ui_screen:
             raise RendererUnexpectedError("You are trying to close screen %s from screen %s! "
                                           "This is most probably not intentional." % (closed_from, screen.ui_screen))
+
+        if screen.execute_new_loop:
+            self._event_loop.close_loop()
 
         if not self._screen_stack.empty():
             self.redraw()
@@ -200,33 +200,27 @@ class Renderer(object):
                 self.redraw()
                 return
 
-        # new mainloop is requested
-        if top_screen.draw_immediately:
-            # change the record to indicate mainloop is running
-            self._screen_stack.pop()
-            self.switch_screen(top_screen.ui_screen, top_screen.args)
-            # redraw this screen now
-            self._do_redraw()
-            # after the mainloop ends, set the redraw flag
-            # and skip the input processing once, to redisplay the screen first
-            self.redraw()
-        else:
-            # if redraw is needed, separate the content on the screen from the
-            # stuff we are about to display now
+        # get the widget tree from the screen and show it in the screen
+        try:
+            # refresh screen content
+            input_required = top_screen.ui_screen.refresh(top_screen.args)
+
+            # Screen was closed in the refresh method
+            if top_screen != self._get_last_screen():
+                return
+
+            # separate the content on the screen from the stuff we are about to display now
             self._input_error_counter = 0
             print(self._spacer)
 
-            # refresh the screen and print its content
-            try:
-                input_required = top_screen.ui_screen.refresh(top_screen.args)
-                top_screen.ui_screen.show_all()
-                if input_required:
-                    self.input_required()
-            except ExitMainLoop:
-                raise
-            except Exception:    # pylint: disable=broad-except
-                self._event_loop.enqueue_signal(ExceptionSignal(self))
-                return False
+            top_screen.ui_screen.show_all()
+            if input_required:
+                self.input_required()
+        except ExitMainLoop:
+            raise
+        except Exception:    # pylint: disable=broad-except
+            self._event_loop.enqueue_signal(ExceptionSignal(self))
+            return False
 
     def _get_last_screen(self):
         if self._screen_stack.empty():

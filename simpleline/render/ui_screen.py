@@ -62,6 +62,7 @@ class UIScreen(SignalHandler):
         :rtype: bool
         """
         self._ready = True
+        App.event_loop().register_signal_source(self)
         return True
 
     def refresh(self, args=None):
