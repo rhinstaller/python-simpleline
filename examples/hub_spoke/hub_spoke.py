@@ -37,8 +37,7 @@ class Hub(UIScreen):
             right.append(TextWidget("   Password is set"))
 
         col = ColumnWidget([(30, left), (30, right)], 5)
-        self._window += [header, "", "", col, ""]
-        return True
+        self.window += [header, "", "", col, ""]
 
     def input(self, args, key):
         """Run spokes based on the user choice."""
@@ -77,7 +76,7 @@ class SetNameScreen(UIScreen):
         """Write message to user."""
         super().refresh(args)
         w = TextWidget(self._message)
-        self._window += [CenterWidget(w), ""]
+        self.window += [CenterWidget(w), ""]
         return True
 
     def prompt(self, args=None):

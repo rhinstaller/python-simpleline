@@ -169,11 +169,11 @@ class ScreenWithWidget(UIScreen):
     def __init__(self, msg, height=25):
         super().__init__(screen_height=height)
         self._msg = msg
+        self.input_required = False
 
     def refresh(self, args=None):
         super().refresh(args)
-        self._window = [TextWidget(self._msg)]
-        return False
+        self.window = [TextWidget(self._msg)]
 
     def show_all(self):
         super().show_all()

@@ -18,8 +18,7 @@ class Hub(UIScreen):
 
         w = CenterWidget(TextWidget("Press '1' to enter Entry counter"))
 
-        self._window += [w, ""]
-        return True
+        self.window += [w, ""]
 
     def input(self, args, key):
         """Run spokes based on the user choice"""
@@ -44,7 +43,7 @@ class CounterScreen(UIScreen):
         self._counter = 0
 
     def closed(self):
-        self._ready = False
+        self.ready = False
 
     def setup(self, args=None):
         super().setup(args)
@@ -55,8 +54,7 @@ class CounterScreen(UIScreen):
         """Write message to user"""
         super().refresh(args)
         w = TextWidget("Counter {}".format(self._counter))
-        self._window += [CenterWidget(w), ""]
-        return True
+        self.window += [CenterWidget(w), ""]
 
     @property
     def counter(self):

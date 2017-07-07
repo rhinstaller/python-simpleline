@@ -9,8 +9,8 @@ class HelloWorld(UIScreen):
     title = u"Hello World"  # title is printed if there is nothing else
 
     def refresh(self, args=None):
-        self._window = [TextWidget("Hello World")]
-        return True
+        super().refresh()
+        self.window = [TextWidget("Hello World")]
 
 
 if __name__ == "__main__":

@@ -212,7 +212,7 @@ class ScreenScheduler(object):
         # get the widget tree from the screen and show it in the screen
         try:
             # refresh screen content
-            input_required = top_screen.ui_screen.refresh(top_screen.args)
+            top_screen.ui_screen.refresh(top_screen.args)
 
             # Screen was closed in the refresh method
             if top_screen != self._get_last_screen():
@@ -223,7 +223,7 @@ class ScreenScheduler(object):
             print(self._spacer)
 
             top_screen.ui_screen.show_all()
-            if input_required:
+            if top_screen.ui_screen.input_required:
                 self.input_required()
         except ExitMainLoop:
             raise

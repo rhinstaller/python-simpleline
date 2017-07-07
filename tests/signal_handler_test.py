@@ -85,12 +85,12 @@ class TestRenderConnectHandler(UIScreen):
     def __init__(self):
         super().__init__()
         self.callback_called = False
+        self.input_required = False
 
     def refresh(self, args=None):
         super().refresh(args)
         self.connect(RenderScreenSignal, self._callback)
         self.close()
-        return False
 
     def _callback(self, signal, args):
         self.callback_called = True
@@ -98,9 +98,9 @@ class TestRenderConnectHandler(UIScreen):
 
 class EmptyScreen(UIScreen):
 
-    def refresh(self, args=None):
-        super().refresh(args=args)
-        return False
+    def __init__(self):
+        super().__init__()
+        self.input_required = False
 
     def show_all(self):
         super().show_all()

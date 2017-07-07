@@ -110,10 +110,10 @@ class ShowedCounterScreen(UIScreen):
         self._switch_to_screen = switch_to_screen
         self._replace_screen = replace_screen
         self.counter = 0
+        self.input_required = False
 
     def refresh(self, args=None):
         super().refresh(args)
-        return False
 
     def show_all(self):
         super().show_all()
@@ -150,6 +150,7 @@ class ModalTestScreen(UIScreen):
         self._modal_screen_render = modal_screen_render
         self._modal_screen_refresh = modal_screen_refresh
         self.copied_modal_counter = 0
+        self.input_required = False
         ModalTestScreen.modal_counter = self.INIT
 
     def refresh(self, args=None):
@@ -159,7 +160,6 @@ class ModalTestScreen(UIScreen):
             ModalTestScreen.modal_counter = self.BEFORE_MODAL_START_REFRESH
             App.renderer().switch_screen_modal(self._modal_screen_refresh)
             ModalTestScreen.modal_counter = self.AFTER_MODAL_START_REFRESH
-        return False
 
     def show_all(self):
         super().show_all()
@@ -186,7 +186,6 @@ class EmitDrawThenCreateModal(UIScreen):
         if self._refresh_screen:
             App.renderer().switch_screen_modal(self._refresh_screen)
             self._refresh_screen = None
-        return True
 
 
 class InputAndDrawScreen(UIScreen):
@@ -197,4 +196,3 @@ class InputAndDrawScreen(UIScreen):
 
     def refresh(self, args=None):
         super().refresh(args)
-        return True

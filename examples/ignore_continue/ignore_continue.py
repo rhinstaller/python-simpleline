@@ -23,8 +23,7 @@ class InfiniteScreen(UIScreen):
         """Print text to user with number of continue clicked"""
         super().refresh(args)
         text = TextWidget("You pressed {} times on continue".format(self.continue_count))
-        self._window += [CenterWidget(text), ""]
-        return True
+        self.window += [CenterWidget(text), ""]
 
     def input(self, args, key):
         """Catch 'c' keys for continue and increase counter"""

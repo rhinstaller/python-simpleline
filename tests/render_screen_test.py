@@ -251,11 +251,10 @@ class EmptyScreen(UIScreen):
         super().__init__()
         self.is_closed = False
         EmptyScreen.title = ""
+        self.input_required = False
 
     def refresh(self, args=None):
         super().refresh(args)
-        # Do not ask for input
-        return False
 
     def show_all(self):
         self.close()
@@ -266,13 +265,16 @@ class EmptyScreen(UIScreen):
 
 class TestScreenSetupFail(UIScreen):
 
+    def __init__(self):
+        super().__init__()
+        self.input_required = False
+
     def setup(self, args):
         super().setup(args)
         return False
 
     def refresh(self, args=None):
         super().refresh(args)
-        return False
 
 
 class InputErrorTestScreen(UIScreen):
@@ -311,8 +313,8 @@ class RefreshTestScreen(UIScreen):
         super().refresh(args)
         if self.input_processed:
             self.close()
-            return False
-        return True
+            self.input_required = False
+        return
 
 
 class FailedSetupScreen(UIScreen):
@@ -324,10 +326,12 @@ class FailedSetupScreen(UIScreen):
 
 class NoInputScreen(UIScreen):
 
+    def __init__(self):
+        super().__init__()
+        self.input_required = False
+
     def refresh(self, args=None):
         super().refresh(args)
-        # Do not ask for input
-        return False
 
     def show_all(self):
         super().show_all()
@@ -356,12 +360,12 @@ class ExceptionTestScreen(UIScreen):
     def __init__(self, where):
         super().__init__()
         self._where = where
+        self.input_required = False
 
     def refresh(self, args=None):
         super().refresh()
         if self._where == self.REFRESH:
             raise TestRefreshException("Refresh test exception happened!")
-        return False
 
     def show_all(self):
         super().show_all()
