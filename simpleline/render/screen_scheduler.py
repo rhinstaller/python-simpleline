@@ -118,7 +118,7 @@ class ScreenScheduler(object):
         self._screen_stack.append(screen)
         self.redraw()
 
-    def switch_screen(self, ui, args=None):
+    def push_screen(self, ui, args=None):
         """Schedules a screen to show, but keeps the current one in stack to
         return to, when the new one is closed.
 
@@ -131,7 +131,7 @@ class ScreenScheduler(object):
         self._screen_stack.append(screen)
         self.redraw()
 
-    def switch_screen_modal(self, ui, args=None):
+    def push_screen_modal(self, ui, args=None):
         """Starts a new screen right away, so the caller can collect data back.
 
         When the new screen is closed, the caller is redisplayed.
@@ -256,7 +256,7 @@ class ScreenScheduler(object):
                 if self.quit_screen:
                     quit_screen = self.quit_screen
                     d = quit_screen(self, self._quit_message)
-                    self.switch_screen_modal(d)
+                    self.push_screen_modal(d)
                     if d.answer:
                         raise ExitMainLoop()
                 else:

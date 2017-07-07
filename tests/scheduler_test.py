@@ -126,7 +126,7 @@ class Scheduler_TestCase(unittest.TestCase):
         self.create_renderer_with_stack()
 
         screen = UIScreen()
-        self.renderer.switch_screen(screen)
+        self.renderer.push_screen(screen)
         self.assertEqual(self.pop_last_item().ui_screen, screen)
 
     def test_switch_screen(self):
@@ -136,7 +136,7 @@ class Scheduler_TestCase(unittest.TestCase):
         new_screen = UIScreen()
 
         self.renderer.schedule_screen(screen)
-        self.renderer.switch_screen(new_screen)
+        self.renderer.push_screen(new_screen)
 
         test_screen = self.pop_last_item()
         self.assertEqual(test_screen.ui_screen, new_screen)
@@ -151,7 +151,7 @@ class Scheduler_TestCase(unittest.TestCase):
         self.create_renderer_with_stack()
 
         screen = UIScreen()
-        self.renderer.switch_screen(screen, args="test")
+        self.renderer.push_screen(screen, args="test")
         self.assertEqual(self.pop_last_item(False).ui_screen, screen)
         self.assertEqual(self.pop_last_item().args, "test")
 
@@ -160,7 +160,7 @@ class Scheduler_TestCase(unittest.TestCase):
         self.create_renderer_with_stack()
 
         screen = UIScreen()
-        self.renderer.switch_screen_modal(screen)
+        self.renderer.push_screen_modal(screen)
         self.assertEqual(self.pop_last_item().ui_screen, screen)
 
     @mock.patch('simpleline.render.io_manager.InOutManager.draw')
@@ -170,7 +170,7 @@ class Scheduler_TestCase(unittest.TestCase):
         screen = UIScreen()
         new_screen = UIScreen()
         self.renderer.schedule_screen(screen)
-        self.renderer.switch_screen_modal(new_screen)
+        self.renderer.push_screen_modal(new_screen)
 
         test_screen = self.pop_last_item()
         self.assertEqual(test_screen.ui_screen, new_screen)
@@ -182,5 +182,5 @@ class Scheduler_TestCase(unittest.TestCase):
         self.create_renderer_with_stack()
 
         screen = UIScreen()
-        self.renderer.switch_screen_modal(screen, args="test")
+        self.renderer.push_screen_modal(screen, args="test")
         self.assertEqual(self.pop_last_item(False).ui_screen, screen)

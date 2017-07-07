@@ -22,11 +22,12 @@
 from simpleline.base import App
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen.signal_handler import SignalHandler
+from simpleline.render.screen.scheduler_handler import SchedulerHandler
 from simpleline.render.widgets import Widget
 from simpleline.utils.i18n import _
 
 
-class UIScreen(SignalHandler):
+class UIScreen(SignalHandler, SchedulerHandler):
     """Base class representing one TUI Screen.
 
     Shares some API with anaconda's GUI to make it easy for devs to create similar UI

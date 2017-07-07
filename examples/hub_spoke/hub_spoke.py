@@ -42,13 +42,13 @@ class Hub(UIScreen):
     def input(self, args, key):
         """Run spokes based on the user choice."""
         if key == self.KEY_USER:  # set first name
-            App.renderer().switch_screen(self._name_spoke)
+            App.renderer().push_screen(self._name_spoke)
             return INPUT_PROCESSED
         elif key == self.KEY_SURNAME:  # set surname
-            App.renderer().switch_screen(self._surname_spoke)
+            App.renderer().push_screen(self._surname_spoke)
             return INPUT_PROCESSED
         elif key == self.KEY_PASSWORD:  # set password
-            App.renderer().switch_screen(self._pass_spoke)
+            App.renderer().push_screen(self._pass_spoke)
             return INPUT_PROCESSED
         elif key == Prompt.CONTINUE:
             if self._name_spoke and self._surname_spoke and self._pass_spoke.answer:

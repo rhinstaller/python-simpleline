@@ -23,7 +23,7 @@ class Hub(UIScreen):
     def input(self, args, key):
         """Run spokes based on the user choice"""
         if key == "1":
-            App.renderer().switch_screen(self._counter_spoke)
+            App.renderer().push_screen(self._counter_spoke)
             return INPUT_PROCESSED
         else:
             return key

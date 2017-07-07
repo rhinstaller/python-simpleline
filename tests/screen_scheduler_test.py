@@ -21,7 +21,6 @@ import unittest
 from io import StringIO
 from unittest import mock
 
-from simpleline.base import App
 from simpleline.render.screen import UIScreen
 from tests import schedule_screen_and_run, create_output_with_separators
 
@@ -119,10 +118,10 @@ class ShowedCounterScreen(UIScreen):
         super().show_all()
         self.counter += 1
         if self._switch_to_screen is not None:
-            App.renderer().switch_screen(self._switch_to_screen)
+            self._switch_to_screen.push_screen()
             self._switch_to_screen = None
         elif self._replace_screen is not None:
-            App.renderer().replace_screen(self._replace_screen)
+            self._replace_screen.replace_screen()
             self._replace_screen = None
         else:
             self.close()
@@ -158,7 +157,7 @@ class ModalTestScreen(UIScreen):
         if self._modal_screen_refresh is not None:
             # Start a new modal screen
             ModalTestScreen.modal_counter = self.BEFORE_MODAL_START_REFRESH
-            App.renderer().switch_screen_modal(self._modal_screen_refresh)
+            self._modal_screen_refresh.push_screen_modal()
             ModalTestScreen.modal_counter = self.AFTER_MODAL_START_REFRESH
 
     def show_all(self):
@@ -166,7 +165,7 @@ class ModalTestScreen(UIScreen):
         if self._modal_screen_render is not None:
             # Start new modal screen
             ModalTestScreen.modal_counter = self.BEFORE_MODAL_START_RENDER
-            App.renderer().switch_screen_modal(self._modal_screen_render)
+            self._modal_screen_render.push_screen_modal()
             ModalTestScreen.modal_counter = self.AFTER_MODAL_START_RENDER
 
         self.copied_modal_counter = ModalTestScreen.modal_counter
@@ -184,7 +183,7 @@ class EmitDrawThenCreateModal(UIScreen):
         super().refresh(args)
         self.redraw()
         if self._refresh_screen:
-            App.renderer().switch_screen_modal(self._refresh_screen)
+            self._refresh_screen.push_screen_modal()
             self._refresh_screen = None
 
 
