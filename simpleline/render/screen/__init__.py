@@ -21,9 +21,9 @@
 
 from simpleline.base import App
 from simpleline.render.prompt import Prompt
+from simpleline.render.screen.signal_handler import SignalHandler
 from simpleline.render.widgets import Widget
 from simpleline.utils.i18n import _
-from simpleline.event_loop.signal_handler import SignalHandler
 
 
 class UIScreen(SignalHandler):
