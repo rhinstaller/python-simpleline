@@ -23,9 +23,9 @@ import unittest
 from unittest import mock
 
 from simpleline.event_loop.main_loop import MainLoop
+from simpleline.render.screen import UIScreen
 from simpleline.render.screen_scheduler import ScreenScheduler
 from simpleline.render.screen_stack import ScreenStack, ScreenStackEmptyException
-from simpleline.render.ui_screen import UIScreen
 
 
 class Scheduler_TestCase(unittest.TestCase):

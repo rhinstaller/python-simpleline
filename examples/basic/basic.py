@@ -1,8 +1,7 @@
 #!/bin/python3
 
-from simpleline.render.ui_screen import UIScreen
 from simpleline.base import App
-
+from simpleline.render.screen import UIScreen
 from simpleline.render.widgets import TextWidget
 
 

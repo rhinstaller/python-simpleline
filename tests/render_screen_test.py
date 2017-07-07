@@ -19,12 +19,12 @@
 
 
 import unittest
-from unittest import mock
 from io import StringIO
+from unittest import mock
 
 from simpleline.base import App
-from simpleline.render.ui_screen import UIScreen
 from simpleline.render import INPUT_PROCESSED, INPUT_DISCARDED, RenderUnexpectedError
+from simpleline.render.screen import UIScreen
 from tests import schedule_screen_and_run, calculate_separator
 
 

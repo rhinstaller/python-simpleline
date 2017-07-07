@@ -3,7 +3,7 @@
 from simpleline.base import App
 from simpleline.render import INPUT_PROCESSED
 from simpleline.render.prompt import Prompt
-from simpleline.render.ui_screen import UIScreen
+from simpleline.render.screen import UIScreen
 from simpleline.render.widgets import TextWidget, CenterWidget
 
 

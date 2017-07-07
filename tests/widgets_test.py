@@ -19,13 +19,13 @@
 
 
 import unittest
-from unittest.mock import patch
 from io import StringIO
+from unittest.mock import patch
 
 from simpleline.base import App
-from simpleline.render.ui_screen import UIScreen
-from simpleline.render.widgets import TextWidget, ColumnWidget
 from simpleline.render.prompt import Prompt
+from simpleline.render.screen import UIScreen
+from simpleline.render.widgets import TextWidget, ColumnWidget
 
 
 class Widgets_TestCase(unittest.TestCase):
