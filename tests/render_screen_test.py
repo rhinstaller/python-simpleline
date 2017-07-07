@@ -47,7 +47,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
         width = 60
 
         App.initialize()
-        App.renderer().width = width
+        App.renderer().io_manager.width = width
         App.renderer().schedule_screen(ui_screen)
         App.run()
 
@@ -58,7 +58,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
         width = 0
 
         App.initialize()
-        App.renderer().width = width
+        App.renderer().io_manager.width = width
         App.renderer().schedule_screen(ui_screen)
         App.run()
 

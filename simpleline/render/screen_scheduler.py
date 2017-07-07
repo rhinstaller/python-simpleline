@@ -46,9 +46,6 @@ class ScreenScheduler(object):
         self._quit_screen = None
         self._quit_message = ""
         self._event_loop = event_loop
-        self._spacer = ""
-        self._input_error_counter = 0
-        self._input_thread = None
         self._io_manager = InOutManager(self._event_loop)
         if renderer_stack:
             self._screen_stack = renderer_stack
@@ -56,22 +53,12 @@ class ScreenScheduler(object):
             self._screen_stack = ScreenStack()
         self._register_handlers()
 
-        self.width = 80
         self.redraw()
 
     def _register_handlers(self):
-        self._event_loop.register_signal_handler(RenderScreenSignal, self._redraw_callback)
+        self._event_loop.register_signal_handler(RenderScreenSignal, self._process_screen_callback)
         self._event_loop.register_signal_handler(InputScreenSignal, self._process_input_callback)
         self._event_loop.register_signal_handler(CloseScreenSignal, self._close_screen_callback)
-
-    @property
-    def width(self):
-        return self._io_manager.width
-
-    @width.setter
-    def width(self, width):
-        self._io_manager.width = width
-        self._spacer = "\n".join(2 * [width * "="])
 
     @property
     def io_manager(self):
@@ -191,10 +178,10 @@ class ScreenScheduler(object):
         """Register rendering to the event loop for processing."""
         self._event_loop.enqueue_signal(RenderScreenSignal(self))
 
-    def _redraw_callback(self, signal, data):
-        self._do_redraw()
+    def _process_screen_callback(self, signal, data):
+        self._process_screen()
 
-    def _do_redraw(self):
+    def _process_screen(self):
         """Draws the current screen and returns True if user input is requested.
 
         If modal screen is requested, starts a new loop and initiates redraw after it ends.
@@ -218,11 +205,9 @@ class ScreenScheduler(object):
             if top_screen != self._get_last_screen():
                 return
 
-            # separate the content on the screen from the stuff we are about to display now
-            self._input_error_counter = 0
-            print(self._spacer)
+            # draw screen to the console
+            self.io_manager.draw(top_screen)
 
-            top_screen.ui_screen.show_all()
             if top_screen.ui_screen.input_required:
                 self.input_required()
         except ExitMainLoop:

@@ -47,9 +47,10 @@ class Scheduler_TestCase(unittest.TestCase):
 
     def test_renderer_width(self):
         renderer = ScreenScheduler(MainLoop())
-        self.assertEqual(renderer.width, 80)
-        renderer.width = 90
-        self.assertEqual(renderer.width, 90)
+        io_manager = renderer.io_manager
+        self.assertEqual(io_manager.width, 80)
+        io_manager.width = 90
+        self.assertEqual(io_manager.width, 90)
 
     def test_renderer_quit_screen(self):
         def test_callback():
@@ -154,7 +155,7 @@ class Scheduler_TestCase(unittest.TestCase):
         self.assertEqual(self.pop_last_item(False).ui_screen, screen)
         self.assertEqual(self.pop_last_item().args, "test")
 
-    @mock.patch('simpleline.render.screen_scheduler.ScreenScheduler._do_redraw')
+    @mock.patch('simpleline.render.io_manager.InOutManager.draw')
     def test_switch_screen_modal_empty_stack(self, _):
         self.create_renderer_with_stack()
 
@@ -162,7 +163,7 @@ class Scheduler_TestCase(unittest.TestCase):
         self.renderer.switch_screen_modal(screen)
         self.assertEqual(self.pop_last_item().ui_screen, screen)
 
-    @mock.patch('simpleline.render.screen_scheduler.ScreenScheduler._do_redraw')
+    @mock.patch('simpleline.render.io_manager.InOutManager.draw')
     def test_switch_screen_modal(self, _):
         self.create_renderer_with_stack()
 
@@ -176,7 +177,7 @@ class Scheduler_TestCase(unittest.TestCase):
         self.assertEqual(test_screen.args, [])
         self.assertEqual(test_screen.execute_new_loop, True)
 
-    @mock.patch('simpleline.render.screen_scheduler.ScreenScheduler._do_redraw')
+    @mock.patch('simpleline.render.io_manager.InOutManager.draw')
     def test_switch_screen_modal_with_args(self, _):
         self.create_renderer_with_stack()
 

@@ -52,6 +52,11 @@ class InOutManager(object):
         self._event_loop = event_loop
         self._getpass_func = getpass.getpass
         self._width = 80
+        self._spacer = ""
+        self._calculate_spacer()
+
+    def _calculate_spacer(self):
+        self._spacer = "\n".join(2 * [self._width * "="])
 
     @property
     def input_error_counter(self):
@@ -67,6 +72,7 @@ class InOutManager(object):
     def width(self, width):
         """Set width of the widgets."""
         self._width = width
+        self._calculate_spacer()
 
     @property
     def input_error_threshold_exceeded(self):
@@ -80,6 +86,23 @@ class InOutManager(object):
     def set_pass_func(self, getpass_func):
         """Set a function for getting passwords."""
         self._getpass_func = getpass_func
+
+    def draw(self, active_screen):
+        """Draws the current `active_screen`.
+
+        :param active_screen: Screen which should be draw to the console.
+        :type active_screen: Classed based on `simpleline.render.screen.UIScreen`.
+        """
+        # get the widget tree from the screen and show it in the screen
+        try:
+            # separate the content on the screen from the stuff we are about to display now
+            print(self._spacer)
+            # print UIScreen content
+            active_screen.ui_screen.show_all()
+        except ExitMainLoop:
+            raise
+        except Exception:    # pylint: disable=broad-except
+            self._event_loop.enqueue_signal(ExceptionSignal(self))
 
     def process_input(self, active_screen):
         """Process input from the screens.

@@ -144,7 +144,7 @@ class UIScreen(SignalHandler):
         """Prepares all elements of self.window for output and then prints them on the screen."""
         for w in self.window:
             if hasattr(w, "render"):
-                w.render(App.renderer().width)  # pylint: disable=no-member
+                w.render(App.renderer().io_manager.width)  # pylint: disable=no-member
             if isinstance(w, Widget):
                 self._print_widget(w)
             elif isinstance(w, bytes):
