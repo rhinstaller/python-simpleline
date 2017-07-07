@@ -187,6 +187,7 @@ class InOutManager(object):
                 finally:
                     RAW_INPUT_LOCK.release()
 
+        self._event_loop.enqueue_signal(InputReadySignal(self))
         queue_instance.put(data)
 
     def _get_input(self):
