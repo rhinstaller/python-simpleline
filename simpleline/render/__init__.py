@@ -19,9 +19,7 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
-INPUT_PROCESSED = True
-INPUT_DISCARDED = False
-
+from enum import Enum
 from simpleline import SimplelineError
 
 
@@ -33,3 +31,6 @@ class RenderUnexpectedError(RenderError):
     pass
 
 
+class InputState(Enum):
+    PROCESSED = True
+    DISCARDED = False

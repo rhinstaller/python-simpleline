@@ -161,10 +161,10 @@ class UIScreen(SignalHandler, SchedulerHandler):
         :type key: str
         :param args: optional argument passed from switch_screen calls
         :type args: anything
-        :return: return INPUT_PROCESSED if key was handled,
-                 INPUT_DISCARDED if the screen should not process input on the scheduler and
+        :return: return `simpleline.render.InputState.PROCESSED` if key was handled,
+                 `simpleline.render.InputState.DISCARDED` if the screen should not process input on the scheduler and
                  key if you want it to.
-        :rtype: `simpleline.render.INPUT_PROCESSED`|`simpleline.render.INPUT_DISCARDED`|str
+        :rtype: `simpleline.render.InputState` enum | str
         """
         return key
 

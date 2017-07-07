@@ -23,7 +23,7 @@ from io import StringIO
 from unittest import mock
 
 from simpleline.base import App
-from simpleline.render import INPUT_PROCESSED, INPUT_DISCARDED, RenderUnexpectedError
+from simpleline.render import InputState, RenderUnexpectedError
 from simpleline.render.screen import UIScreen
 from tests import schedule_screen_and_run, calculate_separator
 
@@ -293,7 +293,7 @@ class InputErrorTestScreen(UIScreen):
         else:
             self.error_counter += 1
             print("Discarded")
-            return INPUT_DISCARDED
+            return InputState.DISCARDED
 
     def show_all(self):
         self.render_counter += 1
@@ -348,7 +348,7 @@ class InputScreen(UIScreen):
         if key == "a":
             self.input_processed = True
         self.close()
-        return INPUT_PROCESSED
+        return InputState.PROCESSED
 
 
 class ExceptionTestScreen(UIScreen):

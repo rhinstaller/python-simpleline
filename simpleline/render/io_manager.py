@@ -27,7 +27,7 @@ import getpass
 
 from enum import Enum
 
-from simpleline.render import INPUT_PROCESSED, INPUT_DISCARDED
+from simpleline.render import InputState
 from simpleline.event_loop import ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal, InputReadySignal
 from simpleline.render.prompt import Prompt
@@ -208,9 +208,9 @@ class InOutManager(object):
         # delegate the handling to active screen first
         try:
             key = active_screen.ui_screen.input(active_screen.args, key)
-            if key == INPUT_PROCESSED:
+            if key == InputState.PROCESSED:
                 return UserInputResult.PROCESSED
-            elif key == INPUT_DISCARDED:
+            elif key == InputState.DISCARDED:
                 return UserInputResult.ERROR
         except ExitMainLoop:
             raise

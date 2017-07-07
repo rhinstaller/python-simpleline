@@ -20,7 +20,7 @@
 import sys
 
 from simpleline.base import App
-from simpleline.render import widgets, INPUT_PROCESSED
+from simpleline.render import widgets, InputState
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen import UIScreen
 from simpleline.utils.i18n import _, N_, C_
@@ -175,7 +175,7 @@ class HelpScreen(UIScreen):
     def input(self, args, key):
         """ Handle user input. """
         self.close()
-        return INPUT_PROCESSED
+        return InputState.PROCESSED
 
     def prompt(self, args=None):
         return Prompt(_("Press %s to return") % Prompt.ENTER)

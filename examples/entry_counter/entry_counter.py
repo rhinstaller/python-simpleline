@@ -1,7 +1,7 @@
 #!/bin/python3
 
 from simpleline.base import App
-from simpleline.render import INPUT_PROCESSED
+from simpleline.render import InputState
 from simpleline.render.screen import UIScreen
 from simpleline.render.widgets import TextWidget, CenterWidget
 
@@ -24,7 +24,7 @@ class Hub(UIScreen):
         """Run spokes based on the user choice"""
         if key == "1":
             App.get_scheduler().push_screen(self._counter_spoke)
-            return INPUT_PROCESSED
+            return InputState.PROCESSED
         else:
             return key
 

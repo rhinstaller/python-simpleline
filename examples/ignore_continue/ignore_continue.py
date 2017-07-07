@@ -1,7 +1,7 @@
 #!/bin/python3
 
 from simpleline.base import App
-from simpleline.render import INPUT_PROCESSED
+from simpleline.render import InputState
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen import UIScreen
 from simpleline.render.widgets import TextWidget, CenterWidget
@@ -30,7 +30,7 @@ class InfiniteScreen(UIScreen):
         if key == Prompt.CONTINUE:
             self.continue_count += 1
             self.redraw()
-            return INPUT_PROCESSED
+            return InputState.PROCESSED
 
         return key
 

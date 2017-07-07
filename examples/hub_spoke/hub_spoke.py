@@ -4,7 +4,7 @@ from simpleline.base import App
 from simpleline.render.adv_widgets import PasswordDialog
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen import UIScreen
-from simpleline.render import INPUT_PROCESSED, INPUT_DISCARDED
+from simpleline.render import InputState
 from simpleline.render.widgets import TextWidget, ColumnWidget, CenterWidget
 
 
@@ -43,18 +43,18 @@ class Hub(UIScreen):
         """Run spokes based on the user choice."""
         if key == self.KEY_USER:  # set first name
             App.get_scheduler().push_screen(self._name_spoke)
-            return INPUT_PROCESSED
+            return InputState.PROCESSED
         elif key == self.KEY_SURNAME:  # set surname
             App.get_scheduler().push_screen(self._surname_spoke)
-            return INPUT_PROCESSED
+            return InputState.PROCESSED
         elif key == self.KEY_PASSWORD:  # set password
             App.get_scheduler().push_screen(self._pass_spoke)
-            return INPUT_PROCESSED
+            return InputState.PROCESSED
         elif key == Prompt.CONTINUE:
             if self._name_spoke and self._surname_spoke and self._pass_spoke.answer:
                 return key
             else:  # catch 'c' key if not everything set
-                return INPUT_DISCARDED
+                return InputState.DISCARDED
         else:
             return key
 
