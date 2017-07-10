@@ -25,7 +25,8 @@ import sys
 import threading
 
 from simpleline.event_loop import ExitMainLoop
-from simpleline.event_loop.signals import ExceptionSignal, InputReadySignal, RenderScreenSignal, InputScreenSignal
+from simpleline.event_loop.signals import ExceptionSignal, InputReadySignal, RenderScreenSignal, InputScreenSignal, \
+                                          CloseScreenSignal
 from simpleline.render import RendererUnexpectedError, INPUT_PROCESSED, INPUT_DISCARDED
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
@@ -65,6 +66,7 @@ class Renderer(object):
     def _register_handlers(self):
         self._event_loop.register_signal_handler(RenderScreenSignal, self._redraw_callback)
         self._event_loop.register_signal_handler(InputScreenSignal, self._process_input_callback)
+        self._event_loop.register_signal_handler(CloseScreenSignal, self._close_screen_callback)
 
     @property
     def width(self):
@@ -155,6 +157,9 @@ class Renderer(object):
         # only new events will be processed now
         # the old one will wait after this event loop will be closed
         self._event_loop.execute_new_loop(RenderScreenSignal(self))
+
+    def _close_screen_callback(self, signal, data):
+        self.close_screen(signal.source)
 
     def close_screen(self, closed_from=None):
         """Close the currently displayed screen and exit it's main loop if necessary.
