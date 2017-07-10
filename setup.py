@@ -6,4 +6,4 @@ setup(name='simpleline', version='0.1',
       description='Python text UI framework',
       author='Jiri Konecny', author_email='jkonecny@redhat.com',
       url='http://git.fedoraproject.org/git/?p=python-simpleline.git',
-      packages=['simpleline', 'simpleline.communication', 'simpleline.render', 'simpleline.event_loop', 'simpleline.utils'])
+      packages=['simpleline', 'simpleline.render', 'simpleline.render.screen', 'simpleline.event_loop', 'simpleline.utils'])
