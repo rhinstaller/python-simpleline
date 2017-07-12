@@ -111,9 +111,6 @@ class ShowedCounterScreen(UIScreen):
         self.counter = 0
         self.input_required = False
 
-    def refresh(self, args=None):
-        super().refresh(args)
-
     def show_all(self):
         super().show_all()
         self.counter += 1
@@ -192,6 +189,3 @@ class InputAndDrawScreen(UIScreen):
     def __init__(self, msg):
         super().__init__()
         self.title = msg
-
-    def refresh(self, args=None):
-        super().refresh(args)

@@ -85,7 +85,7 @@ class Widget(object):
         """
         return [str(u"".join(line)) for line in self._buffer]
 
-    def setxy(self, row, col):
+    def set_cursor_position(self, row, col):
         """Set cursor position.
 
         :param row: row id, starts with 0 at the top of the screen
@@ -184,23 +184,7 @@ class Widget(object):
         y = col
 
         if wordwrap:
-            lines = []
-            # Wrap each line separately
-            for line in text.split('\n'):
-                sublines = []
-                for subline in wrap(line, width):
-                    sublines.append(subline)
-                    if len(subline) < width:
-                        # line shorter than width will be wrapped by '\n' we add
-                        sublines.append('\n')
-                    # line with length == width will be wrapped by the width based
-                    # wrapping logic
-                # end of line will be wrapped by '\n' following the line in
-                # original text
-                if sublines and sublines[-1] == '\n':
-                    sublines.pop()
-                lines.append("".join(sublines))
-            text = '\n'.join(lines)
+            text = self._wrap_words(text, width)
 
         # emulate typing machine
         for character in text:
@@ -235,6 +219,25 @@ class Widget(object):
                     y = 0
 
         self._cursor = (x, y)
+
+    def _wrap_words(self, text, width):
+        lines = []
+        # Wrap each line separately
+        for line in text.split('\n'):
+            sublines = []
+            for subline in wrap(line, width):
+                sublines.append(subline)
+                if len(subline) < width:
+                    # line shorter than width will be wrapped by '\n' we add
+                    sublines.append('\n')
+                # line with length == width will be wrapped by the width based
+                # wrapping logic
+            # end of line will be wrapped by '\n' following the line in
+            # original text
+            if sublines and sublines[-1] == '\n':
+                sublines.pop()
+            lines.append("".join(sublines))
+        return '\n'.join(lines)
 
 
 class TextWidget(Widget):
@@ -281,58 +284,6 @@ class CenterWidget(Widget):
         self._w.render(width)
         # make sure col is an integer
         self.draw(self._w, col=(width - self._w.width) // 2)
-
-
-class ColumnWidget(Widget):
-
-    def __init__(self, columns, spacing=0):
-        """Create text columns
-
-        :param columns: list containing (column width, [list of widgets to put into this column])
-        :type columns: [(int, [...]), ...]
-
-        :param spacing: number of spaces to use between columns
-        :type spacing: int
-        """
-        super().__init__()
-        self._spacing = spacing
-        self._columns = columns
-
-    def render(self, width):
-        """Render the widget to it's internal buffer
-
-        :param width: the maximum width the widget can use
-        :type width: int
-
-        :return: nothing
-        :rtype: None
-        """
-        super().render(width)
-
-        # the leftmost empty column
-        x = 0
-
-        # iterate over tuples (column width, column content)
-        for col_width, col in self._columns:
-
-            # set cursor to first line and leftmost empty column
-            self.setxy(0, x)
-
-            # if requested width is None, limit the maximum to width
-            # and set minimum to 0
-            if col_width is None:
-                col_max_width = width - self.cursor[1]
-                col_width = 0
-            else:
-                col_max_width = col_width
-
-            # render and draw contents of column
-            for item in col:
-                item.render(col_max_width)
-                self.draw(item, block=True)
-
-            # recompute the leftmost empty column
-            x = max((x + col_width), self.width) + self._spacing
 
 
 class CheckboxWidget(Widget):
@@ -405,3 +356,54 @@ class CheckboxWidget(Widget):
     def text(self):
         """Contains the description text from the second line."""
         return self._text
+
+
+class ColumnWidget(Widget):
+
+    def __init__(self, columns, spacing=0):
+        """Create text columns
+
+        :param columns: list containing (column width, [list of widgets to put into this column])
+        :type columns: [(int, [...]), ...]
+
+        :param spacing: number of spaces to use between columns
+        :type spacing: int
+        """
+        super().__init__()
+        self._spacing = spacing
+        self._columns = columns
+
+    def render(self, width):
+        """Render the widget to it's internal buffer
+
+        :param width: the maximum width the widget can use
+        :type width: int
+
+        :return: nothing
+        """
+        super().render(width)
+
+        # the leftmost empty column
+        col_pos = 0
+
+        # iterate over tuples (column width, column content)
+        for col_width, col in self._columns:
+
+            # set cursor to first line and leftmost empty column
+            self.set_cursor_position(0, col_pos)
+
+            # if requested width is None, limit the maximum to width
+            # and set minimum to 0
+            if col_width is None:
+                col_max_width = width - self.cursor[1]
+                col_width = 0
+            else:
+                col_max_width = col_width
+
+            # render and draw contents of column
+            for item in col:
+                item.render(col_max_width)
+                self.draw(item, block=True)
+
+            # recompute the leftmost empty column
+            col_pos = max((col_pos + col_width), self.width) + self._spacing

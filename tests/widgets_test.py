@@ -26,6 +26,7 @@ from simpleline.base import App
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen import UIScreen
 from simpleline.render.widgets import TextWidget, ColumnWidget
+from simpleline.render.containers import ListRowContainer, ListColumnContainer
 
 
 class Widgets_TestCase(unittest.TestCase):
@@ -78,6 +79,49 @@ class Widgets_TestCase(unittest.TestCase):
                            u"Test 2          podruhé",
                            u"                Test 3"]
 
+        res_lines = c.get_lines()
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_listrow_widget(self):
+        c = ListRowContainer(columns=2, widgets=[self.w2, self.w3, self.w5], columns_width=10, spacing=2)
+        c.render(25)
+
+        expected_result = [u"Test        Test 2",
+                           u"Test 3"]
+        res_lines = c.get_lines()
+
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_listrow_widget_wrapping(self):
+        # spacing is 3 by default
+        c = ListRowContainer(2, [self.w1, self.w2, self.w3, self.w4], columns_width=15)
+        c.render(25)
+
+        expected_result = [u"Můj krásný        Test",
+                           u"dlouhý text",
+                           u"Test 2            Krásný dlouhý",
+                           u"                  text podruhé"]
+        res_lines = c.get_lines()
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_listcolumn_widget(self):
+        c = ListColumnContainer(columns=2, widgets=[self.w2, self.w3, self.w5], columns_width=10, spacing=2)
+        c.render(25)
+
+        expected_result = [u"Test        Test 3",
+                           u"Test 2"]
+        res_lines = c.get_lines()
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_listcolumn_widget_wrapping(self):
+        # spacing is 3 by default
+        c = ListColumnContainer(2, [self.w1, self.w2, self.w3, self.w4], columns_width=15)
+        c.render(25)
+
+        expected_result = [u"Můj krásný        Test 2",
+                           u"dlouhý text",
+                           u"Test              Krásný dlouhý",
+                           u"                  text podruhé"]
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
 

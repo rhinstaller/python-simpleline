@@ -253,9 +253,6 @@ class EmptyScreen(UIScreen):
         EmptyScreen.title = ""
         self.input_required = False
 
-    def refresh(self, args=None):
-        super().refresh(args)
-
     def show_all(self):
         self.close()
 
@@ -272,9 +269,6 @@ class TestScreenSetupFail(UIScreen):
     def setup(self, args):
         super().setup(args)
         return False
-
-    def refresh(self, args=None):
-        super().refresh(args)
 
 
 class InputErrorTestScreen(UIScreen):
@@ -329,9 +323,6 @@ class NoInputScreen(UIScreen):
     def __init__(self):
         super().__init__()
         self.input_required = False
-
-    def refresh(self, args=None):
-        super().refresh(args)
 
     def show_all(self):
         super().show_all()

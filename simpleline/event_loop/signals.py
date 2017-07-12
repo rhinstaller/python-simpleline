@@ -48,9 +48,7 @@ class ExceptionSignal(AbstractSignal):
 
 class InputReadySignal(AbstractSignal):
     """Input from user is ready for processing."""
-
-    def __init__(self, source):
-        super().__init__(source)
+    pass
 
 
 class RenderScreenSignal(AbstractSignal):

@@ -98,5 +98,5 @@ class EventQueue_TestCase(unittest.TestCase):
 
 class TestSignal(AbstractSignal):
 
-    def __init__(self, source=None, priority=20):
+    def __init__(self, source=None, priority=20):  # pylint: disable=useless-super-delegation
         super().__init__(source, priority)
