@@ -19,13 +19,13 @@
 
 
 import unittest
-from unittest.mock import patch
 from io import StringIO
+from unittest.mock import patch
 
 from simpleline.base import App
-from simpleline.render.ui_screen import UIScreen
-from simpleline.render.widgets import TextWidget, ColumnWidget
 from simpleline.render.prompt import Prompt
+from simpleline.render.screen import UIScreen
+from simpleline.render.widgets import TextWidget, ColumnWidget
 
 
 class Widgets_TestCase(unittest.TestCase):
@@ -114,12 +114,12 @@ class Widgets_TestCase(unittest.TestCase):
         self.evaluate_result(res_lines, expected_result)
 
 
-@patch('simpleline.render.renderer.Renderer._get_input')
+@patch('simpleline.render.io_manager.InOutManager._get_input')
 @patch('sys.stdout', new_callable=StringIO)
 class WidgetProcessing_TestCase(unittest.TestCase):
 
     def _calculate_spacer(self):
-        # this calculation is taken from renderer for default width '80'
+        # this calculation is taken from scheduler for default width '80'
         return '\n'.join(2 * [80 * '='])
 
     def _expected_output(self, text, widget_height=20):
@@ -136,20 +136,20 @@ class WidgetProcessing_TestCase(unittest.TestCase):
         screen = ScreenWithWidget(widget_text)
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
-        self.assertEqual(out_mock.getvalue(), self._expected_output(widget_text))
+        self.assertEqual(self._expected_output(widget_text), out_mock.getvalue())
 
     def test_widget_multiline(self, out_mock, in_mock):
         widget_text = "Testing output\n\n\nAgain..."
         screen = ScreenWithWidget(widget_text)
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
-        self.assertEqual(out_mock.getvalue(), self._expected_output(widget_text))
+        self.assertEqual(self._expected_output(widget_text), out_mock.getvalue())
 
     def test_widget_too_high(self, out_mock, in_mock):
         widget_text = "Testing\n\n\nWhy not?"
@@ -158,10 +158,10 @@ class WidgetProcessing_TestCase(unittest.TestCase):
         screen = ScreenWithWidget(widget_text, height=4)
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
-        self.assertEqual(out_mock.getvalue(), self._expected_output(widget_text, 4))
+        self.assertEqual(self._expected_output(widget_text, 4), out_mock.getvalue())
 
 
 class ScreenWithWidget(UIScreen):
@@ -169,11 +169,11 @@ class ScreenWithWidget(UIScreen):
     def __init__(self, msg, height=25):
         super().__init__(screen_height=height)
         self._msg = msg
+        self.input_required = False
 
     def refresh(self, args=None):
         super().refresh(args)
-        self._window = [TextWidget(self._msg)]
-        return False
+        self.window = [TextWidget(self._msg)]
 
     def show_all(self):
         super().show_all()

@@ -20,9 +20,9 @@
 import sys
 
 from simpleline.base import App
-from simpleline.render.ui_screen import UIScreen
-from simpleline.render import widgets, INPUT_PROCESSED
+from simpleline.render import widgets, InputState
 from simpleline.render.prompt import Prompt
+from simpleline.render.screen import UIScreen
 from simpleline.utils.i18n import _, N_, C_
 
 
@@ -42,8 +42,7 @@ class ErrorDialog(UIScreen):
     def refresh(self, args=None):
         super().refresh(args)
         text = widgets.TextWidget(self._message)
-        self._window += [widgets.CenterWidget(text), ""]
-        return True
+        self.window += [widgets.CenterWidget(text), ""]
 
     def prompt(self, args=None):
         return Prompt(_("Press %s to exit") % Prompt.ENTER)
@@ -73,11 +72,10 @@ class PasswordDialog(UIScreen):
     def refresh(self, args=None):
         super().refresh(args)
         text = widgets.TextWidget(self._message)
-        self._window += [widgets.CenterWidget(text), ""]
-        return True
+        self.window += [widgets.CenterWidget(text), ""]
 
     def prompt(self, args=None):
-        self._password = App.renderer().raw_input(_("Passphrase: "), hidden=True)
+        self._password = App.get_scheduler().io_manager.get_user_input(_("Passphrase: "), hidden=True)
         if not self._password:
             return None
         else:
@@ -118,8 +116,7 @@ class YesNoDialog(UIScreen):
     def refresh(self, args=None):
         super().refresh(args)
         text = widgets.TextWidget(self._message)
-        self._window += [widgets.CenterWidget(text), ""]
-        return True
+        self.window += [widgets.CenterWidget(text), ""]
 
     def prompt(self, args=None):
         return Prompt(_("Please respond '%(yes)s' or '%(no)s'") % {
@@ -173,13 +170,12 @@ class HelpScreen(UIScreen):
             with open(self.help_path, 'r') as f:
                 help_message = f.read()
 
-        self._window += [widgets.TextWidget(help_message), ""]
-        return True
+        self.window += [widgets.TextWidget(help_message), ""]
 
     def input(self, args, key):
         """ Handle user input. """
         self.close()
-        return INPUT_PROCESSED
+        return InputState.PROCESSED
 
     def prompt(self, args=None):
         return Prompt(_("Press %s to return") % Prompt.ENTER)

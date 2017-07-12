@@ -1,8 +1,8 @@
 #!/bin/python3
 
 from simpleline.base import App
-from simpleline.render import INPUT_PROCESSED
-from simpleline.render.ui_screen import UIScreen
+from simpleline.render import InputState
+from simpleline.render.screen import UIScreen
 from simpleline.render.widgets import TextWidget, CenterWidget
 
 
@@ -18,14 +18,13 @@ class Hub(UIScreen):
 
         w = CenterWidget(TextWidget("Press '1' to enter Entry counter"))
 
-        self._window += [w, ""]
-        return True
+        self.window += [w, ""]
 
     def input(self, args, key):
         """Run spokes based on the user choice"""
         if key == "1":
-            App.renderer().switch_screen(self._counter_spoke)
-            return INPUT_PROCESSED
+            App.get_scheduler().push_screen(self._counter_spoke)
+            return InputState.PROCESSED
         else:
             return key
 
@@ -44,7 +43,7 @@ class CounterScreen(UIScreen):
         self._counter = 0
 
     def closed(self):
-        self._ready = False
+        self.ready = False
 
     def setup(self, args=None):
         super().setup(args)
@@ -55,8 +54,7 @@ class CounterScreen(UIScreen):
         """Write message to user"""
         super().refresh(args)
         w = TextWidget("Counter {}".format(self._counter))
-        self._window += [CenterWidget(w), ""]
-        return True
+        self.window += [CenterWidget(w), ""]
 
     @property
     def counter(self):
@@ -66,5 +64,5 @@ class CounterScreen(UIScreen):
 if __name__ == "__main__":
     App.initialize()
     hub = Hub()
-    App.renderer().schedule_screen(hub)
+    App.get_scheduler().schedule_screen(hub)
     App.run()

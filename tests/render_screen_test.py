@@ -19,12 +19,12 @@
 
 
 import unittest
-from unittest import mock
 from io import StringIO
+from unittest import mock
 
 from simpleline.base import App
-from simpleline.render.ui_screen import UIScreen
-from simpleline.render import INPUT_PROCESSED, INPUT_DISCARDED, RendererUnexpectedError
+from simpleline.render import InputState, RenderUnexpectedError
+from simpleline.render.screen import UIScreen
 from tests import schedule_screen_and_run, calculate_separator
 
 
@@ -47,8 +47,8 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
         width = 60
 
         App.initialize()
-        App.renderer().width = width
-        App.renderer().schedule_screen(ui_screen)
+        App.get_scheduler().io_manager.width = width
+        App.get_scheduler().schedule_screen(ui_screen)
         App.run()
 
         self.assertEqual(calculate_separator(width), stdout_mock.getvalue())
@@ -58,8 +58,8 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
         width = 0
 
         App.initialize()
-        App.renderer().width = width
-        App.renderer().schedule_screen(ui_screen)
+        App.get_scheduler().io_manager.width = width
+        App.get_scheduler().schedule_screen(ui_screen)
         App.run()
 
         self.assertEqual("\n\n", stdout_mock.getvalue())
@@ -68,7 +68,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
         ui_screen = TestScreenSetupFail()
 
         App.initialize()
-        App.renderer().schedule_screen(ui_screen)
+        App.get_scheduler().schedule_screen(ui_screen)
         App.run()
 
         self.assertEqual("", stdout_mock.getvalue())
@@ -80,22 +80,22 @@ class SimpleUIScreenFeatures_TestCase(unittest.TestCase):
         screen = UIScreen()
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         # Program will quit in close_screen when stack is empty
-        App.renderer().schedule_screen(UIScreen())
+        App.get_scheduler().schedule_screen(UIScreen())
         screen.close()
 
     def test_close_screen_closed_from_other_source_error(self):
         App.initialize()
-        App.renderer().schedule_screen(UIScreen())
-        with self.assertRaises(RendererUnexpectedError):
-            App.renderer().close_screen(closed_from=mock.MagicMock())
+        App.get_scheduler().schedule_screen(UIScreen())
+        with self.assertRaises(RenderUnexpectedError):
+            App.get_scheduler().close_screen(closed_from=mock.MagicMock())
 
     def test_failed_screen_setup(self):
         screen = FailedSetupScreen()
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
 
@@ -121,8 +121,8 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase):
         screen = EmptyScreen()
 
         App.initialize()
-        App.renderer().schedule_screen(first_screen)
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(first_screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
         self.assertTrue(first_screen)
@@ -138,7 +138,7 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase):
         out += "TestTitle\n\n"
         self.assertEqual(stdout_mock.getvalue(), out)
 
-    @mock.patch('simpleline.render.renderer.Renderer.raw_input')
+    @mock.patch('simpleline.render.io_manager.InOutManager.get_user_input')
     def test_basic_input(self, input_mock, _):
         input_mock.return_value = "a"
         screen = InputScreen()
@@ -165,15 +165,19 @@ class ScreenException_TestCase(unittest.TestCase):
 
 
 @mock.patch('sys.stdout')
-@mock.patch('simpleline.render.renderer.Renderer._get_input')
+@mock.patch('simpleline.render.io_manager.InOutManager._get_input')
 class InputProcessing_TestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.pass_called = False
+        self.pass_prompt = None
 
     def test_quit_input(self, mock_stdin, mock_stdout):
         mock_stdin.return_value = "q"
         screen = UIScreen()
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
     def test_continue_input(self, mock_stdin, mock_stdout):
@@ -182,8 +186,8 @@ class InputProcessing_TestCase(unittest.TestCase):
         screen2 = EmptyScreen()
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
-        App.renderer().schedule_screen(screen2)
+        App.get_scheduler().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen2)
         App.run()
 
         self.assertTrue(screen.ready)
@@ -194,21 +198,49 @@ class InputProcessing_TestCase(unittest.TestCase):
         screen = RefreshTestScreen()
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
         self.assertTrue(screen.input_processed)
 
     def test_refresh_on_input_error(self, mock_stdin, mock_stdout):
         mock_stdin.return_value = "q"
-        screen = InputErrorTestScreen()
+        threshold = 5
+        screen = InputErrorTestScreen(threshold)
 
         App.initialize()
-        App.renderer().schedule_screen(screen)
+        App.get_scheduler().schedule_screen(screen)
         App.run()
 
         self.assertEqual(screen.render_counter, 2)
-        self.assertEqual(screen.error_counter, InputErrorTestScreen.ERROR_THRESHOLD)
+        self.assertEqual(screen.error_counter, threshold)
+
+    def test_multiple_refresh_on_input_error(self, mock_stdin, mock_stdout):
+        mock_stdin.return_value = "q"
+        threshold = 12
+        screen = InputErrorTestScreen(threshold)
+
+        App.initialize()
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
+
+        self.assertEqual(screen.render_counter, 3)
+        self.assertEqual(screen.error_counter, threshold)
+
+    @mock.patch('simpleline.event_loop.main_loop.MainLoop.process_signals')
+    def test_custom_getpass(self, mock_stdin, mock_stdout, process_signals):
+        prompt = mock.MagicMock()
+        App.initialize()
+        App.get_scheduler().io_manager.set_pass_func(self._test_getpass)
+        App.get_scheduler().io_manager.get_user_input(prompt=prompt, hidden=True)
+
+        self.assertTrue(self.pass_called)
+        self.assertEqual(self.pass_prompt, prompt)
+
+    def _test_getpass(self, prompt):
+        self.pass_prompt = prompt
+        self.pass_called = True
+        return "test"
 
 
 # HELPER CLASSES
@@ -219,11 +251,10 @@ class EmptyScreen(UIScreen):
         super().__init__()
         self.is_closed = False
         EmptyScreen.title = ""
+        self.input_required = False
 
     def refresh(self, args=None):
         super().refresh(args)
-        # Do not ask for input
-        return False
 
     def show_all(self):
         self.close()
@@ -234,33 +265,35 @@ class EmptyScreen(UIScreen):
 
 class TestScreenSetupFail(UIScreen):
 
+    def __init__(self):
+        super().__init__()
+        self.input_required = False
+
     def setup(self, args):
         super().setup(args)
         return False
 
     def refresh(self, args=None):
         super().refresh(args)
-        return False
 
 
 class InputErrorTestScreen(UIScreen):
 
-    ERROR_THRESHOLD = 5
-
-    def __init__(self):
+    def __init__(self, error_threshold=5):
         super().__init__()
         self.error_counter = 0
         self.render_counter = 0
+        self._error_threshold = error_threshold
 
     def input(self, args, key):
         print("key", key)
-        if self.error_counter == self.ERROR_THRESHOLD:
+        if self.error_counter == self._error_threshold:
             # let "q" propagate to quit
             return key
         else:
             self.error_counter += 1
             print("Discarded")
-            return INPUT_DISCARDED
+            return InputState.DISCARDED
 
     def show_all(self):
         self.render_counter += 1
@@ -280,8 +313,8 @@ class RefreshTestScreen(UIScreen):
         super().refresh(args)
         if self.input_processed:
             self.close()
-            return False
-        return True
+            self.input_required = False
+        return
 
 
 class FailedSetupScreen(UIScreen):
@@ -293,10 +326,12 @@ class FailedSetupScreen(UIScreen):
 
 class NoInputScreen(UIScreen):
 
+    def __init__(self):
+        super().__init__()
+        self.input_required = False
+
     def refresh(self, args=None):
         super().refresh(args)
-        # Do not ask for input
-        return False
 
     def show_all(self):
         super().show_all()
@@ -313,7 +348,7 @@ class InputScreen(UIScreen):
         if key == "a":
             self.input_processed = True
         self.close()
-        return INPUT_PROCESSED
+        return InputState.PROCESSED
 
 
 class ExceptionTestScreen(UIScreen):
@@ -325,12 +360,12 @@ class ExceptionTestScreen(UIScreen):
     def __init__(self, where):
         super().__init__()
         self._where = where
+        self.input_required = False
 
     def refresh(self, args=None):
         super().refresh()
         if self._where == self.REFRESH:
             raise TestRefreshException("Refresh test exception happened!")
-        return False
 
     def show_all(self):
         super().show_all()

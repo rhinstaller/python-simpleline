@@ -1,9 +1,9 @@
 #!/bin/python3
 
 from simpleline.base import App
-from simpleline.render import INPUT_PROCESSED
+from simpleline.render import InputState
 from simpleline.render.prompt import Prompt
-from simpleline.render.ui_screen import UIScreen
+from simpleline.render.screen import UIScreen
 from simpleline.render.widgets import TextWidget, CenterWidget
 
 
@@ -23,15 +23,14 @@ class InfiniteScreen(UIScreen):
         """Print text to user with number of continue clicked"""
         super().refresh(args)
         text = TextWidget("You pressed {} times on continue".format(self.continue_count))
-        self._window += [CenterWidget(text), ""]
-        return True
+        self.window += [CenterWidget(text), ""]
 
     def input(self, args, key):
         """Catch 'c' keys for continue and increase counter"""
         if key == Prompt.CONTINUE:
             self.continue_count += 1
             self.redraw()
-            return INPUT_PROCESSED
+            return InputState.PROCESSED
 
         return key
 
@@ -39,5 +38,5 @@ class InfiniteScreen(UIScreen):
 if __name__ == "__main__":
     App.initialize()
     screen = InfiniteScreen()
-    App.renderer().schedule_screen(screen)
+    App.get_scheduler().schedule_screen(screen)
     App.run()

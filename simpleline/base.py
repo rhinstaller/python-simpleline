@@ -19,7 +19,7 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
-from simpleline.render.renderer import Renderer
+from simpleline.render.screen_scheduler import ScreenScheduler
 from simpleline.event_loop.main_loop import MainLoop
 
 __all__ = ["App"]
@@ -28,19 +28,19 @@ __all__ = ["App"]
 class App(object):
     """This is the main class for Simpleline library.
 
-    It is giving you access to the renderer and event loop. You can have only one instance of this
+    It is giving you access to the scheduler and event loop. You can have only one instance of this
     class in your application.
 
     To create this instance call `App.initialize()` method. This method can also be used to
-    reset settings in the App class to start with new event loop or renderer.
+    reset settings in the App class to start with new event loop or scheduler.
     """
     __app = None
 
     class AppPimpl(object):
 
-        def __init__(self, renderer, event_loop):
+        def __init__(self, scheduler, event_loop):
             self.event_loop = event_loop
-            self.renderer = renderer
+            self.scheduler = scheduler
 
     def __init__(self):
         """Do not create instance of this class. Use this class as static.
@@ -50,32 +50,33 @@ class App(object):
         super().__init__()
 
     @classmethod
-    def initialize(cls, renderer=None, event_loop=None):
+    def initialize(cls, scheduler=None, event_loop=None):
         """Create app instance inside of this class.
 
         This method can be called multiple times to reset App settings.
 
-        :param renderer: renderer used for rendering screens; if not specified use `simpleline.render.renderer.Renderer`
-        :type renderer: instance of `simpleline.render.renderer.Renderer`
+        :param scheduler: scheduler used for rendering screens; if not specified use
+                         `simpleline.render.screen_scheduler.ScreenScheduler`.
+        :type scheduler: instance of `simpleline.render.screen_scheduler.ScreenScheduler`.
 
         :param event_loop: event loop used for asynchronous tasks;
-                           if not specified use `simpleline.event_loop.main_loop.MainLoop`
-        :type event_loop: object based on class `simpleline.event_loop.AbstractEventLoop`
+                           if not specified use `simpleline.event_loop.main_loop.MainLoop`.
+        :type event_loop: object based on class `simpleline.event_loop.AbstractEventLoop`.
         """
         if event_loop is None:
             event_loop = MainLoop()
-        if renderer is None:
-            renderer = Renderer(event_loop)
+        if scheduler is None:
+            scheduler = ScreenScheduler(event_loop)
 
-        cls.__app = cls.AppPimpl(renderer, event_loop)
+        cls.__app = cls.AppPimpl(scheduler, event_loop)
 
     @classmethod
-    def renderer(cls):
+    def get_scheduler(cls):
         """Get instance of class responsible for rendering of the screen."""
-        return cls.__app.renderer
+        return cls.__app.scheduler
 
     @classmethod
-    def event_loop(cls):
+    def get_event_loop(cls):
         """Get instance of class responsible for processing asynchronous events."""
         return cls.__app.event_loop
 
@@ -85,4 +86,4 @@ class App(object):
 
         This is shortcut to `App.event_loop().run()`.
         """
-        App.event_loop().run()
+        App.get_event_loop().run()

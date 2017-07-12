@@ -1,4 +1,4 @@
-# Module with classes to handle rendering and input.
+# Class which serves shortcuts for UIScreen to schedule screens.
 #
 # Copyright (C) 2017  Red Hat, Inc.
 #
@@ -19,18 +19,19 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
-from enum import Enum
-from simpleline import SimplelineError
+from simpleline.base import App
 
 
-class RenderError(SimplelineError):
-    pass
+class SchedulerHandler(object):
 
+    def schedule_screen(self):
+        App.get_scheduler().schedule_screen(self)
 
-class RenderUnexpectedError(RenderError):
-    pass
+    def replace_screen(self):
+        App.get_scheduler().replace_screen(self)
 
+    def push_screen(self):
+        App.get_scheduler().push_screen(self)
 
-class InputState(Enum):
-    PROCESSED = True
-    DISCARDED = False
+    def push_screen_modal(self):
+        App.get_scheduler().push_screen_modal(self)

@@ -22,8 +22,8 @@
 
 import unittest
 
+from simpleline.render.screen import UIScreen
 from simpleline.render.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
-from simpleline.render.ui_screen import UIScreen
 
 
 class ScreenStack_TestCase(unittest.TestCase):

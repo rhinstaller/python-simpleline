@@ -21,10 +21,9 @@
 import unittest
 from unittest.mock import patch, MagicMock
 
-from simpleline.render.ui_screen import UIScreen
-from simpleline.event_loop.signals import RenderScreenSignal, AbstractSignal
-
 from simpleline.base import App
+from simpleline.event_loop.signals import RenderScreenSignal, AbstractSignal
+from simpleline.render.screen import UIScreen
 
 
 class SignalHandler_TestCase(unittest.TestCase):
@@ -40,17 +39,17 @@ class SignalHandler_TestCase(unittest.TestCase):
     def test_basic_connect(self):
         connect_screen = UIScreen()
 
-        App.initialize(renderer=MagicMock())
+        App.initialize(scheduler=MagicMock())
         connect_screen.connect(TestSignal, self._callback)
-        App.event_loop().enqueue_signal(TestSignal(self))
-        App.event_loop().process_signals()
+        App.get_event_loop().enqueue_signal(TestSignal(self))
+        App.get_event_loop().process_signals()
 
         self.assertTrue(self.callback_called)
 
     def test_create_signal(self):
         connect_screen = UIScreen()
 
-        App.initialize(renderer=MagicMock())
+        App.initialize(scheduler=MagicMock())
         signal = connect_screen.create_signal(TestSignal, priority=20)
 
         self.assertEqual(signal.priority, 20)
@@ -61,10 +60,10 @@ class SignalHandler_TestCase(unittest.TestCase):
     def test_emit(self):
         connect_screen = UIScreen()
 
-        App.initialize(renderer=MagicMock())
+        App.initialize(scheduler=MagicMock())
         connect_screen.connect(TestSignal, self._callback)
         connect_screen.emit(TestSignal(self))
-        App.event_loop().process_signals()
+        App.get_event_loop().process_signals()
 
         self.assertTrue(self.callback_called)
 
@@ -74,8 +73,8 @@ class SignalHandler_TestCase(unittest.TestCase):
         screen2 = EmptyScreen()
 
         App.initialize()
-        App.renderer().schedule_screen(connect_test_screen)
-        App.renderer().schedule_screen(screen2)
+        App.get_scheduler().schedule_screen(connect_test_screen)
+        App.get_scheduler().schedule_screen(screen2)
         App.run()
 
         self.assertTrue(connect_test_screen.callback_called)
@@ -86,12 +85,12 @@ class TestRenderConnectHandler(UIScreen):
     def __init__(self):
         super().__init__()
         self.callback_called = False
+        self.input_required = False
 
     def refresh(self, args=None):
         super().refresh(args)
         self.connect(RenderScreenSignal, self._callback)
         self.close()
-        return False
 
     def _callback(self, signal, args):
         self.callback_called = True
@@ -99,9 +98,9 @@ class TestRenderConnectHandler(UIScreen):
 
 class EmptyScreen(UIScreen):
 
-    def refresh(self, args=None):
-        super().refresh(args=args)
-        return False
+    def __init__(self):
+        super().__init__()
+        self.input_required = False
 
     def show_all(self):
         super().show_all()

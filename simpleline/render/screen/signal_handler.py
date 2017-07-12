@@ -44,7 +44,7 @@ class SignalHandler(object):
         :param data: Data you want to pass to the callback
         :type data: Anything
         """
-        App.event_loop().register_signal_handler(signal, callback, data)
+        App.get_event_loop().register_signal_handler(signal, callback, data)
 
     def create_signal(self, signal_class, priority=0):
         """Create signal instance usable in the emit method.
@@ -66,7 +66,15 @@ class SignalHandler(object):
         :param signal: signal to emit
         :type signal: instance of class based on `simpleline.event_loop.AbstractSignal`
         """
-        App.event_loop().enqueue_signal(signal)
+        App.get_event_loop().enqueue_signal(signal)
+
+    def create_and_emit(self, signal):
+        """Create the signal and emit it.
+
+        This is basically shortcut for calling `self.create_signal` and `self.emit`.
+        """
+        created_signal = self.create_signal(signal)
+        self.emit(created_signal)
 
     def redraw(self):
         """Emit signal to initiate draw.
@@ -74,7 +82,7 @@ class SignalHandler(object):
         Add RenderScreenSignal to the event loop.
         """
         signal = self.create_signal(RenderScreenSignal)
-        App.event_loop().enqueue_signal(signal)
+        App.get_event_loop().enqueue_signal(signal)
 
     def close(self):
         """Emit signal to close this screen.
@@ -82,4 +90,4 @@ class SignalHandler(object):
         Add CloseScreenSignal to the event loop.
         """
         signal = self.create_signal(CloseScreenSignal)
-        App.event_loop().enqueue_signal(signal)
+        App.get_event_loop().enqueue_signal(signal)

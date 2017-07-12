@@ -1,10 +1,10 @@
 #!/bin/python3
 
 from simpleline.base import App
-from simpleline.render.renderer import INPUT_PROCESSED, INPUT_DISCARDED
 from simpleline.render.adv_widgets import PasswordDialog
 from simpleline.render.prompt import Prompt
-from simpleline.render.ui_screen import UIScreen
+from simpleline.render.screen import UIScreen
+from simpleline.render import InputState
 from simpleline.render.widgets import TextWidget, ColumnWidget, CenterWidget
 
 
@@ -37,25 +37,24 @@ class Hub(UIScreen):
             right.append(TextWidget("   Password is set"))
 
         col = ColumnWidget([(30, left), (30, right)], 5)
-        self._window += [header, "", "", col, ""]
-        return True
+        self.window += [header, "", "", col, ""]
 
     def input(self, args, key):
         """Run spokes based on the user choice."""
         if key == self.KEY_USER:  # set first name
-            App.renderer().switch_screen(self._name_spoke)
-            return INPUT_PROCESSED
+            App.get_scheduler().push_screen(self._name_spoke)
+            return InputState.PROCESSED
         elif key == self.KEY_SURNAME:  # set surname
-            App.renderer().switch_screen(self._surname_spoke)
-            return INPUT_PROCESSED
+            App.get_scheduler().push_screen(self._surname_spoke)
+            return InputState.PROCESSED
         elif key == self.KEY_PASSWORD:  # set password
-            App.renderer().switch_screen(self._pass_spoke)
-            return INPUT_PROCESSED
+            App.get_scheduler().push_screen(self._pass_spoke)
+            return InputState.PROCESSED
         elif key == Prompt.CONTINUE:
             if self._name_spoke and self._surname_spoke and self._pass_spoke.answer:
                 return key
             else:  # catch 'c' key if not everything set
-                return INPUT_DISCARDED
+                return InputState.DISCARDED
         else:
             return key
 
@@ -77,12 +76,12 @@ class SetNameScreen(UIScreen):
         """Write message to user."""
         super().refresh(args)
         w = TextWidget(self._message)
-        self._window += [CenterWidget(w), ""]
+        self.window += [CenterWidget(w), ""]
         return True
 
     def prompt(self, args=None):
         """Take user input."""
-        self._value = App.renderer().raw_input("Write your name: ")
+        self._value = App.get_scheduler().raw_input("Write your name: ")
         self.close()
 
     @property
@@ -93,5 +92,5 @@ class SetNameScreen(UIScreen):
 if __name__ == "__main__":
     App.initialize()
     screen = Hub()
-    App.renderer().schedule_screen(screen)
+    App.get_scheduler().schedule_screen(screen)
     App.run()

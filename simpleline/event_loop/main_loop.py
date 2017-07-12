@@ -137,7 +137,7 @@ class MainLoop(AbstractEventLoop):
         :param return_after: return after the signal was processed
         :type return_after: class of the signal we are waiting for
         """
-        while not self._active_queue.empty():
+        while not self._active_queue.empty() or return_after is not None:
             signal = self._active_queue.get()
             if type(signal) in self._handlers:
                 for handler_data in self._handlers[type(signal)]:

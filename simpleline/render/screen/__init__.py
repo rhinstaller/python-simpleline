@@ -21,12 +21,13 @@
 
 from simpleline.base import App
 from simpleline.render.prompt import Prompt
+from simpleline.render.screen.signal_handler import SignalHandler
+from simpleline.render.screen.scheduler_handler import SchedulerHandler
 from simpleline.render.widgets import Widget
 from simpleline.utils.i18n import _
-from simpleline.event_loop.signal_handler import SignalHandler
 
 
-class UIScreen(SignalHandler):
+class UIScreen(SignalHandler, SchedulerHandler):
     """Base class representing one TUI Screen.
 
     Shares some API with anaconda's GUI to make it easy for devs to create similar UI
@@ -37,7 +38,7 @@ class UIScreen(SignalHandler):
 
     def __init__(self, screen_height=25):
         """ Constructor of the TUI screen.
-        
+
         :param screen_height: height of the screen (useful for printing long widgets)
         :type screen_height: int (the value must be bigger than 4)
         """
@@ -47,9 +48,42 @@ class UIScreen(SignalHandler):
         # list that holds the content to be printed out
         self._window = []
 
+        # should the input be required after draw
+        self._input_required = True
+
         # index of the page (subset of screen) shown during show_all
         # indexing starts with 0
         self._page = 0
+
+    @property
+    def ready(self):
+        """This screen is ready for use."""
+        return self._ready
+
+    @ready.setter
+    def ready(self, ready):
+        """Set ready status for this screen."""
+        self._ready = ready
+
+    @property
+    def input_required(self):
+        """Return if the screen requires input."""
+        return self._input_required
+
+    @input_required.setter
+    def input_required(self, input_required):
+        """Set if the screen should require input."""
+        self._input_required = input_required
+
+    @property
+    def window(self):
+        """Return list of widgets for rendering."""
+        return self._window
+
+    @window.setter
+    def window(self, window):
+        """Set list of widgets for rendering."""
+        self._window = window
 
     def setup(self, args):
         """Do additional setup right before this screen is used.
@@ -62,20 +96,17 @@ class UIScreen(SignalHandler):
         :rtype: bool
         """
         self._ready = True
-        App.event_loop().register_signal_source(self)
+        App.get_event_loop().register_signal_source(self)
         return True
 
     def refresh(self, args=None):
-        """Method which prepares the content desired on the screen to self._window.
+        """Method which prepares the content desired on the screen to `self.window`.
 
         :param args: optional argument passed from switch_screen calls
         :type args: anything
-        :return: has to return True if input processing is requested, otherwise
-                 the screen will get printed and the main loop will continue
-        :rtype: True|False
         """
-        self._window = [_(self.title), u""]
-        return True
+        self.window = [_(self.title), u""]
+        return
 
     def _print_widget(self, widget):
         """Prints a widget (could be longer than the screen height) with user interaction (when needed).
@@ -106,14 +137,15 @@ class UIScreen(SignalHandler):
                 # print part with a prompt to continue
                 for line in lines[pos:(pos + self._screen_height - 2)]:
                     print(line)
-                App.renderer().raw_input(Prompt(_("\nPress %s to continue") % Prompt.ENTER))
+                custom_prompt = Prompt(_("\nPress %s to continue") % Prompt.ENTER)
+                App.get_scheduler().io_manager.get_user_input(custom_prompt)
                 pos += self._screen_height - 1
 
     def show_all(self):
-        """Prepares all elements of self._window for output and then prints them on the screen."""
-        for w in self._window:
+        """Prepares all elements of self.window for output and then prints them on the screen."""
+        for w in self.window:
             if hasattr(w, "render"):
-                w.render(App.renderer().width)  # pylint: disable=no-member
+                w.render(App.get_scheduler().io_manager.width)  # pylint: disable=no-member
             if isinstance(w, Widget):
                 self._print_widget(w)
             elif isinstance(w, bytes):
@@ -129,10 +161,10 @@ class UIScreen(SignalHandler):
         :type key: str
         :param args: optional argument passed from switch_screen calls
         :type args: anything
-        :return: return INPUT_PROCESSED if key was handled,
-                 INPUT_DISCARDED if the screen should not process input on the renderer and
+        :return: return `simpleline.render.InputState.PROCESSED` if key was handled,
+                 `simpleline.render.InputState.DISCARDED` if the screen should not process input on the scheduler and
                  key if you want it to.
-        :rtype: `simpleline.render.INPUT_PROCESSED`|`simpleline.render.INPUT_DISCARDED`|str
+        :rtype: `simpleline.render.InputState` enum | str
         """
         return key
 
@@ -150,14 +182,6 @@ class UIScreen(SignalHandler):
         prompt.add_continue_option()
         prompt.add_quit_option()
         return prompt
-
-    @property
-    def ready(self):
-        """This screen is ready for use.
-
-        The setup() method was already called.
-        """
-        return self._ready
 
     def closed(self):
         """Callback when this screen is closed."""

@@ -19,63 +19,54 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
-import getpass
-import queue
-import sys
 import threading
 
 from simpleline.event_loop import ExitMainLoop
-from simpleline.event_loop.signals import ExceptionSignal, InputReadySignal, RenderScreenSignal, InputScreenSignal, \
+from simpleline.event_loop.signals import ExceptionSignal, RenderScreenSignal, InputScreenSignal, \
                                           CloseScreenSignal
-from simpleline.render import RendererUnexpectedError, INPUT_PROCESSED, INPUT_DISCARDED
-from simpleline.render.prompt import Prompt
+from simpleline.render import RenderUnexpectedError
+from simpleline.render.io_manager import InOutManager, UserInputResult
 from simpleline.render.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
-from simpleline.render.widgets import TextWidget
 
 RAW_INPUT_LOCK = threading.Lock()
 
 
-class Renderer(object):
+class ScreenScheduler(object):
 
-    def __init__(self, event_loop, renderer_stack=None):
-        """Constructor where you can pass your own renderer stack.
+    def __init__(self, event_loop, scheduler_stack=None):
+        """Constructor where you can pass your own scheduler stack.
 
-        The ScreenStack will be used automatically if renderer stack will be None.
+        The ScreenStack will be used automatically if scheduler stack will be None.
 
-        :param event_loop: Event loop used for the renderer.
+        :param event_loop: Event loop used for the scheduler.
         :type event_loop: Class based on `simpleline.event_loop.AbstractEventLoop`.
-        :param renderer_stack: Use custom renderer stack if you need to.
-        :type renderer_stack: `simpleline.screen_stack.ScreenStack` based class.
+        :param scheduler_stack: Use custom scheduler stack if you need to.
+        :type scheduler_stack: `simpleline.screen_stack.ScreenStack` based class.
         """
         self._quit_screen = None
         self._quit_message = ""
         self._event_loop = event_loop
-        self._width = 0
-        self._spacer = ""
-        self._input_error_counter = 0
-        self._input_thread = None
-        if renderer_stack:
-            self._screen_stack = renderer_stack
+        self._io_manager = InOutManager(self._event_loop)
+        if scheduler_stack:
+            self._screen_stack = scheduler_stack
         else:
             self._screen_stack = ScreenStack()
         self._register_handlers()
 
-        self.width = 80
         self.redraw()
 
     def _register_handlers(self):
-        self._event_loop.register_signal_handler(RenderScreenSignal, self._redraw_callback)
+        self._event_loop.register_signal_handler(RenderScreenSignal, self._process_screen_callback)
         self._event_loop.register_signal_handler(InputScreenSignal, self._process_input_callback)
         self._event_loop.register_signal_handler(CloseScreenSignal, self._close_screen_callback)
 
     @property
-    def width(self):
-        return self._width
+    def io_manager(self):
+        return self._io_manager
 
-    @width.setter
-    def width(self, width):
-        self._width = width
-        self._spacer = "\n".join(2 * [width * "="])
+    @io_manager.setter
+    def io_manager(self, io_manager):
+        self._io_manager = io_manager
 
     @property
     def quit_screen(self):
@@ -87,7 +78,7 @@ class Renderer(object):
 
     @property
     def nothing_to_render(self):
-        """Is something for rendering in the renderer stack?
+        """Is something for rendering in the scheduler stack?
 
         :return: True if the rendering stack is empty
         :rtype: bool
@@ -127,7 +118,7 @@ class Renderer(object):
         self._screen_stack.append(screen)
         self.redraw()
 
-    def switch_screen(self, ui, args=None):
+    def push_screen(self, ui, args=None):
         """Schedules a screen to show, but keeps the current one in stack to
         return to, when the new one is closed.
 
@@ -140,7 +131,7 @@ class Renderer(object):
         self._screen_stack.append(screen)
         self.redraw()
 
-    def switch_screen_modal(self, ui, args=None):
+    def push_screen_modal(self, ui, args=None):
         """Starts a new screen right away, so the caller can collect data back.
 
         When the new screen is closed, the caller is redisplayed.
@@ -172,8 +163,8 @@ class Renderer(object):
         screen.ui_screen.closed()
 
         if closed_from is not None and closed_from is not screen.ui_screen:
-            raise RendererUnexpectedError("You are trying to close screen %s from screen %s! "
-                                          "This is most probably not intentional." % (closed_from, screen.ui_screen))
+            raise RenderUnexpectedError("You are trying to close screen %s from screen %s! "
+                                        "This is most probably not intentional." % (closed_from, screen.ui_screen))
 
         if screen.execute_new_loop:
             self._event_loop.close_loop()
@@ -187,10 +178,10 @@ class Renderer(object):
         """Register rendering to the event loop for processing."""
         self._event_loop.enqueue_signal(RenderScreenSignal(self))
 
-    def _redraw_callback(self, signal, data):
-        self._do_redraw()
+    def _process_screen_callback(self, signal, data):
+        self._process_screen()
 
-    def _do_redraw(self):
+    def _process_screen(self):
         """Draws the current screen and returns True if user input is requested.
 
         If modal screen is requested, starts a new loop and initiates redraw after it ends.
@@ -208,18 +199,16 @@ class Renderer(object):
         # get the widget tree from the screen and show it in the screen
         try:
             # refresh screen content
-            input_required = top_screen.ui_screen.refresh(top_screen.args)
+            top_screen.ui_screen.refresh(top_screen.args)
 
             # Screen was closed in the refresh method
             if top_screen != self._get_last_screen():
                 return
 
-            # separate the content on the screen from the stuff we are about to display now
-            self._input_error_counter = 0
-            print(self._spacer)
+            # draw screen to the console
+            self.io_manager.draw(top_screen)
 
-            top_screen.ui_screen.show_all()
-            if input_required:
+            if top_screen.ui_screen.input_required:
                 self.input_required()
         except ExitMainLoop:
             raise
@@ -237,145 +226,38 @@ class Renderer(object):
         """Register user input to the event loop for processing."""
         self._event_loop.enqueue_signal(InputScreenSignal(self))
 
-    def process_input(self):
-        self._process_input()
-
     def _process_input_callback(self, signal, data):
         self._process_input()
 
     def _process_input(self):
         active_screen = self._get_last_screen()
-        last_screen = active_screen.ui_screen
-        # get the screen's prompt
+
         try:
-            prompt = last_screen.prompt(active_screen.args)
+            input_result = self._io_manager.process_input(active_screen)
         except ExitMainLoop:
             raise
         except Exception:    # pylint: disable=broad-except
             self._event_loop.enqueue_signal(ExceptionSignal(self))
             return
 
-        # None means prompt handled the input by itself -> continue
-        if prompt is None:
-            return
-
-        # get the input from user
-        c = self.raw_input(prompt)
-
-        # process the input, if it wasn't processed (valid)
-        # increment the error counter
-        if not self.input(active_screen.args, c):
-            self._input_error_counter += 1
-
-            # redraw the screen after 5 bad inputs
-            if self._input_error_counter >= 5:
+        if not input_result.was_successful():
+            if self._io_manager.input_error_threshold_exceeded:
                 self.redraw()
             else:
                 self.input_required()
-
-    def raw_input(self, prompt, hidden=False):
-        """This method reads one input from user. Its basic form has only one
-        line, but we might need to override it for more complex apps or testing.
-        """
-        if self._input_thread is not None and self._input_thread.is_alive():
-            raise KeyError("Can't run multiple input threads at the same time!")
-
-        input_queue = queue.Queue()
-        self._input_thread = threading.Thread(target=self._thread_input, name="InputThread",
-                                              args=(input_queue, prompt, hidden))
-        self._input_thread.daemon = True
-        self._input_thread.start()
-        self._event_loop.process_signals(return_after=InputReadySignal)
-        return input_queue.get()  # return the user input
-
-    def input(self, args, key):
-        """Method called internally to process unhandled input key presses.
-
-        Also handles the main quit and close commands.
-
-        :param args: optional argument passed from switch_screen calls
-        :type args: anything
-
-        :param key: the string entered by user
-        :type key: str
-
-        :return: True if key was processed, False if it was not recognized
-        :rtype: bool
-        """
-        # delegate the handling to active screen first
-        if not self._screen_stack.empty():
-            try:
-                key = self._screen_stack.pop(False).ui_screen.input(args, key)
-                if key == INPUT_PROCESSED:
-                    return True
-                elif key == INPUT_DISCARDED:
-                    return False
-            except ExitMainLoop:
-                raise
-            except Exception:    # pylint: disable=broad-except
-                self._event_loop.enqueue_signal(ExceptionSignal(self))
-                return False
-
-            # global refresh command
-            if key == Prompt.REFRESH:
+        else:
+            if input_result == UserInputResult.PROCESSED:
+                return
+            elif input_result == UserInputResult.REFRESH:
                 self.redraw()
-                return True
-
-            # global close command
-            if key == Prompt.CONTINUE:
+            elif input_result == UserInputResult.CONTINUE:
                 self.close_screen()
-                return True
-
-            # global quit command
-            if key == Prompt.QUIT:
+            elif input_result == UserInputResult.QUIT:
                 if self.quit_screen:
                     quit_screen = self.quit_screen
                     d = quit_screen(self, self._quit_message)
-                    self.switch_screen_modal(d)
+                    self.push_screen_modal(d)
                     if d.answer:
                         raise ExitMainLoop()
                 else:
                     raise ExitMainLoop()
-                return True
-
-        return False
-
-    def _thread_input(self, queue_instance, prompt, hidden):
-        """This method is responsible for interruptable user input.
-
-        It is expected to be used in a thread started on demand
-        and returns the input via the communication Queue.
-
-        :param queue_instance: communication queue_instance to be used
-        :type queue_instance: queue.Queue instance
-
-        :param prompt: prompt to be displayed
-        :type prompt: Prompt instance
-
-        :param hidden: whether typed characters should be echoed or not
-        :type hidden: bool
-        """
-        if hidden:
-            data = getpass.getpass(prompt)
-        else:
-            widget = TextWidget(str(prompt))
-            widget.render(self._width)
-            lines = widget.get_lines()
-            sys.stdout.write("\n".join(lines) + " ")
-            sys.stdout.flush()
-            if not RAW_INPUT_LOCK.acquire(False):
-                # raw_input is already running
-                return
-            else:
-                # lock acquired, we can run input
-                try:
-                    data = self._get_input()
-                except EOFError:
-                    data = ""
-                finally:
-                    RAW_INPUT_LOCK.release()
-
-        queue_instance.put(data)
-
-    def _get_input(self):
-        return input()
