@@ -25,16 +25,13 @@ from unittest.mock import patch
 from simpleline.base import App
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen import UIScreen
-from simpleline.render.widgets import TextWidget, ColumnWidget
+
+from simpleline.render.widgets import TextWidget, CheckboxWidget, CenterWidget, ColumnWidget
 from simpleline.render.containers import ListRowContainer, ListColumnContainer
 
 
-class Widgets_TestCase(unittest.TestCase):
-    def evaluate_result(self, test_result, expected_result):
-        self.assertEqual(len(test_result), len(expected_result))
-        for i in range(0, len(test_result)):
-            self.assertEqual(test_result[i], expected_result[i])
-
+class BaseWidgets_TestCase(unittest.TestCase):
+    """Base class containing helper functions."""
     def setUp(self):
         self.w1 = TextWidget(u"Můj krásný dlouhý text")
         self.w2 = TextWidget(u"Test")
@@ -53,6 +50,14 @@ class Widgets_TestCase(unittest.TestCase):
                              "oooooooooooooooooooooooooooooooooooooooooooooooooooooo long word.")
         self.w8 = TextWidget("Text that would be wrapped exactly at the screen width should"
                              " have special test. This one.")
+
+    def evaluate_result(self, test_result, expected_result):
+        self.assertEqual(len(test_result), len(expected_result))
+        for i in range(0, len(test_result)):
+            self.assertEqual(test_result[i], expected_result[i])
+
+
+class Widgets_TestCase(BaseWidgets_TestCase):
 
     def test_column_widget(self):
         # Test column text
@@ -79,49 +84,6 @@ class Widgets_TestCase(unittest.TestCase):
                            u"Test 2          podruhé",
                            u"                Test 3"]
 
-        res_lines = c.get_lines()
-        self.evaluate_result(res_lines, expected_result)
-
-    def test_listrow_widget(self):
-        c = ListRowContainer(columns=2, widgets=[self.w2, self.w3, self.w5], columns_width=10, spacing=2)
-        c.render(25)
-
-        expected_result = [u"Test        Test 2",
-                           u"Test 3"]
-        res_lines = c.get_lines()
-
-        self.evaluate_result(res_lines, expected_result)
-
-    def test_listrow_widget_wrapping(self):
-        # spacing is 3 by default
-        c = ListRowContainer(2, [self.w1, self.w2, self.w3, self.w4], columns_width=15)
-        c.render(25)
-
-        expected_result = [u"Můj krásný        Test",
-                           u"dlouhý text",
-                           u"Test 2            Krásný dlouhý",
-                           u"                  text podruhé"]
-        res_lines = c.get_lines()
-        self.evaluate_result(res_lines, expected_result)
-
-    def test_listcolumn_widget(self):
-        c = ListColumnContainer(columns=2, widgets=[self.w2, self.w3, self.w5], columns_width=10, spacing=2)
-        c.render(25)
-
-        expected_result = [u"Test        Test 3",
-                           u"Test 2"]
-        res_lines = c.get_lines()
-        self.evaluate_result(res_lines, expected_result)
-
-    def test_listcolumn_widget_wrapping(self):
-        # spacing is 3 by default
-        c = ListColumnContainer(2, [self.w1, self.w2, self.w3, self.w4], columns_width=15)
-        c.render(25)
-
-        expected_result = [u"Můj krásný        Test 2",
-                           u"dlouhý text",
-                           u"Test              Krásný dlouhý",
-                           u"                  text podruhé"]
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
 
@@ -156,6 +118,162 @@ class Widgets_TestCase(unittest.TestCase):
         res_lines = self.w8.get_lines()
 
         self.evaluate_result(res_lines, expected_result)
+
+    def test_checkbox(self):
+        checkbox = CheckboxWidget(title="Test Title", text="Description")
+
+        checkbox.render(80)
+
+        expected_result = [u"[ ] Test Title",
+                           u"    (Description)"]
+
+        self.evaluate_result(checkbox.get_lines(), expected_result)
+
+    def test_completed_checkbox(self):
+        checkbox = CheckboxWidget(title="Title", text="Description", completed=True)
+
+        checkbox.render(80)
+
+        expected_result = [u"[x] Title",
+                           u"    (Description)"]
+
+        self.evaluate_result(checkbox.get_lines(), expected_result)
+
+    def test_key_checkbox(self):
+        checkbox = CheckboxWidget(key="o", title="Title", text="Description", completed=True)
+
+        checkbox.render(80)
+
+        expected_result = [u"[o] Title",
+                           u"    (Description)"]
+
+        self.evaluate_result(checkbox.get_lines(), expected_result)
+
+    def test_empty_checkbox(self):
+        checkbox = CheckboxWidget()
+
+        checkbox.render(80)
+
+        expected_result = [u"[ ]"]
+
+        self.evaluate_result(checkbox.get_lines(), expected_result)
+
+    def test_checkbox_wrapping(self):
+        checkbox = CheckboxWidget(title="Title", text="Testing\nwrapping")
+
+        checkbox.render(80)
+
+        expected_result = [u"[ ] Title",
+                           u"    (Testing",
+                           u"    wrapping)"]
+
+        self.evaluate_result(checkbox.get_lines(), expected_result)
+
+    def test_center_widget(self):
+        w = CenterWidget(self.w2)
+
+        w.render(10)
+
+        expected_result = [u"   Test"]
+
+        self.evaluate_result(w.get_lines(), expected_result)
+
+
+class Containers_TestCase(BaseWidgets_TestCase):
+
+    def _test_callback(self, data):
+        pass
+
+    def test_listrow_container(self):
+        c = ListRowContainer(columns=2, widgets=[self.w2, self.w3, self.w5], columns_width=10, spacing=2)
+        c.render(25)
+
+        expected_result = [u"Test        Test 2",
+                           u"Test 3"]
+        res_lines = c.get_lines()
+
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_empty(self):
+        c = ListRowContainer(columns=1)
+
+        c.render(10)
+        result = c.get_lines()
+
+        self.assertEqual(len(result), 0)
+
+    def test_more_columns_than_widgets(self):
+        c = ListRowContainer(columns=3, widgets=[self.w1], columns_width=40)
+        c.render(80)
+
+        expected_result = [u"Můj krásný dlouhý text"]
+
+        res_lines = c.get_lines()
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_listrow_wrapping(self):
+        # spacing is 3 by default
+        c = ListRowContainer(2, [self.w1, self.w2, self.w3, self.w4], columns_width=15)
+        c.render(25)
+
+        expected_result = [u"Můj krásný        Test",
+                           u"dlouhý text",
+                           u"Test 2            Krásný dlouhý",
+                           u"                  text podruhé"]
+        res_lines = c.get_lines()
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_newline_wrapping(self):
+        widgets = [TextWidget("Hello"), TextWidget("Wrap\nthis\ntext"), TextWidget("Hi"),
+                   TextWidget("Hello2")]
+
+        c = ListRowContainer(3, widgets, columns_width=6, spacing=1)
+        c.render(80)
+
+        expected_result = [u"Hello  Wrap   Hi",
+                           u"       this",
+                           u"       text",
+                           u"Hello2"]
+        res_lines = c.get_lines()
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_listcolumn_widget(self):
+        c = ListColumnContainer(columns=2, widgets=[self.w2, self.w3, self.w5], columns_width=10, spacing=2)
+        c.render(25)
+
+        expected_result = [u"Test        Test 3",
+                           u"Test 2"]
+        res_lines = c.get_lines()
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_listcolumn_widget_wrapping(self):
+        # spacing is 3 by default
+        c = ListColumnContainer(2, [self.w1, self.w2, self.w3, self.w4], columns_width=15)
+        c.render(25)
+
+        expected_result = [u"Můj krásný        Test 2",
+                           u"dlouhý text",
+                           u"Test              Krásný dlouhý",
+                           u"                  text podruhé"]
+        res_lines = c.get_lines()
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_add_new_container(self):
+        c = ListRowContainer(columns=2, widgets=[TextWidget("Ahoj")], columns_width=15, spacing=0)
+
+        expected_result = [u"Ahoj"]
+
+        c.render(80)
+        self.evaluate_result(c.get_lines(), expected_result)
+
+        c.add(TextWidget("Nový widget"))
+        c.add(TextWidget("Hello"))
+
+        expected_result = [u"Ahoj           Nový widget",
+                           u"Hello"]
+
+        c.render(80)
+        self.evaluate_result(c.get_lines(), expected_result)
 
 
 @patch('simpleline.render.io_manager.InOutManager._get_input')

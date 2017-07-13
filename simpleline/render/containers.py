@@ -35,8 +35,9 @@ class Container(Widget):
         """
         super().__init__()
         self._items = []
-        for i in items:
-            self._items.append(ContainerItem(i))
+        if items:
+            for i in items:
+                self._items.append(ContainerItem(i))
 
     def add(self, item, callback=None, data=None):
         """Add item to the Container.
