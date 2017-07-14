@@ -27,7 +27,7 @@ from simpleline.render.prompt import Prompt
 from simpleline.render.screen import UIScreen
 
 from simpleline.render.widgets import TextWidget, CheckboxWidget, CenterWidget, ColumnWidget
-from simpleline.render.containers import ListRowContainer, ListColumnContainer
+from simpleline.render.containers import ListRowContainer, ListColumnContainer, KeyPattern
 
 
 class BaseWidgets_TestCase(unittest.TestCase):
@@ -274,6 +274,46 @@ class Containers_TestCase(BaseWidgets_TestCase):
 
         c.render(80)
         self.evaluate_result(c.get_lines(), expected_result)
+
+    def test_column_numbering(self):
+        # spacing is 3 by default
+        c = ListColumnContainer(2, [self.w1, self.w2, self.w3, self.w4], columns_width=16)
+        c.key_pattern = KeyPattern()
+        c.render(25)
+
+        expected_result = [u"1. Můj krásný      3. Test 2",
+                           u"   dlouhý text",
+                           u"2. Test            4. Krásný dlouhý",
+                           u"                      text podruhé"]
+        res_lines = c.get_lines()
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_row_numbering(self):
+        # spacing is 3 by default
+        c = ListRowContainer(2, [self.w1, self.w2, self.w3, self.w4], columns_width=16)
+        c.key_pattern = KeyPattern()
+        c.render(25)
+
+        expected_result = [u"1. Můj krásný      2. Test",
+                           u"   dlouhý text",
+                           u"3. Test 2          4. Krásný dlouhý",
+                           u"                      text podruhé"]
+        res_lines = c.get_lines()
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_custom_numbering(self):
+        # spacing is 3 by default
+        c = ListRowContainer(2, [self.w1, self.w2, self.w3, self.w4], columns_width=20)
+        c.key_pattern = KeyPattern("a {:d} a ")
+        c.render(25)
+
+        expected_result = [u"a 1 a Můj krásný       a 2 a Test",
+                           u"      dlouhý text",
+                           u"a 3 a Test 2           a 4 a Krásný dlouhý",
+                           u"                             text podruhé"]
+        res_lines = c.get_lines()
+        self.evaluate_result(res_lines, expected_result)
+        self.assertEqual(c.key_pattern.get_widget_identifier(1), "2")
 
 
 @patch('simpleline.render.io_manager.InOutManager._get_input')

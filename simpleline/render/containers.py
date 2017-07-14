@@ -19,7 +19,7 @@
 
 from math import ceil
 
-from simpleline.render.widgets import Widget
+from simpleline.render.widgets import Widget, TextWidget
 
 __all__ = ["ListRowContainer", "ListColumnContainer"]
 
@@ -34,10 +34,27 @@ class Container(Widget):
         :type items: List of items for rendering.
         """
         super().__init__()
+        self._key_pattern = None
         self._items = []
         if items:
             for i in items:
                 self._items.append(ContainerItem(i))
+
+    @property
+    def key_pattern(self):
+        """Return key pattern which will be used for items numbering.
+
+        Will return `None` if not set.
+        """
+        return self._key_pattern
+
+    @key_pattern.setter
+    def key_pattern(self, key_pattern):
+        """Set the key pattern object which will be used for items numbering.
+
+        Setting `None` will stop doing numbering.
+        """
+        self._key_pattern = key_pattern
 
     def add(self, item, callback=None, data=None):
         """Add item to the Container.
@@ -90,13 +107,12 @@ class ListRowContainer(Container):
         self._columns = columns
         self._columns_width = columns_width
         self._spacing = spacing
+        self._numbering_widgets = []
 
-    def prepare_list(self):
-        """Prepare list for items ordering to rows and columns.
-
-        List will be prepared as ([column 1], [column 2], ...)
-        """
-        return list(map(lambda x: [], range(0, self._columns)))
+    @property
+    def size(self):
+        """Return items count."""
+        return len(self._items)
 
     def render(self, width):
         """Render widgets to it's internal buffer.
@@ -108,20 +124,28 @@ class ListRowContainer(Container):
         """
         super().render(width)
 
-        ordered_items = self._order_items()
-        lines_per_rows = self.render_and_calculate_lines_per_rows(ordered_items)
+        ordered_map = self._get_ordered_map()
+        lines_per_rows = self.render_and_calculate_lines_per_rows(ordered_map)
 
         # the leftmost empty column
         col_pos = 0
 
-        for col in ordered_items:
+        for col in ordered_map:
             row_pos = 0
 
             # render and draw contents of column
-            for row_id, container in enumerate(col):
+            for row_id, item_id in enumerate(col):
+                container = self._items[item_id]
                 widget = container.widget
+
                 # set cursor to first line and leftmost empty column
                 self.set_cursor_position(row_pos, col_pos)
+
+                if self._key_pattern is not None:
+                    number_widget = self._numbering_widgets[item_id]
+                    widget_width = len(number_widget.text)
+                    self.draw(number_widget)
+                    self.set_cursor_position(row_pos, col_pos + widget_width)
 
                 self.draw(widget, block=True)
                 row_pos = row_pos + lines_per_rows[row_id]
@@ -138,8 +162,19 @@ class ListRowContainer(Container):
         return self._lines_per_every_row(ordered_items)
 
     def _render_all_items(self):
-        for item in self._items:
-            item.widget.render(self._columns_width)
+        for item_id, item in enumerate(self._items):
+            item_width = self._columns_width
+
+            if self._key_pattern:
+                # render numbers before widgets
+                number_widget = self._key_pattern.get_widget_from_item_id(item_id)
+                number_width = len(number_widget.text)
+                number_widget.render(number_width)
+                self._numbering_widgets.append(number_widget)
+                # reduce the size of widget because of the number
+                item_width -= number_width
+
+            item.widget.render(item_width)
 
     def _lines_per_every_row(self, items):
         # call `self._render_and_calculate_lines_per_rows()` method instead
@@ -147,7 +182,8 @@ class ListRowContainer(Container):
 
         # go through all items and find how many lines we need for each row printed (because of wrapping)
         for column_items in items:
-            for row_id, item in enumerate(column_items):
+            for row_id, item_id in enumerate(column_items):
+                item = self._items[item_id]
                 if len(lines_per_row) <= row_id:
                     lines_per_row.append(0)
 
@@ -155,14 +191,25 @@ class ListRowContainer(Container):
 
         return lines_per_row
 
-    def _order_items(self):
+    def _get_ordered_map(self):
+        """Return list of identifiers (index) to the original item list.
+
+        .. NOTE: Use of ``self._prepare_list()` is encouraged to create output list and just fill up this list.
+        """
         # create list of columns (lists)
-        positioned_items = self.prepare_list()
+        ordering_map = self._prepare_list()
 
-        for item_id, item in enumerate(self._items):
-            positioned_items[item_id % self._columns].append(item)
+        for item_id in range(self.size):
+            ordering_map[item_id % self._columns].append(item_id)
 
-        return positioned_items
+        return ordering_map
+
+    def _prepare_list(self):
+        """Prepare list for items ordering to rows and columns.
+
+        List will be prepared as ([column 1], [column 2], ...)
+        """
+        return list(map(lambda x: [], range(0, self._columns)))
 
 
 class ListColumnContainer(ListRowContainer):
@@ -177,15 +224,50 @@ class ListColumnContainer(ListRowContainer):
     w3   w6   w9
     """
 
-    def _order_items(self):
-        positioned_items = self.prepare_list()
+    def _get_ordered_map(self):
+        ordering_map = self._prepare_list()
         items_in_column = ceil(len(self._items) / self._columns)
 
-        for item_id, item in enumerate(self._items):
+        for item_id in range(self.size):
             col_position = int(item_id // items_in_column)
-            positioned_items[col_position].append(item)
+            ordering_map[col_position].append(item_id)
 
-        return positioned_items
+        return ordering_map
+
+
+class KeyPattern(object):
+    """Pattern for automatic key printing before items."""
+
+    def __init__(self, pattern="{:d}. ", offset=1):
+        """Create the pattern class.
+
+        :param pattern: Set pattern which will be called for every item.
+        :type pattern: Strings format method. See https://docs.python.org/3.3/library/string.html#format-string-syntax.
+
+        :param offset: Set the offset for numbering items. Default is 1 to start indexing naturally for user.
+        :type offset: int
+        """
+        self._pattern = pattern
+        self._offset = offset
+
+    def get_widget_from_item_id(self, item_id):
+        """Get widget key for printing before item.
+
+        .. NOTE: Adding + offset to item_id before printing.
+
+        :param item_id: Position of the widget in the list.
+        :type item_id: int starts from 0.
+        """
+        text = self._pattern.format(item_id + self._offset)
+        return TextWidget(text)
+
+    def get_widget_identifier(self, item_id):
+        """Get widget identifier for user input.
+
+        :param item_id: Position of the widget in the list.
+        :type item_id: int starts from 0.
+        """
+        return str(item_id + self._offset)
 
 
 class ContainerItem(object):

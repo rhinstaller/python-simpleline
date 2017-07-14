@@ -251,6 +251,11 @@ class TextWidget(Widget):
         super().__init__()
         self._text = text
 
+    @property
+    def text(self):
+        """Contains text of this widget."""
+        return self._text
+
     def render(self, width):
         """Renders the text widget limited to width number of columns (wraps to the next line when the text is longer).
 
