@@ -27,11 +27,14 @@ __all__ = ["ListRowContainer", "ListColumnContainer"]
 class Container(Widget):
     """Base class for containers which will do positioning of the widgets."""
 
-    def __init__(self, items=None):
+    def __init__(self, items=None, numbering=True):
         """Construct Container.
 
-        :param items: Array of items for positioning in this Container. Callback can't be specified this way.
+        :param items: List of items for positioning in this Container. Callback can't be specified this way.
         :type items: List of items for rendering.
+
+        :param numbering: Enable/disable automatic numbering (labels) for items. Enabled by default (True).
+        :type numbering: bool
         """
         super().__init__()
         self._key_pattern = None
@@ -39,6 +42,11 @@ class Container(Widget):
         if items:
             for i in items:
                 self._items.append(ContainerItem(i))
+
+        if numbering:
+            self._key_pattern = KeyPattern()
+        else:
+            self._key_pattern = None
 
     @property
     def key_pattern(self):
@@ -75,35 +83,77 @@ class Container(Widget):
         self._items.append(ContainerItem(item, callback, data))
         return len(self._items) - 1
 
+    def process_user_input(self, key):
+        """Process input from the user if any of the items in the list was called.
+
+        This method must be called in `UIScreen.input()` method if list widget should call the callbacks.
+
+        :param key: Key pressed from user.
+        :type key: str
+
+        :returns: True if key was processed. False otherwise.
+        """
+        if not self._key_pattern or type(key) != str:
+            return False
+
+        res = self._key_pattern.translate_input_to_widget_id(key)
+        if res is not None:
+            try:
+                container = self._items[res]
+                container.callback(container.data)
+                return True
+            except IndexError:  # container widget with this id doesn't exists
+                return False
+
+        return False
+
+    def create_number_label(self, item_id):
+        """Create TextWidget from KeyPattern.
+
+        :param item_id: Create label for item with this id.
+        :type item_id: int
+
+        :returns: Widget with label for the item with item_id.
+        :rtype: `simpleline.render.widgets.TextWidget` instance.
+        """
+        number_widget = TextWidget(self._key_pattern.get_widget_label(item_id))
+        return number_widget
+
 
 class ListRowContainer(Container):
     """Place widgets in rows automatically.
 
     Compared to the ColumnWidget this is able to handle word wrapping correctly.
 
+    There is numbering N) automatically for all items. To disable this feature call `self.key_pattern = None`.
+    If you want other numbering then look on `KeyPattern` class.
+
     Widgets will be placed based on the number of columns in the following way:
 
-    w1   w2   w3
-    w4   w5   w6
+    1) w1  2) w2  3) w3
+    4) w4  5) w5  6) w6
     ....
     """
 
-    def __init__(self, columns, widgets=None, columns_width=25, spacing=3):
+    def __init__(self, columns, items=None, columns_width=25, spacing=3, numbering=True):
         """Create ListWidget with specific number of columns.
 
         :param columns: How many columns we want.
         :type columns: int, bigger than 0
 
-        :param widgets: List of `WidgetContainer`s. This will be positioned in the ListWidget.
-        :type widgets: Array of `Widget` based class.
+        :param items: List of items for positioning in this Container. Callback can't be specified this way.
+        :type items: List of items for rendering.
 
         :param columns_width: Width of every column.
         :type columns_width: int
 
         :param spacing: Set the spacing between columns.
         :type spacing: int
+
+        :param numbering: Enable/disable automatic numbering (labels) for items. Enabled by default (True).
+        :type numbering: bool
         """
-        super().__init__(widgets)
+        super().__init__(items, numbering)
         self._columns = columns
         self._columns_width = columns_width
         self._spacing = spacing
@@ -125,7 +175,7 @@ class ListRowContainer(Container):
         super().render(width)
 
         ordered_map = self._get_ordered_map()
-        lines_per_rows = self.render_and_calculate_lines_per_rows(ordered_map)
+        lines_per_rows = self._lines_per_every_row(ordered_map)
 
         # the leftmost empty column
         col_pos = 0
@@ -153,30 +203,8 @@ class ListRowContainer(Container):
             # recompute the leftmost empty column
             col_pos = max((col_pos + self._columns_width), self.width) + self._spacing
 
-    def render_and_calculate_lines_per_rows(self, ordered_items):
-        """Render all items and then find how many lines are required for every row.
-
-        This will call `self._render_all_items()` and `self._lines_per_every_row()` in correct order.
-        """
-        self._render_all_items()
-        return self._lines_per_every_row(ordered_items)
-
-    def _render_all_items(self):
-        for item_id, item in enumerate(self._items):
-            item_width = self._columns_width
-
-            if self._key_pattern:
-                # render numbers before widgets
-                number_widget = self._key_pattern.get_widget_from_item_id(item_id)
-                number_width = len(number_widget.text)
-                number_widget.render(number_width)
-                self._numbering_widgets.append(number_widget)
-                # reduce the size of widget because of the number
-                item_width -= number_width
-
-            item.widget.render(item_width)
-
     def _lines_per_every_row(self, items):
+        self._render_all_items()
         # call `self._render_and_calculate_lines_per_rows()` method instead
         lines_per_row = []
 
@@ -190,6 +218,21 @@ class ListRowContainer(Container):
                 lines_per_row[row_id] = max(lines_per_row[row_id], len(item.widget.get_lines()))
 
         return lines_per_row
+
+    def _render_all_items(self):
+        for item_id, item in enumerate(self._items):
+            item_width = self._columns_width
+
+            if self._key_pattern:
+                number_widget = self.create_number_label(item_id)
+                # render numbers before widgets
+                number_width = len(number_widget.text)
+                number_widget.render(number_width)
+                self._numbering_widgets.append(number_widget)
+                # reduce the size of widget because of the number
+                item_width -= number_width
+
+            item.widget.render(item_width)
 
     def _get_ordered_map(self):
         """Return list of identifiers (index) to the original item list.
@@ -217,11 +260,14 @@ class ListColumnContainer(ListRowContainer):
 
     Compared to the ColumnWidget this is able to handle word wrapping correctly.
 
+    There is numbering N) automatically for all items. To disable this feature call `self.key_pattern = None`.
+    If you want other numbering then look on `KeyPattern` class.
+
     Widgets will be placed based on the number of columns in the following way:
 
-    w1   w4   w7
-    w2   w5   w8
-    w3   w6   w9
+    1) w1  4) w4  7) w7
+    2) w2  5) w5  8) w8
+    3) w3  6) w6  9) w9
     """
 
     def _get_ordered_map(self):
@@ -238,8 +284,11 @@ class ListColumnContainer(ListRowContainer):
 class KeyPattern(object):
     """Pattern for automatic key printing before items."""
 
-    def __init__(self, pattern="{:d}. ", offset=1):
+    def __init__(self, pattern="{:d}) ", offset=1):
         """Create the pattern class.
+
+        For enabling greater functionality than python 3 format is able to do, feel free to override this class and
+        use your subclass instead.
 
         :param pattern: Set pattern which will be called for every item.
         :type pattern: Strings format method. See https://docs.python.org/3.3/library/string.html#format-string-syntax.
@@ -250,24 +299,32 @@ class KeyPattern(object):
         self._pattern = pattern
         self._offset = offset
 
-    def get_widget_from_item_id(self, item_id):
-        """Get widget key for printing before item.
+    def get_widget_label(self, item_id):
+        """Get widget identifier for user input description.
 
-        .. NOTE: Adding + offset to item_id before printing.
-
-        :param item_id: Position of the widget in the list.
-        :type item_id: int starts from 0.
-        """
-        text = self._pattern.format(item_id + self._offset)
-        return TextWidget(text)
-
-    def get_widget_identifier(self, item_id):
-        """Get widget identifier for user input.
+        It should be something similar to the pattern.
 
         :param item_id: Position of the widget in the list.
         :type item_id: int starts from 0.
         """
-        return str(item_id + self._offset)
+        return self._pattern.format(item_id + self._offset)
+
+    def translate_input_to_widget_id(self, user_input):
+        """Get id of the widget from the user input.
+
+        This is reverse translation to `self.get_widget_identifier()`.
+
+        :param user_input: Input from user:
+        :type user_input: str
+
+        :return: ID of the widget in the list or None if the input can't be translated.
+        :rtype: int or None
+        """
+        try:
+            return int(user_input) - 1
+        except ValueError:
+            print("Value Error")
+            return None
 
 
 class ContainerItem(object):
