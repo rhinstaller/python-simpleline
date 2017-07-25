@@ -10,7 +10,8 @@ class HelloWorld(UIScreen):
 
     def refresh(self, args=None):
         super().refresh()
-        self.window = [TextWidget("Hello World")]
+        self.window.add(TextWidget("Hello World"))
+        self.window.add_separator()
 
 
 if __name__ == "__main__":

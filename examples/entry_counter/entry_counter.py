@@ -7,10 +7,9 @@ from simpleline.render.widgets import TextWidget, CenterWidget
 
 
 class Hub(UIScreen):
-    title = u"Hub for entry counter"
 
     def __init__(self):
-        super().__init__()
+        super().__init__("Hub for entry counter")
         self._counter_spoke = CounterScreen()
 
     def refresh(self, args=None):
@@ -18,7 +17,8 @@ class Hub(UIScreen):
 
         w = CenterWidget(TextWidget("Press '1' to enter Entry counter"))
 
-        self.window += [w, ""]
+        self.window.add(w)
+        self.window.add_separator()
 
     def input(self, args, key):
         """Run spokes based on the user choice"""
@@ -36,10 +36,9 @@ class Hub(UIScreen):
 
 
 class CounterScreen(UIScreen):
-    title = u"Counter Screen"
 
     def __init__(self):
-        super().__init__()
+        super().__init__("Counter Screen")
         self._counter = 0
 
     def closed(self):
@@ -54,7 +53,7 @@ class CounterScreen(UIScreen):
         """Write message to user"""
         super().refresh(args)
         w = TextWidget("Counter {}".format(self._counter))
-        self.window += [CenterWidget(w), ""]
+        self.window.add(CenterWidget(w), "")
 
     @property
     def counter(self):

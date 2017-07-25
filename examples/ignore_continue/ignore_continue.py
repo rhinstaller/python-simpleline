@@ -13,17 +13,16 @@ class MyApp(App):
 
 
 class InfiniteScreen(UIScreen):
-    title = u"You need to use 'q' to quit"
 
     def __init__(self):
-        super().__init__()
+        super().__init__("You need to use 'q' to quit")
         self.continue_count = 0
 
     def refresh(self, args=None):
         """Print text to user with number of continue clicked"""
         super().refresh(args)
         text = TextWidget("You pressed {} times on continue".format(self.continue_count))
-        self.window += [CenterWidget(text), ""]
+        self.window.add(CenterWidget(text))
 
     def input(self, args, key):
         """Catch 'c' keys for continue and increase counter"""
