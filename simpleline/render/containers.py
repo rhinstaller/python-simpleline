@@ -19,9 +19,9 @@
 
 from math import ceil
 
-from simpleline.render.widgets import Widget, TextWidget
+from simpleline.render.widgets import Widget, TextWidget, SeparatorWidget
 
-__all__ = ["ListRowContainer", "ListColumnContainer"]
+__all__ = ["ListRowContainer", "ListColumnContainer", "WindowContainer"]
 
 
 class Container(Widget):
@@ -47,6 +47,11 @@ class Container(Widget):
             self._key_pattern = KeyPattern()
         else:
             self._key_pattern = None
+
+    @property
+    def size(self):
+        """Return items count."""
+        return len(self._items)
 
     @property
     def key_pattern(self):
@@ -120,6 +125,69 @@ class Container(Widget):
         return number_widget
 
 
+class WindowContainer(Container):
+    """Base container for screens.
+
+    This can hold other containers or Widgets for rendering.
+    """
+
+    def __init__(self, title=None):
+        """Construct base container for screens.
+
+        This container doesn't have numbering support. Input other containers in it to allow numbering
+        and input processing.
+
+        :param title: Title line with separator after this title.
+        :type title: str
+        """
+        super().__init__(numbering=False)
+        self._title = title
+
+    def add_separator(self, lines=1):
+        """Add blank lines between widgets.
+
+        :param lines: How many blank lines should be printed.
+        :type lines: int greater than 0.
+        """
+        self.add(SeparatorWidget(lines))
+
+    @property
+    def title(self):
+        """Title of WindowContainer."""
+        return self._title
+
+    def render(self, width):
+        """Render widgets to it's internal buffer.
+
+        :param width: the maximum width the item can use
+        :type width: int
+
+        :return: nothing
+        """
+        super().render(width)
+
+        # set cursor position to top-left corner
+        self.set_cursor_position(0, 0)
+
+        if self._title:
+            self._draw_title_and_separator(width)
+
+        for item in self._items:
+            widget = item.widget
+            widget.render(width)
+            self.draw(widget)
+
+    def _draw_title_and_separator(self, width):
+        title_widget = TextWidget(self._title)
+        sep = SeparatorWidget()
+
+        title_widget.render(width)
+        sep.render(width)
+
+        self.draw(title_widget)
+        self.draw(sep)
+
+
 class ListRowContainer(Container):
     """Place widgets in rows automatically.
 
@@ -158,11 +226,6 @@ class ListRowContainer(Container):
         self._columns_width = columns_width
         self._spacing = spacing
         self._numbering_widgets = []
-
-    @property
-    def size(self):
-        """Return items count."""
-        return len(self._items)
 
     def render(self, width):
         """Render widgets to it's internal buffer.

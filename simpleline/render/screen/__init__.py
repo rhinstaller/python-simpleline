@@ -23,7 +23,7 @@ from simpleline.base import App
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen.signal_handler import SignalHandler
 from simpleline.render.screen.scheduler_handler import SchedulerHandler
-from simpleline.render.widgets import Widget
+from simpleline.render.containers import WindowContainer
 from simpleline.utils.i18n import _
 
 
@@ -33,20 +33,22 @@ class UIScreen(SignalHandler, SchedulerHandler):
     Shares some API with anaconda's GUI to make it easy for devs to create similar UI
     with the familiar API.
     """
-    # title line of the screen
-    title = u"Screen.."
 
-    def __init__(self, screen_height=25):
+    def __init__(self, title=None, screen_height=25):
         """ Constructor of the TUI screen.
+
+        :param title: Title line of the screen.
+        :type title: str
 
         :param screen_height: height of the screen (useful for printing long widgets)
         :type screen_height: int (the value must be bigger than 4)
         """
+        self._title = title
         self._screen_height = screen_height
         self._ready = False
 
         # list that holds the content to be printed out
-        self._window = []
+        self._window = WindowContainer(self.title)
 
         # should the input be required after draw
         self._input_required = True
@@ -54,6 +56,19 @@ class UIScreen(SignalHandler, SchedulerHandler):
         # index of the page (subset of screen) shown during show_all
         # indexing starts with 0
         self._page = 0
+
+    @property
+    def title(self):
+        """Screen title."""
+        return self._title
+
+    @title.setter
+    def title(self, title):
+        """Set screen title.
+
+        Set `None` to remove title.
+        """
+        self._title = title
 
     @property
     def ready(self):
@@ -77,13 +92,28 @@ class UIScreen(SignalHandler, SchedulerHandler):
 
     @property
     def window(self):
-        """Return list of widgets for rendering."""
+        """Return WindowContainer instance."""
         return self._window
 
     @window.setter
     def window(self, window):
-        """Set list of widgets for rendering."""
+        """Set base WindowContainer instance.
+
+        :param window: Base window container containing other widgets and containers.
+        :type window: Instance of `simpleline.render.containers.WindowContainer` class.
+        """
         self._window = window
+
+    def get_user_input(self, message):
+        """Get immediately input from user.
+
+        Use this with cautious. Never call this in middle of rendering or when other input is already waiting.
+        It is recommended to use `self.input_required` instead.
+
+        :param message: Message for the user.
+        :type message: str
+        """
+        return App.get_scheduler().io_manager.get_user_input(message)
 
     def setup(self, args):
         """Do additional setup right before this screen is used.
@@ -105,7 +135,7 @@ class UIScreen(SignalHandler, SchedulerHandler):
         :param args: optional argument passed from switch_screen calls
         :type args: anything
         """
-        self.window = [_(self.title), u""]
+        self.window = WindowContainer(self._title)
         return
 
     def _print_widget(self, widget):
@@ -142,17 +172,9 @@ class UIScreen(SignalHandler, SchedulerHandler):
                 pos += self._screen_height - 1
 
     def show_all(self):
-        """Prepares all elements of self.window for output and then prints them on the screen."""
-        for w in self.window:
-            if hasattr(w, "render"):
-                w.render(App.get_scheduler().io_manager.width)  # pylint: disable=no-member
-            if isinstance(w, Widget):
-                self._print_widget(w)
-            elif isinstance(w, bytes):
-                print(w)
-            else:
-                # not a widget or string, just print its string representation
-                print(str(w))
+        """Print WindowContainer in `self.window` with all its content."""
+        self.window.render(App.get_scheduler().io_manager.width)
+        self._print_widget(self.window)
 
     def input(self, args, key):
         """Method called to process input. If the input is not handled here, return it.

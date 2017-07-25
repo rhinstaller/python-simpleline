@@ -24,11 +24,10 @@ from unittest.mock import patch
 
 from simpleline.base import App
 from simpleline.render import InputState
+from simpleline.render.containers import WindowContainer, ListRowContainer, ListColumnContainer, KeyPattern
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen import UIScreen
-
 from simpleline.render.widgets import TextWidget, SeparatorWidget, CheckboxWidget, CenterWidget, ColumnWidget
-from simpleline.render.containers import ListRowContainer, ListColumnContainer, KeyPattern
 
 
 class BaseWidgets_TestCase(unittest.TestCase):
@@ -59,6 +58,28 @@ class BaseWidgets_TestCase(unittest.TestCase):
 
 
 class Widgets_TestCase(BaseWidgets_TestCase):
+
+    def test_separator_widget(self):
+        w = SeparatorWidget()
+        w.render(80)
+
+        res_lines = w.get_lines()
+
+        expected_result = [u""]
+
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_separator_widget_multiline(self):
+        w = SeparatorWidget(3)
+        w.render(80)
+
+        res_lines = w.get_lines()
+
+        expected_result = [u"",
+                           u"",
+                           u""]
+
+        self.evaluate_result(res_lines, expected_result)
 
     def test_column_widget(self):
         # Test column text
@@ -238,7 +259,7 @@ class Containers_TestCase(BaseWidgets_TestCase):
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
 
-    def test_listcolumn_widget(self):
+    def test_listcolumn_container(self):
         c = ListColumnContainer(columns=2, items=[self.w2, self.w3, self.w5], columns_width=10, spacing=2,
                                 numbering=False)
         c.render(25)
@@ -248,7 +269,7 @@ class Containers_TestCase(BaseWidgets_TestCase):
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
 
-    def test_listcolumn_widget_wrapping(self):
+    def test_listcolumn_wrapping(self):
         # spacing is 3 by default
         c = ListColumnContainer(2, [self.w1, self.w2, self.w3, self.w4], columns_width=15, numbering=False)
         c.render(25)
@@ -311,6 +332,51 @@ class Containers_TestCase(BaseWidgets_TestCase):
                            u"      dlouhý text",
                            u"a 3 a Test 2           a 4 a Krásný dlouhý",
                            u"                             text podruhé"]
+        res_lines = c.get_lines()
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_window_container(self):
+        c = WindowContainer(title="Test")
+
+        c.add(TextWidget("Body"))
+        c.render(10)
+
+        expected_result = [u"Test",
+                           u"",
+                           u"Body"]
+
+        res_lines = c.get_lines()
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_window_container_with_multiple_items(self):
+        c = WindowContainer(title="Test")
+
+        c.add(TextWidget("Body"))
+        c.add(TextWidget("Body second line"))
+        c.render(30)
+
+        expected_result = [u"Test",
+                           u"",
+                           u"Body",
+                           u"Body second line"]
+
+        res_lines = c.get_lines()
+        self.evaluate_result(res_lines, expected_result)
+
+    def test_window_container_wrapping(self):
+        c = WindowContainer(title="Test")
+
+        c.add(TextWidget("Body long line"))
+        c.add(TextWidget("Body"))
+        c.render(5)
+
+        expected_result = [u"Test",
+                           u"",
+                           u"Body",
+                           u"long",
+                           u"line",
+                           u"Body"]
+
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
 
@@ -386,7 +452,7 @@ class ScreenWithWidget(UIScreen):
 
     def refresh(self, args=None):
         super().refresh(args)
-        self.window = [TextWidget(self._msg)]
+        self.window.add(TextWidget(self._msg))
 
     def show_all(self):
         super().show_all()
@@ -408,7 +474,7 @@ class ScreenWithListWidget(UIScreen):
         for i in range(self._widgets_count):
             self._list_widget.add(TextWidget("Test %s" % i), self._callback, i)
 
-        self.window = [self._list_widget]
+        self.window.add(self._list_widget)
 
     def input(self, args, key):
         self.close()
