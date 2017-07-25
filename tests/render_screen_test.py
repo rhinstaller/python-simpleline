@@ -168,6 +168,11 @@ class ScreenException_TestCase(unittest.TestCase):
 @mock.patch('simpleline.render.io_manager.InOutManager._get_input')
 class InputProcessing_TestCase(unittest.TestCase):
 
+    def _test_getpass(self, prompt):
+        self.pass_prompt = prompt
+        self.pass_called = True
+        return "test"
+
     def setUp(self):
         self.pass_called = False
         self.pass_prompt = None
@@ -227,6 +232,15 @@ class InputProcessing_TestCase(unittest.TestCase):
         self.assertEqual(screen.render_counter, 3)
         self.assertEqual(screen.error_counter, threshold)
 
+    def test_input_no_prompt(self, mock_stdin, mock_stdout):
+        screen = InputWithNoPrompt()
+
+        App.initialize()
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
+
+        self.assertTrue(screen.prompt_entered)
+
     @mock.patch('simpleline.event_loop.main_loop.MainLoop.process_signals')
     def test_custom_getpass(self, mock_stdin, mock_stdout, process_signals):
         prompt = mock.MagicMock()
@@ -236,11 +250,6 @@ class InputProcessing_TestCase(unittest.TestCase):
 
         self.assertTrue(self.pass_called)
         self.assertEqual(self.pass_prompt, prompt)
-
-    def _test_getpass(self, prompt):
-        self.pass_prompt = prompt
-        self.pass_called = True
-        return "test"
 
 
 # HELPER CLASSES
@@ -291,6 +300,20 @@ class InputErrorTestScreen(UIScreen):
 
     def show_all(self):
         self.render_counter += 1
+
+
+class InputWithNoPrompt(UIScreen):
+
+    def __init__(self):
+        super().__init__()
+        self.prompt_entered = False
+        self.input_required = True
+
+    def prompt(self, args=None):
+        self.prompt_entered = True
+        self.close()
+        # do not process input - it was processed here by user
+        return None
 
 
 class RefreshTestScreen(UIScreen):
