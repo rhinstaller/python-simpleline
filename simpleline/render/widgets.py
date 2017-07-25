@@ -25,8 +25,7 @@ from textwrap import wrap
 from simpleline.utils.i18n import _
 from simpleline.utils import ensure_str
 
-__all__ = ["Widget", "TextWidget", "ColumnWidget", "CheckboxWidget",
-           "CenterWidget"]
+__all__ = ["Widget", "TextWidget", "SeparatorWidget", "ColumnWidget", "CheckboxWidget", "CenterWidget"]
 
 
 class Widget(object):
@@ -100,7 +99,7 @@ class Widget(object):
     def cursor(self):
         return self._cursor
 
-    def setend(self):
+    def set_end(self):
         """Set the cursor to first column in new line at the end."""
         self._cursor = (self.height, 0)
 
@@ -261,11 +260,41 @@ class TextWidget(Widget):
 
         :param width: maximum width allocated to the string
         :type width: int
-
-        :raises
         """
         super().render(width)
         self.write(self._text, width=width, wordwrap=True)
+
+
+class SeparatorWidget(Widget):
+    """Print empty line."""
+
+    def __init__(self, lines=1):
+        """Construct SeparatorWidget for printing blank lines.
+
+        :param lines: How many lines should be blank.
+        :type lines: int greater than 0.
+        """
+        super().__init__()
+        self._lines = lines
+
+    def render(self, width):
+        """Render empty line to the buffer.
+
+        :param width: maximum width allocated to the string
+        :type width: int
+        """
+        super().render(width)
+        self.write("")
+
+    def write(self, text, row=None, col=None, width=None, block=False, wordwrap=False):
+        """Optimize write function.
+
+        To print just a blank line we don't need too much logic.
+        """
+        for i in range(0, self._lines):
+            self._buffer.append(list())
+            self._buffer[i] += u""
+        self.set_cursor_position(self._lines - 1, 0)
 
 
 class CenterWidget(Widget):

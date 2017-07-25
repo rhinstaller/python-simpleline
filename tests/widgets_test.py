@@ -27,7 +27,7 @@ from simpleline.render import InputState
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen import UIScreen
 
-from simpleline.render.widgets import TextWidget, CheckboxWidget, CenterWidget, ColumnWidget
+from simpleline.render.widgets import TextWidget, SeparatorWidget, CheckboxWidget, CenterWidget, ColumnWidget
 from simpleline.render.containers import ListRowContainer, ListColumnContainer, KeyPattern
 
 
