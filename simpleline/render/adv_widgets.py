@@ -42,7 +42,8 @@ class ErrorDialog(UIScreen):
     def refresh(self, args=None):
         super().refresh(args)
         text = widgets.TextWidget(self._message)
-        self.window += [widgets.CenterWidget(text), ""]
+        self.window.add(widgets.CenterWidget(text))
+        self.window.add_separator()
 
     def prompt(self, args=None):
         return Prompt(_("Press %s to exit") % Prompt.ENTER)
@@ -72,7 +73,8 @@ class PasswordDialog(UIScreen):
     def refresh(self, args=None):
         super().refresh(args)
         text = widgets.TextWidget(self._message)
-        self.window += [widgets.CenterWidget(text), ""]
+        self.window.add(widgets.CenterWidget(text))
+        self.window.add_separator()
 
     def prompt(self, args=None):
         self._password = App.get_scheduler().io_manager.get_user_input(_("Passphrase: "), hidden=True)
@@ -116,7 +118,8 @@ class YesNoDialog(UIScreen):
     def refresh(self, args=None):
         super().refresh(args)
         text = widgets.TextWidget(self._message)
-        self.window += [widgets.CenterWidget(text), ""]
+        self.window.add(widgets.CenterWidget(text))
+        self.window.add_separator()
 
     def prompt(self, args=None):
         return Prompt(_("Please respond '%(yes)s' or '%(no)s'") % {
@@ -170,7 +173,8 @@ class HelpScreen(UIScreen):
             with open(self.help_path, 'r') as f:
                 help_message = f.read()
 
-        self.window += [widgets.TextWidget(help_message), ""]
+        self.window.add(widgets.TextWidget(help_message))
+        self.window.add_separator()
 
     def input(self, args, key):
         """ Handle user input. """

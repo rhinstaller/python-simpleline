@@ -123,7 +123,7 @@ class InOutManager(object):
 
         # None means prompt handled the input by itself -> continue
         if prompt is None:
-            return True
+            return UserInputResult.PROCESSED
 
         # get the input from user
         c = self.get_user_input(prompt)

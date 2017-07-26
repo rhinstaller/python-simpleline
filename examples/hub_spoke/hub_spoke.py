@@ -9,14 +9,13 @@ from simpleline.render.widgets import TextWidget, ColumnWidget, CenterWidget
 
 
 class Hub(UIScreen):
-    title = u"Hub"
 
     KEY_USER = "1"
     KEY_SURNAME = "2"
     KEY_PASSWORD = "3"
 
     def __init__(self):
-        super().__init__()
+        super().__init__("Hub")
         self._name_spoke = SetNameScreen("First name", "John")
         self._surname_spoke = SetNameScreen("Surname", "Doe")
         self._pass_spoke = PasswordDialog()
@@ -26,6 +25,7 @@ class Hub(UIScreen):
 
         header = TextWidget("Please complete all the spokes to continue")
         header = CenterWidget(header)
+        self.window.add(header)
 
         left = [TextWidget("{}) First name".format(self.KEY_USER)),
                 TextWidget("   {}".format(self._name_spoke.value)),
@@ -37,7 +37,9 @@ class Hub(UIScreen):
             right.append(TextWidget("   Password is set"))
 
         col = ColumnWidget([(30, left), (30, right)], 5)
-        self.window += [header, "", "", col, ""]
+        self.window.add_separator(2)
+        self.window.add(col)
+        self.window.add_separator()
 
     def input(self, args, key):
         """Run spokes based on the user choice."""
@@ -76,12 +78,11 @@ class SetNameScreen(UIScreen):
         """Write message to user."""
         super().refresh(args)
         w = TextWidget(self._message)
-        self.window += [CenterWidget(w), ""]
-        return True
+        self.window.add(CenterWidget(w))
 
     def prompt(self, args=None):
         """Take user input."""
-        self._value = App.get_scheduler().raw_input("Write your name: ")
+        self._value = self.get_user_input("Write your name: ")
         self.close()
 
     @property

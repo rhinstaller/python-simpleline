@@ -99,14 +99,14 @@ class AbstractEventLoop(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def process_signals(self, return_at=None):
+    def process_signals(self, return_after=None):
         """Processes incoming async messages and returns when a specific message is encountered
         or when the queue_instance is empty.
 
-        :param return_at: If return_at message was specified, the received message is returned.
-        :type return_at: Value returned by `Event.id`.
+        :param return_after: If `return_after` message was specified, the received message is returned.
+        :type return_after: Value returned by `Event.id`.
 
-        If the message does not fit return_at, but handlers are defined then it processes all handlers for
+        If the message does not fit `return_after`, but handlers are defined then it processes all handlers for
         this message.
         """
         pass

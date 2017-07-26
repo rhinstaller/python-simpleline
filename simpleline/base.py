@@ -28,6 +28,9 @@ __all__ = ["App"]
 class App(object):
     """This is the main class for Simpleline library.
 
+    Do not create instance of this class. Use this class as static!
+    The `initialize()` method must be called before use.
+
     It is giving you access to the scheduler and event loop. You can have only one instance of this
     class in your application.
 
@@ -41,13 +44,6 @@ class App(object):
         def __init__(self, scheduler, event_loop):
             self.event_loop = event_loop
             self.scheduler = scheduler
-
-    def __init__(self):
-        """Do not create instance of this class. Use this class as static.
-
-        The `initialize()` method must be called before use.
-        """
-        super().__init__()
 
     @classmethod
     def initialize(cls, scheduler=None, event_loop=None):
