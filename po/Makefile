@@ -24,7 +24,7 @@ MSGFMT		= msgfmt --statistics --verbose
 # What do we need to do
 POFILES		= $(wildcard *.po)
 MOFILES		= $(patsubst %.po,%.mo,$(POFILES))
-PYSRC		= $(wildcard ../simpleline/*.py)
+PYSRC		= $(wildcard ../simpleline/*.py) $(wildcard ../simpleline/**/*.py)
 
 all::  update-po $(MOFILES)
 
