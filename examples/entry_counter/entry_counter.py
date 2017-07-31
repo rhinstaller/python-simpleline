@@ -42,7 +42,7 @@ class CounterScreen(UIScreen):
         self._counter = 0
 
     def closed(self):
-        self.ready = False
+        self.screen_ready = False
 
     def setup(self, args=None):
         super().setup(args)

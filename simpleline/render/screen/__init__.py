@@ -45,7 +45,7 @@ class UIScreen(SignalHandler, SchedulerHandler):
         """
         self._title = title
         self._screen_height = screen_height
-        self._ready = False
+        self._screen_ready = False
 
         # list that holds the content to be printed out
         self._window = WindowContainer(self.title)
@@ -71,14 +71,14 @@ class UIScreen(SignalHandler, SchedulerHandler):
         self._title = title
 
     @property
-    def ready(self):
+    def screen_ready(self):
         """This screen is ready for use."""
-        return self._ready
+        return self._screen_ready
 
-    @ready.setter
-    def ready(self, ready):
+    @screen_ready.setter
+    def screen_ready(self, screen_ready):
         """Set ready status for this screen."""
-        self._ready = ready
+        self._screen_ready = screen_ready
 
     @property
     def input_required(self):
@@ -125,7 +125,7 @@ class UIScreen(SignalHandler, SchedulerHandler):
         :return: whether this screen should be scheduled or not
         :rtype: bool
         """
-        self._ready = True
+        self._screen_ready = True
         App.get_event_loop().register_signal_source(self)
         return True
 

@@ -189,7 +189,7 @@ class ScreenScheduler(object):
         top_screen = self._get_last_screen()
 
         # this screen is used first time (call setup() method)
-        if not top_screen.ui_screen.ready:
+        if not top_screen.ui_screen.screen_ready:
             if not top_screen.ui_screen.setup(top_screen.args):
                 # remove the screen and skip if setup went wrong
                 self._screen_stack.pop()
