@@ -44,7 +44,6 @@ class ScreenScheduler(object):
         :type scheduler_stack: `simpleline.screen_stack.ScreenStack` based class.
         """
         self._quit_screen = None
-        self._quit_message = ""
         self._event_loop = event_loop
         self._io_manager = InOutManager(self._event_loop)
         if scheduler_stack:
@@ -70,10 +69,17 @@ class ScreenScheduler(object):
 
     @property
     def quit_screen(self):
+        """Return quit UIScreen."""
         return self._quit_screen
 
     @quit_screen.setter
     def quit_screen(self, quit_screen):
+        """Set the UIScreen based instance which will be showed before the Application will quit.
+
+        You can also use `simpleline.render.adv_widgets.YesNoDialog` or `UIScreen` based class
+        with the `answer` property. Without the `answer` property the application will always
+        close.
+        """
         self._quit_screen = quit_screen
 
     @property
@@ -254,10 +260,11 @@ class ScreenScheduler(object):
                 self.close_screen()
             elif input_result == UserInputResult.QUIT:
                 if self.quit_screen:
-                    quit_screen = self.quit_screen
-                    d = quit_screen(self, self._quit_message)
-                    self.push_screen_modal(d)
-                    if d.answer:
+                    self.push_screen_modal(self.quit_screen)
+                    try:
+                        if self.quit_screen.answer is True:
+                            raise ExitMainLoop()
+                    except AttributeError:
                         raise ExitMainLoop()
                 else:
                     raise ExitMainLoop()
