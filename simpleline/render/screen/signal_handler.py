@@ -19,7 +19,7 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
-from simpleline.base import App
+from simpleline import App
 from simpleline.event_loop.signals import RenderScreenSignal, CloseScreenSignal
 
 

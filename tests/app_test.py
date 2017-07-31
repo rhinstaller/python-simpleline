@@ -19,7 +19,8 @@
 
 import unittest
 from unittest import mock
-from simpleline.base import App
+
+from simpleline import App
 from simpleline.render.screen_scheduler import ScreenScheduler
 from simpleline.event_loop.main_loop import MainLoop
 

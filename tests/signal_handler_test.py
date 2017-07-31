@@ -21,7 +21,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 
-from simpleline.base import App
+from simpleline import App
 from simpleline.event_loop.signals import RenderScreenSignal, AbstractSignal
 from simpleline.render.screen import UIScreen
 

@@ -20,7 +20,7 @@
 #
 
 
-from simpleline import SimplelineError
+from simpleline.errors import SimplelineError
 
 
 class ScreenStackException(SimplelineError):

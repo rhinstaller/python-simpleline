@@ -21,7 +21,7 @@
 
 
 from queue import PriorityQueue
-from simpleline import SimplelineError
+from simpleline.errors import SimplelineError
 
 
 class EventQueueError(SimplelineError):
