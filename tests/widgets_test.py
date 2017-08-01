@@ -22,7 +22,7 @@ import unittest
 from io import StringIO
 from unittest.mock import patch
 
-from simpleline.base import App
+from simpleline import App
 from simpleline.render import InputState
 from simpleline.render.containers import WindowContainer, ListRowContainer, ListColumnContainer, KeyPattern
 from simpleline.render.prompt import Prompt

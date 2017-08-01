@@ -19,7 +19,7 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
-from simpleline.base import App
+from simpleline import App
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen.signal_handler import SignalHandler
 from simpleline.render.screen.scheduler_handler import SchedulerHandler

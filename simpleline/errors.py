@@ -1,6 +1,8 @@
-# Helper functions for the test classes.
+# Base exceptions for the Simpleline application.
 #
-# Copyright (C) 2017  Red Hat, Inc.
+# Base class for Simpleline Text UI framework.
+#
+# Copyright (C) 2016  Red Hat, Inc.
 #
 # This copyrighted material is made available to anyone wishing to use,
 # modify, copy, or redistribute it subject to the terms and conditions of
@@ -16,27 +18,10 @@
 # License and may only be used or replicated with the express permission of
 # Red Hat, Inc.
 #
-
-from simpleline import App
-
-
-def calculate_separator(width=80):
-    separator = "\n".join(2 * [width * "="])
-    separator += "\n"  # print adds another newline
-    return separator
+#
+# This can't be moved to __init__.py because of cyclic imports error.
+#
 
 
-def create_output_with_separators(screens_text):
-    msg = ""
-    for screen_txt in screens_text:
-        msg += calculate_separator()
-        msg += screen_txt + "\n\n"
-
-    return msg
-
-
-def schedule_screen_and_run(screen):
-    App.initialize()
-    App.get_scheduler().schedule_screen(screen)
-    App.run()
-
+class SimplelineError(Exception):
+    pass

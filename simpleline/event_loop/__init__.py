@@ -22,7 +22,7 @@
 #
 
 from abc import ABCMeta, abstractmethod
-from simpleline import SimplelineError
+from simpleline.errors import SimplelineError
 
 
 class ExitMainLoop(SimplelineError):

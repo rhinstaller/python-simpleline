@@ -20,7 +20,7 @@
 #
 
 from enum import Enum
-from simpleline import SimplelineError
+from simpleline.errors import SimplelineError
 
 
 class RenderError(SimplelineError):
