@@ -104,7 +104,7 @@ class UIScreen(SignalHandler, SchedulerHandler):
         """
         self._window = window
 
-    def get_user_input(self, message):
+    def get_user_input(self, message, hidden=False):
         """Get immediately input from user.
 
         Use this with cautious. Never call this in middle of rendering or when other input is already waiting.
@@ -112,8 +112,11 @@ class UIScreen(SignalHandler, SchedulerHandler):
 
         :param message: Message for the user.
         :type message: str
+
+        :param hidden: Do not echo user input (password typing).
+        :type hidden: bool
         """
-        return App.get_scheduler().io_manager.get_user_input(message)
+        return App.get_scheduler().io_manager.get_user_input(message, hidden)
 
     def setup(self, args):
         """Do additional setup right before this screen is used.
@@ -136,7 +139,6 @@ class UIScreen(SignalHandler, SchedulerHandler):
         :type args: anything
         """
         self.window = WindowContainer(self._title)
-        return
 
     def _print_widget(self, widget):
         """Prints a widget (could be longer than the screen height) with user interaction (when needed).
