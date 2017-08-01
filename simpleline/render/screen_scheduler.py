@@ -104,11 +104,11 @@ class ScreenScheduler(object):
         screen = ScreenData(ui_screen, args)
         self._screen_stack.add_first(screen)
 
-    def replace_screen(self, ui, args=None):
+    def replace_screen(self, ui_screen, args=None):
         """Schedules a screen to replace the current one.
 
-        :param ui: screen to show
-        :type ui: instance of UIScreen
+        :param ui_screen: screen to show
+        :type ui_screen: instance of UIScreen
         :param args: optional argument to pass to ui's refresh and setup methods
                      (can be used to select what item should be displayed or so)
         :type args: anything
@@ -120,36 +120,36 @@ class ScreenScheduler(object):
 
         # we have to keep the old_loop value so we stop
         # dialog's mainloop if it ever uses switch_screen
-        screen = ScreenData(ui, args, execute_new_loop)
+        screen = ScreenData(ui_screen, args, execute_new_loop)
         self._screen_stack.append(screen)
         self.redraw()
 
-    def push_screen(self, ui, args=None):
+    def push_screen(self, ui_screen, args=None):
         """Schedules a screen to show, but keeps the current one in stack to
         return to, when the new one is closed.
 
-        :param ui: screen to show
-        :type ui: UIScreen instance
+        :param ui_screen: screen to show
+        :type ui_screen: UIScreen instance
         :param args: optional argument
         :type args: anything
         """
-        screen = ScreenData(ui, args, False)
+        screen = ScreenData(ui_screen, args, False)
         self._screen_stack.append(screen)
         self.redraw()
 
-    def push_screen_modal(self, ui, args=None):
+    def push_screen_modal(self, ui_screen, args=None):
         """Starts a new screen right away, so the caller can collect data back.
 
         When the new screen is closed, the caller is redisplayed.
 
         This method does not return until the new screen is closed.
 
-        :param ui: screen to show
-        :type ui: UIScreen instance
+        :param ui_screen: screen to show
+        :type ui_screen: UIScreen instance
         :param args: optional argument, please see switch_screen for details
         :type args: anything
         """
-        screen = ScreenData(ui, args, True)
+        screen = ScreenData(ui_screen, args, True)
         self._screen_stack.append(screen)
         # only new events will be processed now
         # the old one will wait after this event loop will be closed
