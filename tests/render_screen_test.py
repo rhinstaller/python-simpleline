@@ -195,8 +195,8 @@ class InputProcessing_TestCase(unittest.TestCase):
         App.get_scheduler().schedule_screen(screen2)
         App.run()
 
-        self.assertTrue(screen.ready)
-        self.assertTrue(screen.ready)
+        self.assertTrue(screen.screen_ready)
+        self.assertTrue(screen.screen_ready)
 
     def test_refresh_input(self, mock_stdin, mock_stdout):
         mock_stdin.return_value = "r"
