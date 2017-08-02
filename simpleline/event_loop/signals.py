@@ -27,6 +27,8 @@ class ExceptionSignal(AbstractSignal):
     """Emit this signal when exception is raised.
 
     This class must be created inside of exception handler or `exception_info` must be specified in creation process.
+
+    If you register handler for this exception then the Simpleline's exception handling is disabled!
     """
 
     def __init__(self, source, exception_info=None):

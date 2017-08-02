@@ -35,8 +35,6 @@ class MainLoop(AbstractEventLoop):
         self._handlers = {}
         self._active_queue = EventQueue()
         self._event_queues = [self._active_queue]
-        # handle all exceptions in the _raised_exception() method
-        self.register_signal_handler(ExceptionSignal, self._raise_exception)
 
     def register_signal_handler(self, signal, callback, data=None):
         """Register a callback which will be called when message "event"
@@ -145,10 +143,13 @@ class MainLoop(AbstractEventLoop):
                         handler_data.callback(signal, handler_data.data)
                     except ExitMainLoop:
                         raise
+            # if an exception is not processed by handlers re-raise it here
+            elif type(signal) is ExceptionSignal:
+                self._raise_exception(signal)
             if return_after is not None and isinstance(signal, return_after):
                 return
 
-    def _raise_exception(self, signal, data):
+    def _raise_exception(self, signal):
         raise signal.exception_info[0] from signal.exception_info[1]
 
 
