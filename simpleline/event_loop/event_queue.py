@@ -1,5 +1,7 @@
 # Default event queue for Simpleline application.
 #
+# This class is thread safe.
+#
 # Copyright (C) 2017  Red Hat, Inc.
 #
 # This copyrighted material is made available to anyone wishing to use,
@@ -21,6 +23,8 @@
 
 
 from queue import PriorityQueue
+from threading import Lock
+
 from simpleline.errors import SimplelineError
 
 
@@ -44,6 +48,7 @@ class EventQueue(object):
     def __init__(self):
         self._queue = PriorityQueue()
         self._contained_screens = set()
+        self._lock = Lock()
 
     def empty(self):
         """Return true if Queue is empty.
@@ -98,7 +103,8 @@ class EventQueue(object):
         :param signal_source: Source of future signals.
         :type signal_source: Anything which will emit signals in future.
         """
-        self._contained_screens.add(signal_source)
+        with self._lock:
+            self._contained_screens.add(signal_source)
 
     def remove_source(self, signal_source):
         """Remove signal source from this queue.
@@ -107,7 +113,8 @@ class EventQueue(object):
         :type signal_source: Anything.
         :raise: EventQueueError"""
         try:
-            self._contained_screens.remove(signal_source)
+            with self._lock:
+                self._contained_screens.remove(signal_source)
         except KeyError:
             raise EventQueueError("Can't remove non-existing event source!")
 
@@ -119,4 +126,5 @@ class EventQueue(object):
         :return: True if signal source belongs to this queue.
         :rtype: bool
         """
-        return signal_source in self._contained_screens
+        with self._lock:
+            return signal_source in self._contained_screens
