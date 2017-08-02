@@ -143,6 +143,34 @@ class WindowContainer(Container):
         super().__init__(numbering=False)
         self._title = title
 
+    def add_with_separator(self, item, callback=None, data=None, blank_lines=1):
+        """Add widget and after widget add blank line.
+
+        This method will call
+        `self.add(item, callback, data)`
+        `self.add_separator(lines)`
+
+        :param item: Add item to this container.
+        :type item: Could be item (based on `simpleline.render.widgets.Widget`)
+                    or other container (based on `simpleline.render.containers.Container`).
+
+        :param callback: Add callback for this item. This callback will be called when user activate this `item`.
+        :type callback: function ``func(item, data)``.
+
+        :param data: Data which will be passed to the callback.
+        :param data: Anything.
+
+        :param blank_lines: How many blank lines should be printed.
+        :type blank_lines: int greater than 0.
+
+        :returns: ID of the item in this Container.
+        :rtype: int
+        """
+        item_id = self.add(item, callback, data)
+        self.add_separator(blank_lines)
+
+        return item_id
+
     def add_separator(self, lines=1):
         """Add blank lines between widgets.
 
