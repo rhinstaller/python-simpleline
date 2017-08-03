@@ -50,7 +50,22 @@ class ExceptionSignal(AbstractSignal):
 
 class InputReadySignal(AbstractSignal):
     """Input from user is ready for processing."""
-    pass
+    def __init__(self, source, data, priority=0):
+        """Store user input inside of this signal
+
+        Read the data from user input in `data` attribute.
+
+        :param source: Source of this signal.
+        :type source: Any object.
+
+        :param data: User input data.
+        :type data: str
+
+        :param priority: Priority of this event.
+        :type priority: Int greater than 0.
+        """
+        super().__init__(source, priority=priority)
+        self.data = data
 
 
 class RenderScreenSignal(AbstractSignal):
