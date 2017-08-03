@@ -103,8 +103,9 @@ class EventQueue(object):
         :param signal_source: Source of future signals.
         :type signal_source: Anything which will emit signals in future.
         """
-        with self._lock:
-            self._contained_screens.add(signal_source)
+        self._lock.acquire()
+        self._contained_screens.add(signal_source)
+        self._lock.release()
 
     def remove_source(self, signal_source):
         """Remove signal source from this queue.
@@ -113,10 +114,12 @@ class EventQueue(object):
         :type signal_source: Anything.
         :raise: EventQueueError"""
         try:
-            with self._lock:
-                self._contained_screens.remove(signal_source)
+            self._lock.acquire()
+            self._contained_screens.remove(signal_source)
         except KeyError:
             raise EventQueueError("Can't remove non-existing event source!")
+        finally:
+            self._lock.release()
 
     def contains_source(self, signal_source):
         """Test if `signal_source` belongs to this queue.
@@ -126,5 +129,7 @@ class EventQueue(object):
         :return: True if signal source belongs to this queue.
         :rtype: bool
         """
-        with self._lock:
-            return signal_source in self._contained_screens
+        self._lock.acquire()
+        ret = signal_source in self._contained_screens
+        self._lock.release()
+        return ret
