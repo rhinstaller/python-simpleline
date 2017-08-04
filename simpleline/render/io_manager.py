@@ -180,7 +180,7 @@ class InOutManager(object):
                                               args=(prompt, hidden))
         self._input_thread.daemon = True
         self._input_thread.start()
-        self._event_loop.process_signals(return_after=InputReadySignal)
+        self._event_loop.process_signals(InputReadySignal)
         return self._user_input  # return the user input
 
     def _thread_input(self, prompt, hidden):

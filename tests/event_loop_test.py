@@ -17,8 +17,8 @@
 # Red Hat, Inc.
 #
 
-
 import unittest
+
 from simpleline.event_loop.main_loop import EventHandler
 from simpleline.event_loop.main_loop import MainLoop
 from simpleline.event_loop import AbstractSignal
@@ -83,7 +83,7 @@ class ProcessEvents_TestCase(unittest.TestCase):
         loop.process_signals()
         self.assertEqual(self.signal_counter, 4)
 
-    def test_return_after_more_signals_register_handler(self):
+    def test_wait_on_signal(self):
         self.signal_counter = 0
         loop = MainLoop()
         loop.register_signal_handler(TestSignal, self._handler_signal_counter)
@@ -94,6 +94,19 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.assertEqual(self.signal_counter, 1)
         loop.process_signals()
         self.assertEqual(self.signal_counter, 2)
+
+    def test_wait_on_signal_skipped_by_inner_process_events(self):
+        self.signal_counter = 0
+        loop = MainLoop()
+        loop.register_signal_handler(TestSignal, self._handler_signal_counter)
+        # run process signals recursively in this handler which will skip processing for wait_on_signal
+        loop.register_signal_handler(TestSignal2, self._handler_process_events_then_register_testsignal, loop)
+        loop.enqueue_signal(TestSignal2())
+        loop.enqueue_signal(TestSignal())
+        # new signal will be registered in handler method but that shouldn't be processed by wait_on_signal
+        # because it should end on the first signal even when it was skipped
+        loop.process_signals(return_after=TestSignal)
+        self.assertEqual(self.signal_counter, 1)
 
     def test_multiple_handlers_to_signal(self):
         self.signal_counter = 0
@@ -147,6 +160,12 @@ class ProcessEvents_TestCase(unittest.TestCase):
 
     def _handler_signal_copy_counter(self, signal, data):
         self.signal_counter_copied = self.signal_counter
+
+    def _handler_process_events_then_register_testsignal(self, signal, data):
+        event_loop = data
+        event_loop.process_signals()
+        # This shouldn't be processed
+        event_loop.enqueue_signal(TestSignal())
 
 
 # TESTING EVENTS
