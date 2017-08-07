@@ -19,9 +19,6 @@
 # Red Hat, Inc.
 #
 
-from simpleline.event_loop.main_loop import MainLoop
-from simpleline.render.screen_scheduler import ScreenScheduler
-
 __all__ = ["App"]
 
 
@@ -59,6 +56,9 @@ class App(object):
                            if not specified use `simpleline.event_loop.main_loop.MainLoop`.
         :type event_loop: object based on class `simpleline.event_loop.AbstractEventLoop`.
         """
+        from simpleline.event_loop.main_loop import MainLoop
+        from simpleline.render.screen_scheduler import ScreenScheduler
+
         if event_loop is None:
             event_loop = MainLoop()
         if scheduler is None:
