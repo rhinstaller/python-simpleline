@@ -27,7 +27,7 @@ import getpass
 
 from enum import Enum
 
-from simpleline.render import InputState
+from simpleline.render.screen import InputState
 from simpleline.event_loop import ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal, InputReadySignal
 from simpleline.render.prompt import Prompt

@@ -23,10 +23,9 @@ from io import StringIO
 from unittest.mock import patch
 
 from simpleline import App
-from simpleline.render import InputState
 from simpleline.render.containers import WindowContainer, ListRowContainer, ListColumnContainer, KeyPattern
 from simpleline.render.prompt import Prompt
-from simpleline.render.screen import UIScreen
+from simpleline.render.screen import UIScreen, InputState
 from simpleline.render.widgets import TextWidget, SeparatorWidget, CheckboxWidget, CenterWidget, ColumnWidget
 
 

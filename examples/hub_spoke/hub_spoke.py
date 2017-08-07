@@ -3,8 +3,7 @@
 from simpleline import App
 from simpleline.render.adv_widgets import PasswordDialog
 from simpleline.render.prompt import Prompt
-from simpleline.render.screen import UIScreen
-from simpleline.render import InputState
+from simpleline.render.screen import UIScreen, InputState
 from simpleline.render.widgets import TextWidget, ColumnWidget, CenterWidget
 
 

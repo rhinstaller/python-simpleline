@@ -19,6 +19,8 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
+from enum import Enum
+
 from simpleline import App
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen.signal_handler import SignalHandler
@@ -210,3 +212,8 @@ class UIScreen(SignalHandler, SchedulerHandler):
     def closed(self):
         """Callback when this screen is closed."""
         pass
+
+
+class InputState(Enum):
+    PROCESSED = True
+    DISCARDED = False
