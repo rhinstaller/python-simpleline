@@ -103,6 +103,8 @@ class EventQueue(object):
         :param signal_source: Source of future signals.
         :type signal_source: Anything which will emit signals in future.
         """
+        # TODO: Remove when python3-astroid 1.5.3 will be in Fedora
+        # pylint: disable=not-context-manager
         with self._lock:
             self._contained_screens.add(signal_source)
 
@@ -113,6 +115,8 @@ class EventQueue(object):
         :type signal_source: Anything.
         :raise: EventQueueError"""
         try:
+            # TODO: Remove when python3-astroid 1.5.3 will be in Fedora
+            # pylint: disable=not-context-manager
             with self._lock:
                 self._contained_screens.remove(signal_source)
         except KeyError:
@@ -126,5 +130,7 @@ class EventQueue(object):
         :return: True if signal source belongs to this queue.
         :rtype: bool
         """
+        # TODO: Remove when python3-astroid 1.5.3 will be in Fedora
+        # pylint: disable=not-context-manager
         with self._lock:
             return signal_source in self._contained_screens
