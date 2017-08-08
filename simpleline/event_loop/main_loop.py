@@ -43,6 +43,8 @@ class MainLoop(AbstractEventLoop):
         self._event_queues = [self._active_queue]
         self._processed_signals = TicketMachine()
         self._lock = Lock()
+        # end most inner loop politely by setting to False
+        self._run_loop = True
 
     def register_signal_handler(self, signal, callback, data=None):
         """Register a callback which will be called when message "event"
@@ -80,7 +82,9 @@ class MainLoop(AbstractEventLoop):
         needed to keep nested mainloop working.
         """
         log.debug("Starting main loop")
+        self._run_loop = True
         self._mainloop()
+
         if self._quit_callback:
             self._quit_callback()
 
@@ -122,7 +126,7 @@ class MainLoop(AbstractEventLoop):
                 log.error("No more event queues to work with!")
                 raise ExitMainLoop()
 
-        raise ExitMainLoop()
+        self._run_loop = False
 
     def enqueue_signal(self, signal):
         """Enqueue new event for processing.
@@ -149,12 +153,15 @@ class MainLoop(AbstractEventLoop):
         """Single mainloop. Do not use directly, start the application using run()."""
         # run infinite loop
         # this will always wait on input processing or similar so it is not busy waiting
-        while True:
+        while self._run_loop:
             try:
                 self.process_signals()
             # end just this loop
             except ExitMainLoop:
                 break
+
+        # set back to True to leave outer loop working
+        self._run_loop = True
 
     def process_signals(self, return_after=None):
         """This method processes incoming async messages.

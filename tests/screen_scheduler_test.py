@@ -52,17 +52,19 @@ class ScreenScheduler_TestCase(unittest.TestCase):
 
         schedule_screen_and_run(screen)
 
-        self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_START_RENDER)
-        self.assertEqual(modal_screen.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_START_RENDER)
+        self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_RENDER)
+        self.assertEqual(modal_screen.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_RENDER)
 
     def test_switch_screen_modal_in_refresh(self, _):
+        import logging
+        logging.basicConfig(filename="log.txt", level=logging.DEBUG)
         modal_screen = ModalTestScreen()
         screen = ModalTestScreen(modal_screen_refresh=modal_screen)
 
         schedule_screen_and_run(screen)
 
-        self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_START_REFRESH)
-        self.assertEqual(modal_screen.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_START_REFRESH)
+        self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_REFRESH)
+        self.assertEqual(modal_screen.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_REFRESH)
 
     def test_switch_screen_modal_refresh_and_render(self, _):
         modal_refresh = ModalTestScreen()
@@ -71,9 +73,9 @@ class ScreenScheduler_TestCase(unittest.TestCase):
 
         schedule_screen_and_run(screen)
 
-        self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_START_RENDER)
-        self.assertEqual(modal_refresh.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_START_REFRESH)
-        self.assertEqual(modal_render.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_START_RENDER)
+        self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_RENDER)
+        self.assertEqual(modal_refresh.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_REFRESH)
+        self.assertEqual(modal_render.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_RENDER)
 
     def test_switch_screen_modal_render_recursive(self, _):
         modal_render_inner = ModalTestScreen()
@@ -82,10 +84,10 @@ class ScreenScheduler_TestCase(unittest.TestCase):
 
         schedule_screen_and_run(screen)
 
-        self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_START_RENDER)
-        # outer modal screen has AFTER_MODAL_START_RENDER because it was set before by inner loop
-        self.assertEqual(modal_render_outer.copied_modal_counter, ModalTestScreen.AFTER_MODAL_START_RENDER)
-        self.assertEqual(modal_render_inner.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_START_RENDER)
+        self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_RENDER)
+        # outer modal screen has AFTER_MODAL_RENDER because it was set before by inner loop
+        self.assertEqual(modal_render_outer.copied_modal_counter, ModalTestScreen.AFTER_MODAL_RENDER)
+        self.assertEqual(modal_render_inner.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_RENDER)
 
     @mock.patch('simpleline.render.io_manager.InOutManager.get_user_input')
     def test_switch_screen_modal_input_order(self, mock_input, mock_stdout):
@@ -134,10 +136,10 @@ class ModalTestScreen(UIScreen):
     """
 
     INIT = 0
-    BEFORE_MODAL_START_REFRESH = 1
-    AFTER_MODAL_START_REFRESH = 2
-    BEFORE_MODAL_START_RENDER = 3
-    AFTER_MODAL_START_RENDER = 4
+    BEFORE_MODAL_REFRESH = 1
+    AFTER_MODAL_REFRESH = 2
+    BEFORE_MODAL_RENDER = 3
+    AFTER_MODAL_RENDER = 4
 
     modal_counter = 0
 
@@ -153,17 +155,17 @@ class ModalTestScreen(UIScreen):
         super().refresh(args)
         if self._modal_screen_refresh is not None:
             # Start a new modal screen
-            ModalTestScreen.modal_counter = self.BEFORE_MODAL_START_REFRESH
+            ModalTestScreen.modal_counter = self.BEFORE_MODAL_REFRESH
             self._modal_screen_refresh.push_screen_modal()
-            ModalTestScreen.modal_counter = self.AFTER_MODAL_START_REFRESH
+            ModalTestScreen.modal_counter = self.AFTER_MODAL_REFRESH
 
     def show_all(self):
         super().show_all()
         if self._modal_screen_render is not None:
             # Start new modal screen
-            ModalTestScreen.modal_counter = self.BEFORE_MODAL_START_RENDER
+            ModalTestScreen.modal_counter = self.BEFORE_MODAL_RENDER
             self._modal_screen_render.push_screen_modal()
-            ModalTestScreen.modal_counter = self.AFTER_MODAL_START_RENDER
+            ModalTestScreen.modal_counter = self.AFTER_MODAL_RENDER
 
         self.copied_modal_counter = ModalTestScreen.modal_counter
         self.close()
