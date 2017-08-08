@@ -59,6 +59,10 @@ class UIScreen(SignalHandler, SchedulerHandler):
         # indexing starts with 0
         self._page = 0
 
+    def __str__(self):
+        """For easier logging."""
+        return self.__class__.__name__
+
     @property
     def title(self):
         """Screen title."""

@@ -25,6 +25,10 @@ from simpleline.event_loop import AbstractEventLoop, ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal
 from simpleline.event_loop.event_queue import EventQueue
 
+from simpleline.logging import get_simpleline_logger
+
+log = get_simpleline_logger()
+
 
 class MainLoop(AbstractEventLoop):
     """Default main event loop for the Simpleline.
@@ -75,6 +79,7 @@ class MainLoop(AbstractEventLoop):
         Do not use self.mainloop() directly as run() handles all the required exceptions
         needed to keep nested mainloop working.
         """
+        log.debug("Starting main loop")
         self._mainloop()
         if self._quit_callback:
             self._quit_callback()
@@ -87,6 +92,7 @@ class MainLoop(AbstractEventLoop):
         :param signal: signal passed to the new event loop
         :type signal: `AbstractSignal` based class
         """
+        log.debug("Executing inner loop")
         self._active_queue = EventQueue()
 
         # TODO: Remove when python3-astroid 1.5.3 will be in Fedora
@@ -96,12 +102,14 @@ class MainLoop(AbstractEventLoop):
 
         self.enqueue_signal(signal)
         self._mainloop()
+        log.debug("Inner loop ended")
 
     def close_loop(self):
         """Close active event loop.
 
         Close an event loop created by the `execute_new_loop()` method.
         """
+        log.debug("Closing inner loop")
         self.process_signals()
 
         # TODO: Remove when python3-astroid 1.5.3 will be in Fedora
@@ -111,6 +119,7 @@ class MainLoop(AbstractEventLoop):
             try:
                 self._active_queue = self._event_queues[-1]
             except IndexError:
+                log.error("No more event queues to work with!")
                 raise ExitMainLoop()
 
         raise ExitMainLoop()
@@ -126,6 +135,7 @@ class MainLoop(AbstractEventLoop):
         :param signal: event which you want to add to the event queue for processing
         :type signal: instance based on AbstractEvent class
         """
+        log.debug("New signal %s enqueued with source %s", signal, signal.source.__class__.__name__)
         # TODO: Remove when python3-astroid 1.5.3 will be in Fedora
         # pylint: disable=not-context-manager
         with self._lock:
@@ -177,6 +187,7 @@ class MainLoop(AbstractEventLoop):
                 return
 
     def _process_signal(self, signal):
+        log.debug("Processing signal %s", signal)
         if type(signal) in self._handlers:
             for handler_data in self._handlers[type(signal)]:
                 try:

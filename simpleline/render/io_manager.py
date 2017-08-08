@@ -31,6 +31,10 @@ from simpleline.event_loop.signals import ExceptionSignal, InputReadySignal
 from simpleline.render.prompt import Prompt
 from simpleline.render.widgets import TextWidget
 
+from simpleline.logging import get_simpleline_logger
+
+log = get_simpleline_logger()
+
 
 RAW_INPUT_LOCK = threading.Lock()
 
@@ -257,6 +261,9 @@ class InOutManager(object):
         # global quit command
         if key == Prompt.QUIT:
             return UserInputResult.QUIT
+
+        if key is None:
+            log.warning("Returned key from screen is None. This could be missing return in a screen input method?")
 
         return UserInputResult.ERROR
 
