@@ -23,8 +23,8 @@ from io import StringIO
 from unittest import mock
 
 from simpleline import App
-from simpleline.render import InputState, RenderUnexpectedError
-from simpleline.render.screen import UIScreen
+from simpleline.render import RenderUnexpectedError
+from simpleline.render.screen import UIScreen, InputState
 from tests import schedule_screen_and_run, calculate_separator
 
 

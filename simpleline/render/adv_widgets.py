@@ -20,9 +20,9 @@
 import sys
 
 from simpleline import App
-from simpleline.render import widgets, InputState
+from simpleline.render import widgets
 from simpleline.render.prompt import Prompt
-from simpleline.render.screen import UIScreen
+from simpleline.render.screen import UIScreen, InputState
 from simpleline.utils.i18n import _, N_, C_
 
 

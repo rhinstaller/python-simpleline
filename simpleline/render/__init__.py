@@ -19,7 +19,6 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
-from enum import Enum
 from simpleline.errors import SimplelineError
 
 
@@ -29,8 +28,3 @@ class RenderError(SimplelineError):
 
 class RenderUnexpectedError(RenderError):
     pass
-
-
-class InputState(Enum):
-    PROCESSED = True
-    DISCARDED = False
