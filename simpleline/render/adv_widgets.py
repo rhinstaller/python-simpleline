@@ -29,21 +29,19 @@ from simpleline.utils.i18n import _, N_, C_
 class ErrorDialog(UIScreen):
     """Dialog screen for reporting errors to user."""
 
-    title = N_("Error")
-
     def __init__(self, message):
         """
         :param message: the message to show to the user
         :type message: str
         """
         super().__init__()
+        self.title = N_("Error")
         self._message = message
 
     def refresh(self, args=None):
         super().refresh(args)
         text = widgets.TextWidget(self._message)
-        self.window.add(widgets.CenterWidget(text))
-        self.window.add_separator()
+        self.window.add_with_separator(widgets.CenterWidget(text))
 
     def prompt(self, args=None):
         return Prompt(_("Press %s to exit") % Prompt.ENTER)
@@ -59,22 +57,20 @@ class ErrorDialog(UIScreen):
 class PasswordDialog(UIScreen):
     """Dialog screen for password input."""
 
-    title = N_("Password")
-
     def __init__(self, message=None):
         """
         :param message: password prompt question
         :type message: string
         """
         super().__init__()
+        self.title = N_("Password")
         self._message = message or _("Enter your passphrase")
         self._password = None
 
     def refresh(self, args=None):
         super().refresh(args)
         text = widgets.TextWidget(self._message)
-        self.window.add(widgets.CenterWidget(text))
-        self.window.add_separator()
+        self.window.add_with_separator(widgets.CenterWidget(text))
 
     def prompt(self, args=None):
         self._password = App.get_scheduler().io_manager.get_user_input(_("Passphrase: "), hidden=True)
@@ -96,15 +92,13 @@ class PasswordDialog(UIScreen):
         if key:
             self._password = key
             self.close()
-            return True
+            return InputState.PROCESSED
         else:
-            return False
+            return InputState.DISCARDED
 
 
 class YesNoDialog(UIScreen):
     """Dialog screen for Yes - No questions."""
-
-    title = N_("Question")
 
     def __init__(self, message):
         """
@@ -112,14 +106,14 @@ class YesNoDialog(UIScreen):
         :type message: unicode
         """
         super().__init__()
+        self.title = N_("Question")
         self._message = message
         self._response = None
 
     def refresh(self, args=None):
         super().refresh(args)
         text = widgets.TextWidget(self._message)
-        self.window.add(widgets.CenterWidget(text))
-        self.window.add_separator()
+        self.window.add_with_separator(widgets.CenterWidget(text))
 
     def prompt(self, args=None):
         return Prompt(_("Please respond '%(yes)s' or '%(no)s'") % {
@@ -134,16 +128,16 @@ class YesNoDialog(UIScreen):
         if key == C_('TUI|Spoke Navigation', 'yes'):
             self._response = True
             self.close()
-            return None
+            return InputState.PROCESSED
 
         # TRANSLATORS: 'no' as negative reply
         elif key == C_('TUI|Spoke Navigation', 'no'):
             self._response = False
             self.close()
-            return None
+            return InputState.PROCESSED
 
         else:
-            return False
+            return InputState.DISCARDED
 
     @property
     def answer(self):
@@ -173,8 +167,7 @@ class HelpScreen(UIScreen):
             with open(self.help_path, 'r') as f:
                 help_message = f.read()
 
-        self.window.add(widgets.TextWidget(help_message))
-        self.window.add_separator()
+        self.window.add_with_separator(widgets.TextWidget(help_message))
 
     def input(self, args, key):
         """ Handle user input. """
