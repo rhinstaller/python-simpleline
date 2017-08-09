@@ -90,10 +90,7 @@ class ScreenData(object):
 
     def __init__(self, ui_screen, args=None, execute_new_loop=False):
         self.ui_screen = ui_screen
-        if args is None:
-            self.args = []
-        else:
-            self.args = args
+        self.args = args
         self.execute_new_loop = execute_new_loop
 
     def __str__(self):
