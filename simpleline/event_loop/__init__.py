@@ -100,14 +100,19 @@ class AbstractEventLoop(metaclass=ABCMeta):
 
     @abstractmethod
     def process_signals(self, return_after=None):
-        """Processes incoming async messages and returns when a specific message is encountered
-        or when the queue_instance is empty.
+        """This method processes incoming async messages.
 
-        :param return_after: If `return_after` message was specified, the received message is returned.
-        :type return_after: Value returned by `Event.id`.
+        Process signals enqueued by the `self.enqueue_signal()` method. Call handlers registered to the signals by
+        the `self.register_signal_handler()` method.
 
-        If the message does not fit `return_after`, but handlers are defined then it processes all handlers for
-        this message.
+        When `return_after` is specified then wait to the point when this signal is processed. This could be after
+        some more signals was processed because of recursion in calls.
+        Without `return_after` parameter this method will return after all queued signals will be processed.
+
+        The method is NOT thread safe!
+
+        :param return_after: Wait on this signal to be processed.
+        :type return_after: Class of the signal.
         """
         pass
 

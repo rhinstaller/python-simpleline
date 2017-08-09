@@ -19,6 +19,8 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
+from threading import Lock
+
 from simpleline.event_loop import AbstractEventLoop, ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal
 from simpleline.event_loop.event_queue import EventQueue
@@ -35,6 +37,8 @@ class MainLoop(AbstractEventLoop):
         self._handlers = {}
         self._active_queue = EventQueue()
         self._event_queues = [self._active_queue]
+        self._processed_signals = TicketMachine()
+        self._lock = Lock()
 
     def register_signal_handler(self, signal, callback, data=None):
         """Register a callback which will be called when message "event"
@@ -84,7 +88,12 @@ class MainLoop(AbstractEventLoop):
         :type signal: `AbstractSignal` based class
         """
         self._active_queue = EventQueue()
-        self._event_queues.append(self._active_queue)
+
+        # TODO: Remove when python3-astroid 1.5.3 will be in Fedora
+        # pylint: disable=not-context-manager
+        with self._lock:
+            self._event_queues.append(self._active_queue)
+
         self.enqueue_signal(signal)
         self._mainloop()
 
@@ -94,11 +103,15 @@ class MainLoop(AbstractEventLoop):
         Close an event loop created by the `execute_new_loop()` method.
         """
         self.process_signals()
-        self._event_queues.pop()
-        try:
-            self._active_queue = self._event_queues[-1]
-        except IndexError:
-            raise ExitMainLoop()
+
+        # TODO: Remove when python3-astroid 1.5.3 will be in Fedora
+        # pylint: disable=not-context-manager
+        with self._lock:
+            self._event_queues.pop()
+            try:
+                self._active_queue = self._event_queues[-1]
+            except IndexError:
+                raise ExitMainLoop()
 
         raise ExitMainLoop()
 
@@ -108,12 +121,18 @@ class MainLoop(AbstractEventLoop):
         Enqueue signal to the most inner queue (nearest to the active queue) where the `signal.source` belongs.
         If it belongs nowhere enqueue it to the active one.
 
+        This method is thread safe.
+
         :param signal: event which you want to add to the event queue for processing
         :type signal: instance based on AbstractEvent class
         """
-        for queue in reversed(self._event_queues):
-            if queue.enqueue_if_source_belongs(signal, signal.source):
-                return
+        # TODO: Remove when python3-astroid 1.5.3 will be in Fedora
+        # pylint: disable=not-context-manager
+        with self._lock:
+            for queue in reversed(self._event_queues):
+                if queue.enqueue_if_source_belongs(signal, signal.source):
+                    return
+
         self._active_queue.enqueue(signal)
 
     def _mainloop(self):
@@ -128,29 +147,64 @@ class MainLoop(AbstractEventLoop):
                 break
 
     def process_signals(self, return_after=None):
-        """This method processes incoming async messages and returns
-        when a specific message is processed or when the queue_instance
-        is empty.
+        """This method processes incoming async messages.
 
-        :param return_after: return after the signal was processed
-        :type return_after: class of the signal we are waiting for
+        Process signals enqueued by the `self.enqueue_signal()` method. Call handlers registered to the signals by
+        the `self.register_signal_handler()` method.
+
+        When `return_after` is specified then wait to the point when this signal is processed. This could be after
+        some more signals was processed because of recursion in calls.
+        Without `return_after` parameter this method will return after all queued signals will be processed.
+
+        The method is NOT thread safe!
+
+        :param return_after: Wait on this signal to be processed.
+        :type return_after: Class of the signal.
         """
+        # get unique ID when waiting for the signal
+        unique_id = self._register_wait_on_signal(return_after)
+
         while not self._active_queue.empty() or return_after is not None:
             signal = self._active_queue.get()
-            if type(signal) in self._handlers:
-                for handler_data in self._handlers[type(signal)]:
-                    try:
-                        handler_data.callback(signal, handler_data.data)
-                    except ExitMainLoop:
-                        raise
-            # if an exception is not processed by handlers re-raise it here
-            elif type(signal) is ExceptionSignal:
-                self._raise_exception(signal)
-            if return_after is not None and isinstance(signal, return_after):
+            # all who is waiting on this signal can stop waiting
+            self._mark_signal_processed(signal)
+
+            # do the signal processing (call handlers)
+            self._process_signal(signal)
+
+            # was our signal processed if yes, return this method
+            if self._check_if_signal_processed(return_after, unique_id):
                 return
+
+    def _process_signal(self, signal):
+        if type(signal) in self._handlers:
+            for handler_data in self._handlers[type(signal)]:
+                try:
+                    handler_data.callback(signal, handler_data.data)
+                except ExitMainLoop:
+                    raise
+        elif type(signal) is ExceptionSignal:
+            self._raise_exception(signal)
 
     def _raise_exception(self, signal):
         raise signal.exception_info[0] from signal.exception_info[1]
+
+    def _register_wait_on_signal(self, wait_on_signal):
+        if wait_on_signal is None:
+            return -1
+
+        return self._processed_signals.take_ticket(wait_on_signal.__name__)
+
+    def _mark_signal_processed(self, signal):
+        self._processed_signals.mark_line_to_go(signal.__class__.__name__)
+
+    def _check_if_signal_processed(self, wait_on_signal, unique_id):
+        if wait_on_signal is None:
+            # return false because we are not waiting on specific signal
+            # continue with signal processing
+            return False
+
+        return self._processed_signals.check_ticket(wait_on_signal.__name__, unique_id)
 
 
 class EventHandler(object):
@@ -159,3 +213,58 @@ class EventHandler(object):
     def __init__(self, callback, data):
         self.callback = callback
         self.data = data
+
+
+class TicketMachine(object):
+    """Hold signals processed by the event loop if someone wait on them.
+
+    This is useful when recursive process events will skip required signal.
+    """
+
+    def __init__(self):
+        self._lines = {}
+        self._counter = 0
+
+    def take_ticket(self, line_id):
+        """Take ticket (id) and go line (processing events).
+
+        Use `check_ticket` if you are ready to go.
+
+        :param line_id: Line where you are waiting.
+        :type line_id: Anything.
+        """
+        obj_id = self._counter
+        if line_id not in self._lines:
+            self._lines[line_id] = {obj_id: False}
+        else:
+            self._lines[line_id][obj_id] = False
+
+        self._counter += 1
+        return obj_id
+
+    def check_ticket(self, line, unique_id):
+        """Check if you are ready to go.
+
+        If True the unique_id is not valid anymore.
+
+        :param unique_id: Your id used to identify you in the line.
+        :type unique_id: int
+
+        :param line: Line where you are waiting.
+        :type line: Anything.
+        """
+        if self._lines[line][unique_id]:
+            return self._lines[line].pop(unique_id)
+
+    def mark_line_to_go(self, line):
+        """All in the `line` are ready to go.
+
+        Mark all tickets in the line as True.
+
+        :param line: Line which should processed.
+        :type line: Anything.
+        """
+        if line in self._lines:
+            our_line = self._lines[line]
+            for key in our_line:
+                our_line[key] = True

@@ -289,13 +289,11 @@ class InputErrorTestScreen(UIScreen):
         self._error_threshold = error_threshold
 
     def input(self, args, key):
-        print("key", key)
         if self.error_counter == self._error_threshold:
             # let "q" propagate to quit
             return key
         else:
             self.error_counter += 1
-            print("Discarded")
             return InputState.DISCARDED
 
     def show_all(self):

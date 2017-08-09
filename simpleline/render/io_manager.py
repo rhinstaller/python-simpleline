@@ -19,8 +19,6 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
-
-import queue
 import threading
 import sys
 import getpass
@@ -54,6 +52,10 @@ class InOutManager(object):
         self._width = 80
         self._spacer = ""
         self._calculate_spacer()
+        self._user_input = ""
+
+        # save user input
+        self._event_loop.register_signal_handler(InputReadySignal, self._user_input_received_handler)
 
     def _calculate_spacer(self):
         self._spacer = "\n".join(2 * [self._width * "="])
@@ -82,6 +84,9 @@ class InOutManager(object):
         """
         errors = self._input_error_counter % self._input_error_threshold
         return errors == 0
+
+    def _user_input_received_handler(self, signal, args):
+        self._user_input = signal.data
 
     def set_pass_func(self, getpass_func):
         """Set a function for getting passwords."""
@@ -138,28 +143,52 @@ class InOutManager(object):
         return result
 
     def get_user_input(self, prompt, hidden=False):
-        """This method reads one input from user. Its basic form has only one
-        line, but we might need to override it for more complex apps or testing.
+        """Reads user input.
+
+        You can wait on user input only once. Beware signals are processed when you
+        are waiting for an input.
+
+        :param prompt: Ask user what you want to get.
+        :type prompt: String or Prompt instance.
+
+        :param hidden: Hide echo of the keys from user.
+        :type hidden: bool
+
+        :returns: User input.
+        :rtype: str
         """
         if self._input_thread is not None and self._input_thread.is_alive():
             raise KeyError("Can't run multiple input threads at the same time!")
 
-        input_queue = queue.Queue()
+        return self._get_user_input(prompt, hidden)
+
+    def get_user_input_without_check(self, prompt, hidden=False):
+        """Reads user input without checking if someone is already waiting for input.
+
+        This works the same as `get_user_input` but ignore checks if there is somebody waiting on input.
+        When the user input is taken, all the waiting threads will get the same input.
+
+        WARNING:
+            This may be necessary in some situations, however, it can cause errors which are hard to find!
+
+        See `get_user_input()` method.
+        """
+        return self._get_user_input(prompt, hidden)
+
+    def _get_user_input(self, prompt, hidden):
         self._input_thread = threading.Thread(target=self._thread_input, name="InputThread",
-                                              args=(input_queue, prompt, hidden))
+                                              args=(prompt, hidden))
         self._input_thread.daemon = True
         self._input_thread.start()
-        self._event_loop.process_signals(return_after=InputReadySignal)
-        return input_queue.get()  # return the user input
+        self._event_loop.process_signals(InputReadySignal)
+        self._input_thread.join()
+        return self._user_input  # return the user input
 
-    def _thread_input(self, queue_instance, prompt, hidden):
+    def _thread_input(self, prompt, hidden):
         """This method is responsible for interruptable user input.
 
         It is expected to be used in a thread started on demand
         and returns the input via the communication Queue.
-
-        :param queue_instance: communication queue_instance to be used
-        :type queue_instance: queue.Queue instance
 
         :param prompt: prompt to be displayed
         :type prompt: Prompt instance
@@ -187,8 +216,7 @@ class InOutManager(object):
                 finally:
                     RAW_INPUT_LOCK.release()
 
-        self._event_loop.enqueue_signal(InputReadySignal(self))
-        queue_instance.put(data)
+        self._event_loop.enqueue_signal(InputReadySignal(self, data))
 
     def _get_input(self):
         return input()
