@@ -140,6 +140,10 @@ class AbstractSignal(metaclass=ABCMeta):
         """Order Signal classes by priority."""
         return self._priority == other.priority
 
+    def __str__(self):
+        """For easier logging."""
+        return self.__class__.__name__
+
     @property
     def priority(self):
         """Priority of this event.

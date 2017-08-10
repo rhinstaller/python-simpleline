@@ -28,6 +28,10 @@ from simpleline.render import RenderUnexpectedError
 from simpleline.render.io_manager import InOutManager, UserInputResult
 from simpleline.render.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
 
+from simpleline.logging import get_simpleline_logger
+
+log = get_simpleline_logger()
+
 RAW_INPUT_LOCK = threading.Lock()
 
 
@@ -101,6 +105,7 @@ class ScreenScheduler(object):
         :param args: optional argument, please see switch_screen for details
         :type args: anything
         """
+        log.debug("Scheduling screen %s", ui_screen)
         screen = ScreenData(ui_screen, args)
         self._screen_stack.add_first(screen)
 
@@ -113,6 +118,7 @@ class ScreenScheduler(object):
                      (can be used to select what item should be displayed or so)
         :type args: anything
         """
+        log.debug("Replacing screen %s", ui_screen)
         try:
             execute_new_loop = self._screen_stack.pop().execute_new_loop
         except ScreenStackEmptyException:
@@ -133,6 +139,7 @@ class ScreenScheduler(object):
         :param args: optional argument
         :type args: anything
         """
+        log.debug("Pushing screen %s to stack", ui_screen)
         screen = ScreenData(ui_screen, args, False)
         self._screen_stack.append(screen)
         self.redraw()
@@ -149,6 +156,7 @@ class ScreenScheduler(object):
         :param args: optional argument, please see switch_screen for details
         :type args: anything
         """
+        log.debug("Pushing modal screen %s to stack", ui_screen)
         screen = ScreenData(ui_screen, args, True)
         self._screen_stack.append(screen)
         # only new events will be processed now
@@ -164,6 +172,7 @@ class ScreenScheduler(object):
         Next screen from the stack is then displayed.
         """
         screen = self._screen_stack.pop()
+        log.debug("Closing screen %s from %s", screen, closed_from)
 
         # User can react when screen is closing
         screen.ui_screen.closed()
@@ -194,12 +203,15 @@ class ScreenScheduler(object):
         """
         top_screen = self._get_last_screen()
 
+        log.debug("Processing screen %s", top_screen)
+
         # this screen is used first time (call setup() method)
         if not top_screen.ui_screen.screen_ready:
             if not top_screen.ui_screen.setup(top_screen.args):
                 # remove the screen and skip if setup went wrong
                 self._screen_stack.pop()
                 self.redraw()
+                log.warning("Screen %s setup wasn't successful", top_screen)
                 return
 
         # get the widget tree from the screen and show it in the screen
@@ -215,6 +227,7 @@ class ScreenScheduler(object):
             self.io_manager.draw(top_screen)
 
             if top_screen.ui_screen.input_required:
+                log.debug("Input is required by %s screen", top_screen)
                 self.input_required()
         except ExitMainLoop:
             raise
@@ -250,6 +263,7 @@ class ScreenScheduler(object):
             if self._io_manager.input_error_threshold_exceeded:
                 self.redraw()
             else:
+                log.debug("Input was not successful, ask for new input.")
                 self.input_required()
         else:
             if input_result == UserInputResult.PROCESSED:
