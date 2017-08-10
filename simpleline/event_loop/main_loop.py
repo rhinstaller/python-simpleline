@@ -83,7 +83,13 @@ class MainLoop(AbstractEventLoop):
         """
         log.debug("Starting main loop")
         self._run_loop = True
-        self._mainloop()
+
+        try:
+            self._mainloop()
+        except ExitMainLoop:
+            pass
+
+        log.debug("Main loop ended. Running callback if set.")
 
         if self._quit_callback:
             self._quit_callback()
@@ -106,7 +112,7 @@ class MainLoop(AbstractEventLoop):
 
         self.enqueue_signal(signal)
         self._mainloop()
-        log.debug("Inner loop ended")
+        log.debug("Inner loop is closed")
 
     def close_loop(self):
         """Close active event loop.
@@ -152,13 +158,9 @@ class MainLoop(AbstractEventLoop):
     def _mainloop(self):
         """Single mainloop. Do not use directly, start the application using run()."""
         # run infinite loop
-        # this will always wait on input processing or similar so it is not busy waiting
+        # this will always wait on input processing or similar so it should not busy waiting
         while self._run_loop:
-            try:
-                self.process_signals()
-            # end just this loop
-            except ExitMainLoop:
-                break
+            self.process_signals()
 
         # set back to True to leave outer loop working
         self._run_loop = True
