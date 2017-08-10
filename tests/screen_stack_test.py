@@ -118,7 +118,7 @@ class ScreenData_TestCase(unittest.TestCase):
     def test_screen_data(self):
         self._prepare()
         screen = ScreenData(self.ui_screen)
-        self._screen_check(screen, self.ui_screen, [], False)
+        self._screen_check(screen, self.ui_screen, None, False)
 
     def test_screen_data_with_args(self):
         self._prepare()
@@ -132,10 +132,10 @@ class ScreenData_TestCase(unittest.TestCase):
     def test_screen_data_with_execute_loop(self):
         self._prepare()
         screen = ScreenData(self.ui_screen, execute_new_loop=True)
-        self._screen_check(screen, self.ui_screen, [], True)
+        self._screen_check(screen, self.ui_screen, None, True)
 
         screen2 = ScreenData(self.ui_screen, execute_new_loop=False)
-        self._screen_check(screen2, self.ui_screen, [], False)
+        self._screen_check(screen2, self.ui_screen, None, False)
 
     def test_screen_data_with_args_and_execute_loop(self):
         self._prepare()

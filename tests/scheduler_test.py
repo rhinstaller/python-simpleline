@@ -77,7 +77,7 @@ class Scheduler_TestCase(unittest.TestCase):
         self.scheduler.schedule_screen(screen)
         test_screen = self.pop_last_item(False)
         self.assertEqual(test_screen.ui_screen, screen)
-        self.assertEqual(len(test_screen.args), 0)  # empty field - no arguments
+        self.assertEqual(test_screen.args, None)  # empty field - no arguments
         self.assertFalse(test_screen.execute_new_loop)
 
         # Schedule another screen, new one will be added to the bottom of the stack
@@ -140,7 +140,7 @@ class Scheduler_TestCase(unittest.TestCase):
 
         test_screen = self.pop_last_item()
         self.assertEqual(test_screen.ui_screen, new_screen)
-        self.assertEqual(test_screen.args, [])
+        self.assertEqual(test_screen.args, None)
         self.assertEqual(test_screen.execute_new_loop, False)
 
         # We popped the new_screen so the old screen should stay here
@@ -174,7 +174,7 @@ class Scheduler_TestCase(unittest.TestCase):
 
         test_screen = self.pop_last_item()
         self.assertEqual(test_screen.ui_screen, new_screen)
-        self.assertEqual(test_screen.args, [])
+        self.assertEqual(test_screen.args, None)
         self.assertEqual(test_screen.execute_new_loop, True)
 
     @mock.patch('simpleline.render.io_manager.InOutManager.draw')
