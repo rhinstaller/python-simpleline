@@ -36,7 +36,7 @@ class UIScreen(SignalHandler, SchedulerHandler):
     with the familiar API.
     """
 
-    def __init__(self, title=None, screen_height=25):
+    def __init__(self, title=None, screen_height=30):
         """ Constructor of the TUI screen.
 
         :param title: Title line of the screen.
