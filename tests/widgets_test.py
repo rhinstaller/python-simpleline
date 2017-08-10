@@ -389,12 +389,20 @@ class WidgetProcessing_TestCase(unittest.TestCase):
         return '\n'.join(2 * [80 * '='])
 
     def _expected_output(self, text, widget_height=20):
-        text = text + '\n'
+
+        # two lines are always added to the printed size
+        prompt_height = 2
+        real_widget_height = widget_height - prompt_height
+
         lines = text.split('\n')
-        if len(lines) >= widget_height:
-            lines.insert(widget_height - 1, "Press %s to continue: \n" % Prompt.ENTER)
+
+        # add Press ENTER... to the text
+        if len(lines) - 1 >= real_widget_height:
+            lines.insert(real_widget_height, "\nPress %s to continue: \n" % Prompt.ENTER)
+
         msg = self._calculate_spacer() + '\n'
         msg += "\n".join(lines)
+        msg += "\n"
         return msg
 
     def test_draw_simple_widget(self, out_mock, in_mock):
@@ -417,18 +425,6 @@ class WidgetProcessing_TestCase(unittest.TestCase):
 
         self.assertEqual(self._expected_output(widget_text), out_mock.getvalue())
 
-    def test_widget_too_high(self, out_mock, in_mock):
-        widget_text = "Testing\n\n\nWhy not?"
-        in_mock.return_value = "\n"
-        in_mock.side_effect = lambda: print('\n')
-        screen = ScreenWithWidget(widget_text, height=4)
-
-        App.initialize()
-        App.get_scheduler().schedule_screen(screen)
-        App.run()
-
-        self.assertEqual(self._expected_output(widget_text, 4), out_mock.getvalue())
-
     def test_list_widget_input_processing(self, out_mock, in_mock):
         # call first container callback
         in_mock.return_value = "2"
@@ -440,6 +436,37 @@ class WidgetProcessing_TestCase(unittest.TestCase):
         App.run()
 
         self.assertEqual(1, screen.container_callback_input)
+
+    def test_widget_too_high(self, out_mock, in_mock):
+        in_mock.return_value = "\n"
+        in_mock.side_effect = lambda: print('\n')
+        widget_text = ("Line\n"
+                       "Line2\n"
+                       "Line3\n"
+                       "Line4\n"
+                       "Line5")
+        # Screen height take into account also 2 lines for prompt
+        screen = ScreenWithWidget(widget_text, height=6)
+
+        App.initialize()
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
+
+        self.assertEqual(self._expected_output(widget_text, widget_height=6), out_mock.getvalue())
+
+    def test_widget_is_exactly_height_to_print(self, out_mock, in_mock):
+        widget_text = ("Line\n"
+                       "Line2\n"
+                       "Line3\n"
+                       "Line4")
+        # Screen height take into account also 2 lines for prompt
+        screen = ScreenWithWidget(widget_text, height=6)
+
+        App.initialize()
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
+
+        self.assertEqual(self._expected_output(widget_text, widget_height=6), out_mock.getvalue())
 
 
 class ScreenWithWidget(UIScreen):
