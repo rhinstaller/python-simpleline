@@ -184,7 +184,9 @@ class ScreenScheduler(object):
         if screen.execute_new_loop:
             self._event_loop.close_loop()
 
-        if not self._screen_stack.empty():
+        # redraw screen if there is what to redraw
+        # and if it is not modal screen (modal screen parent is blocked)
+        if not self._screen_stack.empty() and not screen.execute_new_loop:
             self.redraw()
         else:
             raise ExitMainLoop()
