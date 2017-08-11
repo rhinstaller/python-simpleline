@@ -181,7 +181,7 @@ class MainLoop(AbstractEventLoop):
         # get unique ID when waiting for the signal
         unique_id = self._register_wait_on_signal(return_after)
 
-        while not self._active_queue.empty() or return_after is not None:
+        while self._can_process_signals() or return_after is not None:
             signal = self._active_queue.get()
             # all who is waiting on this signal can stop waiting
             self._mark_signal_processed(signal)
@@ -192,6 +192,10 @@ class MainLoop(AbstractEventLoop):
             # was our signal processed if yes, return this method
             if self._check_if_signal_processed(return_after, unique_id):
                 return
+
+    def _can_process_signals(self):
+        """To proceed signal processing, these conditions must be true."""
+        return not self._active_queue.empty() and self._run_loop
 
     def _process_signal(self, signal):
         log.debug("Processing signal %s", signal)
