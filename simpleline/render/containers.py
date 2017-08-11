@@ -104,8 +104,8 @@ class Container(Widget):
         res = self._key_pattern.translate_input_to_widget_id(key)
         if res is not None:
             try:
-                container = self._items[res]
-                container.callback(container.data)
+                item = self._items[res]
+                item.callback(item, item.data)
                 return True
             except IndexError:  # container widget with this id doesn't exists
                 return False
