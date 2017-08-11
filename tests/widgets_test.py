@@ -509,5 +509,5 @@ class ScreenWithListWidget(UIScreen):
 
         return InputState.DISCARDED
 
-    def _callback(self, data):
+    def _callback(self, item, data):
         self.container_callback_input = data
