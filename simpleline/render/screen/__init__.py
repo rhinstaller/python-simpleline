@@ -36,7 +36,7 @@ class UIScreen(SignalHandler, SchedulerHandler):
     with the familiar API.
     """
 
-    def __init__(self, title=None, screen_height=25):
+    def __init__(self, title=None, screen_height=30):
         """ Constructor of the TUI screen.
 
         :param title: Title line of the screen.
@@ -157,7 +157,10 @@ class UIScreen(SignalHandler, SchedulerHandler):
         lines = widget.get_lines()
         num_lines = len(lines)
 
-        if num_lines < self._screen_height - 2:
+        prompt_height = 2
+        real_screen_height = self._screen_height - prompt_height
+
+        if num_lines < real_screen_height:
             # widget plus prompt are shorter than screen height, just print the widget
             print(u"\n".join(lines))
             return
@@ -165,7 +168,7 @@ class UIScreen(SignalHandler, SchedulerHandler):
         # long widget, print it in steps and prompt user to continue
         last_line = num_lines - 1
         while pos <= last_line:
-            if pos + self._screen_height - 2 > last_line:
+            if pos + real_screen_height > last_line:
                 # enough space to print the rest of the widget plus regular
                 # prompt (2 lines)
                 for line in lines[pos:]:
@@ -173,11 +176,11 @@ class UIScreen(SignalHandler, SchedulerHandler):
                 pos += self._screen_height - 1
             else:
                 # print part with a prompt to continue
-                for line in lines[pos:(pos + self._screen_height - 2)]:
+                for line in lines[pos:(pos + real_screen_height)]:
                     print(line)
                 custom_prompt = Prompt(_("\nPress %s to continue") % Prompt.ENTER)
                 App.get_scheduler().io_manager.get_user_input(custom_prompt)
-                pos += self._screen_height - 1
+                pos += real_screen_height
 
     def show_all(self):
         """Print WindowContainer in `self.window` with all its content."""
