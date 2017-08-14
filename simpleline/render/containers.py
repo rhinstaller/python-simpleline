@@ -21,7 +21,11 @@ from math import ceil
 
 from simpleline.render.widgets import Widget, TextWidget, SeparatorWidget
 
+from simpleline.logging import get_simpleline_logger
+
 __all__ = ["ListRowContainer", "ListColumnContainer", "WindowContainer"]
+
+log = get_simpleline_logger()
 
 
 class Container(Widget):
@@ -414,7 +418,7 @@ class KeyPattern(object):
         try:
             return int(user_input) - 1
         except ValueError:
-            print("Value Error")
+            log.debug("No callback registered for user input %s", user_input)
             return None
 
 
