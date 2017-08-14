@@ -231,7 +231,7 @@ class ListRowContainer(Container):
     ....
     """
 
-    def __init__(self, columns, items=None, columns_width=25, spacing=3, numbering=True):
+    def __init__(self, columns, items=None, columns_width=None, spacing=3, numbering=True):
         """Create ListWidget with specific number of columns.
 
         :param columns: How many columns we want.
@@ -240,8 +240,9 @@ class ListRowContainer(Container):
         :param items: List of items for positioning in this Container. Callback can't be specified this way.
         :type items: List of items for rendering.
 
-        :param columns_width: Width of every column.
-        :type columns_width: int
+        :param columns_width: Width of every column. If nothing specified the maximum width will be distributed
+                              to columns.
+        :type columns_width: int or None
 
         :param spacing: Set the spacing between columns.
         :type spacing: int
@@ -264,6 +265,11 @@ class ListRowContainer(Container):
         :return: nothing
         """
         super().render(width)
+
+        if self._columns_width is None:
+            spaces_between_columns = self._columns - 1
+            sum_spacing = spaces_between_columns * self._spacing
+            self._columns_width = int((width - sum_spacing) / self._columns)
 
         ordered_map = self._get_ordered_map()
         lines_per_rows = self._lines_per_every_row(ordered_map)
@@ -314,6 +320,9 @@ class ListRowContainer(Container):
         for item_id, item in enumerate(self._items):
             item_width = self._columns_width
 
+            if item_width <= 0:
+                raise ValueError("Widget can't be rendered! Columns width is too small.")
+
             if self._key_pattern:
                 number_widget = self.create_number_label(item_id)
                 # render numbers before widgets
@@ -322,6 +331,10 @@ class ListRowContainer(Container):
                 self._numbering_widgets.append(number_widget)
                 # reduce the size of widget because of the number
                 item_width -= number_width
+
+                if item_width <= 0:
+                    raise ValueError("Widget can't be rendered with numbering on! "
+                                     "Increase column width or disable numbering.")
 
             item.widget.render(item_width)
 
