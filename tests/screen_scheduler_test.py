@@ -56,8 +56,6 @@ class ScreenScheduler_TestCase(unittest.TestCase):
         self.assertEqual(modal_screen.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_RENDER)
 
     def test_switch_screen_modal_in_refresh(self, _):
-        import logging
-        logging.basicConfig(filename="log.txt", level=logging.DEBUG)
         modal_screen = ModalTestScreen()
         screen = ModalTestScreen(modal_screen_refresh=modal_screen)
 
