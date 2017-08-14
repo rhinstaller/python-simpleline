@@ -77,7 +77,7 @@ class Container(Widget):
                     or other container (based on `simpleline.render.containers.Container`).
 
         :param callback: Add callback for this item. This callback will be called when user activate this `item`.
-        :type callback: function ``func(item, data)``.
+        :type callback: function ``func(data)``.
 
         :param data: Data which will be passed to the callback.
         :param data: Anything.
@@ -104,8 +104,8 @@ class Container(Widget):
         res = self._key_pattern.translate_input_to_widget_id(key)
         if res is not None:
             try:
-                container = self._items[res]
-                container.callback(container.data)
+                item = self._items[res]
+                item.callback(item.data)
                 return True
             except IndexError:  # container widget with this id doesn't exists
                 return False
@@ -155,7 +155,7 @@ class WindowContainer(Container):
                     or other container (based on `simpleline.render.containers.Container`).
 
         :param callback: Add callback for this item. This callback will be called when user activate this `item`.
-        :type callback: function ``func(item, data)``.
+        :type callback: function ``func(data)``.
 
         :param data: Data which will be passed to the callback.
         :param data: Anything.
