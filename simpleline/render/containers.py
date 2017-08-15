@@ -106,7 +106,7 @@ class Container(Widget):
             return False
 
         res = self._key_pattern.translate_input_to_widget_id(key)
-        if res is not None:
+        if res is not None and res >= 0:
             try:
                 item = self._items[res]
                 item.callback(item.data)
