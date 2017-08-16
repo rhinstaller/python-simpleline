@@ -22,7 +22,11 @@
 #
 
 from abc import ABCMeta, abstractmethod
+from collections import namedtuple
+
 from simpleline.errors import SimplelineError
+
+QuitCallback = namedtuple("QuitCallback", ["callback", "args"])
 
 
 class ExitMainLoop(SimplelineError):
@@ -116,9 +120,16 @@ class AbstractEventLoop(metaclass=ABCMeta):
         """
         pass
 
-    def event_loop_quit_callback(self, callback):
-        """Call this callback when event loop quits."""
-        self._quit_callback = callback
+    def set_quit_callback(self, callback, args=None):
+        """Call this callback when event loop quits.
+
+        :param callback: Call this callback when event loops ends (application quit).
+        :type callback: Function with one parameter data `func(data)`.
+
+        :param args: Arguments passed to the quit callback.
+        :type args: Anything.
+        """
+        self._quit_callback = QuitCallback(callback, args)
 
 
 class AbstractSignal(metaclass=ABCMeta):
