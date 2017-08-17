@@ -67,7 +67,7 @@ local: po-pull
 	@echo "The archive name is $(PKGNAME)-$(VERSION).tar.gz"
 
 rpmlog:
-	@git log --pretty="format:- %s (%ae)" $(TAG).. |sed -e 's/@.*)/)/'
+	@git log --no-merges --pretty="format:- %s (%ae)" $(TAG).. |sed -e 's/@.*)/)/'
 	@echo
 
 potfile:
