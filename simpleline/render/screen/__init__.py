@@ -22,14 +22,13 @@
 from enum import Enum
 
 from simpleline import App
+from simpleline.render.containers import WindowContainer
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen.signal_handler import SignalHandler
-from simpleline.render.screen.scheduler_handler import SchedulerHandler
-from simpleline.render.containers import WindowContainer
 from simpleline.utils.i18n import _
 
 
-class UIScreen(SignalHandler, SchedulerHandler):
+class UIScreen(SignalHandler):
     """Base class representing one TUI Screen.
 
     Shares some API with anaconda's GUI to make it easy for devs to create similar UI

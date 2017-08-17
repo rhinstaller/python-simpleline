@@ -1,4 +1,4 @@
-# Class which serves shortcuts for UIScreen to schedule screens.
+# Serves shortcuts for easy screen scheduling.
 #
 # Copyright (C) 2017  Red Hat, Inc.
 #
@@ -22,32 +22,36 @@
 from simpleline import App
 
 
-class SchedulerHandler(object):
+class ScreenHandler(object):
 
-    def schedule_screen(self, args=None):
+    @classmethod
+    def schedule_screen(cls, ui_screen, args=None):
         """Schedule screen to the active scheduler.
 
         See: `simpleline.render.screen_scheduler.schedule_screen()`.
         """
-        App.get_scheduler().schedule_screen(ui_screen=self, args=args)
+        App.get_scheduler().schedule_screen(ui_screen=ui_screen, args=args)
 
-    def replace_screen(self, args=None):
+    @classmethod
+    def replace_screen(cls, ui_screen, args=None):
         """Schedule screen to the active scheduler.
 
         See: `simpleline.render.screen_scheduler.replace_screen()`.
         """
-        App.get_scheduler().replace_screen(ui_screen=self, args=args)
+        App.get_scheduler().replace_screen(ui_screen=ui_screen, args=args)
 
-    def push_screen(self, args=None):
+    @classmethod
+    def push_screen(cls, ui_screen, args=None):
         """Schedule screen to the active scheduler.
 
         See: `simpleline.render.screen_scheduler.push_screen()`.
         """
-        App.get_scheduler().push_screen(ui_screen=self, args=args)
+        App.get_scheduler().push_screen(ui_screen=ui_screen, args=args)
 
-    def push_screen_modal(self, args=None):
+    @classmethod
+    def push_screen_modal(cls, ui_screen, args=None):
         """Schedule screen to the active scheduler.
 
         See: `simpleline.render.screen_scheduler.push_screen_modal()`.
         """
-        App.get_scheduler().push_screen_modal(ui_screen=self, args=args)
+        App.get_scheduler().push_screen_modal(ui_screen=ui_screen, args=args)
