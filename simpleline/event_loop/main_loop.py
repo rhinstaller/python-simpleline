@@ -92,7 +92,8 @@ class MainLoop(AbstractEventLoop):
         log.debug("Main loop ended. Running callback if set.")
 
         if self._quit_callback:
-            self._quit_callback()
+            cb = self._quit_callback.callback
+            cb(self._quit_callback.args)
 
     def execute_new_loop(self, signal):
         """Starts the new event loop and pass `signal` in it.
