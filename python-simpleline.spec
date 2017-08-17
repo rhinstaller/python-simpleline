@@ -3,7 +3,7 @@
 Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
-Version: 0.2
+Version: 0.3
 Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
@@ -59,6 +59,14 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Thu Aug 17 2017 Jiri Konecny <jkonecny@redhat.com> - 0.3-1
+- Remove merge commits from changelog (jkonecny)
+- Fix bad input processing for list containers (jkonecny)
+- Rename quit callback and add args there. (jkonecny)
+- Add tests for new container feature (jkonecny)
+- List containers take max width if not specified (jkonecny)
+- Remove leftover print in containers parsing input (jkonecny)
+
 * Mon Aug 14 2017 Jiri Konecny <jkonecny@redhat.com> - 0.2-1
 - Merge pull request #26 from jkonecny12/master-fix-ExitMainLoop-exception (jkonecny)
 - Merge pull request #28 from jkonecny12/master-fix-container-callback (jkonecny)
