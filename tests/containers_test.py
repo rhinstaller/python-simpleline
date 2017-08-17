@@ -17,9 +17,15 @@
 # Red Hat, Inc.
 #
 
+import unittest
+from unittest.mock import patch
+from io import StringIO
+
 from tests.widgets_test import BaseWidgets_TestCase
 
+from simpleline import App
 from simpleline.render.containers import WindowContainer, ListRowContainer, ListColumnContainer, KeyPattern
+from simpleline.render.screen import UIScreen, InputState
 from simpleline.render.widgets import TextWidget
 
 
@@ -247,3 +253,105 @@ class Containers_TestCase(BaseWidgets_TestCase):
 
         with self.assertRaisesRegex(ValueError, "Increase column width or disable numbering."):
             c.render(19)
+
+
+@patch('simpleline.render.io_manager.InOutManager._get_input')
+@patch('sys.stdout', new_callable=StringIO)
+class ContainerInput_TestCase(unittest.TestCase):
+
+    def setUp(self):
+        self._callback_id = None
+        self._callback_called = None
+
+    def _prepare_callbacks(self, container, count):
+        for i in range(count):
+            container.add(TextWidget("Test"), self._callback, i + 1)
+
+    def test_list_widget_input_processing(self, out_mock, in_mock):
+        # call first container callback
+        in_mock.return_value = "2"
+
+        screen = ScreenWithListWidget(3)
+
+        App.initialize()
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
+
+        self.assertEqual(1, screen.container_callback_input)
+
+    # TEST 0 or less as user input
+
+    def test_list_input_processing_input_0(self, out_mock, in_mock):
+        c = ListRowContainer(1)
+
+        self._prepare_callbacks(c, 3)
+
+        self.assertFalse(c.process_user_input("0"))
+
+    def test_list_input_processing_negative_number(self, out_mock, in_mock):
+        c = ListRowContainer(1)
+
+        self._prepare_callbacks(c, 3)
+
+        self.assertFalse(c.process_user_input("-2"))
+
+    def test_list_input_processing_exceeded(self, out_mock, in_mock):
+        c = ListRowContainer(1)
+
+        self._prepare_callbacks(c, 2)
+
+        self.assertFalse(c.process_user_input("3"))
+
+    def test_list_correct_input_processing(self, out_mock, in_mock):
+        c = ListRowContainer(1)
+
+        self._prepare_callbacks(c, 3)
+
+        self.assertTrue(c.process_user_input("2"))
+
+        self.assertEqual(self._callback_called, 2)
+
+    def test_list_wrong_input_processing(self, out_mock, in_mock):
+        c = ListRowContainer(1)
+
+        self._prepare_callbacks(c, 3)
+
+        self.assertFalse(c.process_user_input("c"))
+
+    def test_list_input_processing_none(self, out_mock, in_mock):
+        c = ListRowContainer(1)
+
+        self._prepare_callbacks(c, 2)
+
+        self.assertFalse(c.process_user_input(None))
+
+    def _callback(self, data):
+        self._callback_called = data
+
+
+class ScreenWithListWidget(UIScreen):
+
+    def __init__(self, widgets_count):
+        super().__init__()
+        self._widgets_count = widgets_count
+        self._list_widget = None
+        self.container_callback_input = -1
+
+    def refresh(self, args=None):
+        super().refresh(args)
+
+        self._list_widget = ListRowContainer(2)
+        for i in range(self._widgets_count):
+            self._list_widget.add(TextWidget("Test %s" % i), self._callback, i)
+
+        self.window.add(self._list_widget)
+
+    def input(self, args, key):
+        self.close()
+        if self._list_widget.process_user_input(key):
+            return InputState.PROCESSED
+
+        return InputState.DISCARDED
+
+    def _callback(self, data):
+        self.container_callback_input = data

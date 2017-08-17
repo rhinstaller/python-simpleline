@@ -23,9 +23,8 @@ from io import StringIO
 from unittest.mock import patch
 
 from simpleline import App
-from simpleline.render.containers import ListRowContainer
 from simpleline.render.prompt import Prompt
-from simpleline.render.screen import UIScreen, InputState
+from simpleline.render.screen import UIScreen
 from simpleline.render.widgets import TextWidget, SeparatorWidget, CheckboxWidget, CenterWidget, ColumnWidget
 
 
@@ -245,18 +244,6 @@ class WidgetProcessing_TestCase(unittest.TestCase):
 
         self.assertEqual(self._expected_output(widget_text), out_mock.getvalue())
 
-    def test_list_widget_input_processing(self, out_mock, in_mock):
-        # call first container callback
-        in_mock.return_value = "2"
-
-        screen = ScreenWithListWidget(3)
-
-        App.initialize()
-        App.get_scheduler().schedule_screen(screen)
-        App.run()
-
-        self.assertEqual(1, screen.container_callback_input)
-
     def test_widget_too_high(self, out_mock, in_mock):
         in_mock.return_value = "\n"
         in_mock.side_effect = lambda: print('\n')
@@ -303,31 +290,3 @@ class ScreenWithWidget(UIScreen):
     def show_all(self):
         super().show_all()
         self.close()
-
-
-class ScreenWithListWidget(UIScreen):
-
-    def __init__(self, widgets_count):
-        super().__init__()
-        self._widgets_count = widgets_count
-        self._list_widget = None
-        self.container_callback_input = -1
-
-    def refresh(self, args=None):
-        super().refresh(args)
-
-        self._list_widget = ListRowContainer(2)
-        for i in range(self._widgets_count):
-            self._list_widget.add(TextWidget("Test %s" % i), self._callback, i)
-
-        self.window.add(self._list_widget)
-
-    def input(self, args, key):
-        self.close()
-        if self._list_widget.process_user_input(key):
-            return InputState.PROCESSED
-
-        return InputState.DISCARDED
-
-    def _callback(self, data):
-        self.container_callback_input = data
