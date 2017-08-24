@@ -17,6 +17,7 @@ BuildRequires: gettext
 BuildRequires: python3-setuptools
 BuildRequires: intltool
 BuildRequires: python3-pocketlint
+BuildRequires: python3-gobject-base
 
 %description
 Simpleline is a Python library for creating text UI.
