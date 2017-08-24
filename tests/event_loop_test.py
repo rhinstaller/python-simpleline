@@ -19,11 +19,10 @@
 
 import unittest
 
-from simpleline.event_loop.main_loop import EventHandler
-from simpleline.event_loop.main_loop import MainLoop
 from simpleline.event_loop import AbstractSignal
-
+from simpleline.event_loop import EventHandler
 from simpleline.event_loop import ExitMainLoop
+from simpleline.event_loop.main_loop import MainLoop
 
 
 class EventLoopHandler_TestCase(unittest.TestCase):
@@ -54,11 +53,15 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.signal_counter_copied = 0
         self.callback_called = False
         self.callback_args = None
+        self.create_loop()
+
+    def create_loop(self):
+        self.loop = MainLoop()
 
     def test_simple_register_handler(self):
         self.callback_called = False
 
-        loop = MainLoop()
+        loop = self.loop
         loop.register_signal_handler(TestSignal, self._handler_callback)
         loop.enqueue_signal(TestSignal())
         loop.process_signals()
@@ -68,7 +71,7 @@ class ProcessEvents_TestCase(unittest.TestCase):
     def test_process_more_signals(self):
         self.signal_counter = 0
 
-        loop = MainLoop()
+        loop = self.loop
         loop.register_signal_handler(TestSignal, self._handler_signal_counter)
         loop.enqueue_signal(TestSignal())
         loop.enqueue_signal(TestSignal())
@@ -80,7 +83,7 @@ class ProcessEvents_TestCase(unittest.TestCase):
     def test_process_signals_multiple_times(self):
         self.signal_counter = 0
 
-        loop = MainLoop()
+        loop = self.loop
         loop.register_signal_handler(TestSignal, self._handler_signal_counter)
         loop.enqueue_signal(TestSignal())
         loop.enqueue_signal(TestSignal())
@@ -95,7 +98,7 @@ class ProcessEvents_TestCase(unittest.TestCase):
     def test_wait_on_signal(self):
         self.signal_counter = 0
 
-        loop = MainLoop()
+        loop = self.loop
         loop.register_signal_handler(TestSignal, self._handler_signal_counter)
         loop.enqueue_signal(TestSignal())
         loop.enqueue_signal(TestSignal2())
@@ -109,7 +112,7 @@ class ProcessEvents_TestCase(unittest.TestCase):
     def test_wait_on_signal_skipped_by_inner_process_events(self):
         self.signal_counter = 0
 
-        loop = MainLoop()
+        loop = self.loop
         loop.register_signal_handler(TestSignal, self._handler_signal_counter)
         # run process signals recursively in this handler which will skip processing
         loop.register_signal_handler(TestSignal2, self._handler_process_events_then_register_testsignal, loop)
@@ -125,7 +128,7 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.signal_counter = 0
         self.signal_counter2 = 0
 
-        loop = MainLoop()
+        loop = self.loop
         loop.register_signal_handler(TestSignal, self._handler_signal_counter)
         loop.register_signal_handler(TestSignal, self._handler_signal_counter2)
         loop.enqueue_signal(TestSignal())
@@ -139,7 +142,7 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.signal_counter = 0
         self.signal_counter_copied = 0
 
-        loop = MainLoop()
+        loop = self.loop
         loop.register_signal_handler(TestSignal, self._handler_signal_counter)
         loop.register_signal_handler(TestPrioritySignal, self._handler_signal_copy_counter)
         loop.enqueue_signal(TestSignal())
@@ -155,7 +158,7 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.signal_counter = 0
         self.signal_counter_copied = 0
 
-        loop = MainLoop()
+        loop = self.loop
         loop.register_signal_handler(TestSignal, self._handler_signal_counter)
         loop.register_signal_handler(TestLowPrioritySignal, self._handler_signal_copy_counter)
         loop.enqueue_signal(TestSignal())
@@ -172,7 +175,7 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.callback_args = None
         msg = "Test data"
 
-        loop = MainLoop()
+        loop = self.loop
         loop.set_quit_callback(self._handler_quit_callback, args=msg)
         loop.register_signal_handler(TestSignal, self._handler_raise_ExitMainLoop_exception)
         loop.enqueue_signal(TestSignal())

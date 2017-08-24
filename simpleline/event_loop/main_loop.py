@@ -22,12 +22,13 @@
 from threading import Lock
 
 from simpleline.event_loop import AbstractEventLoop, ExitMainLoop
-from simpleline.event_loop.signals import ExceptionSignal
 from simpleline.event_loop.event_queue import EventQueue
-
+from simpleline.event_loop.signals import ExceptionSignal
 from simpleline.logging import get_simpleline_logger
 
 log = get_simpleline_logger()
+
+__all__ = ["MainLoop"]
 
 
 class MainLoop(AbstractEventLoop):
@@ -38,41 +39,17 @@ class MainLoop(AbstractEventLoop):
 
     def __init__(self):
         super().__init__()
-        self._handlers = {}
         self._active_queue = EventQueue()
         self._event_queues = [self._active_queue]
-        self._processed_signals = TicketMachine()
         self._lock = Lock()
-        # end most inner loop politely by setting to False
-        self._run_loop = True
-
-    def register_signal_handler(self, signal, callback, data=None):
-        """Register a callback which will be called when message "event"
-        is encountered during process_events.
-
-        The callback has to accept two arguments:
-        - the received message in the form of (type, [arguments])
-        - the data registered with the handler
-
-        :param signal: signal we want to react on
-        :type signal: class of the signal class
-
-        :param callback: the callback function
-        :type callback: func(signal, data)
-
-        :param data: optional data to pass to callback
-        :type data: anything
-        """
-        if signal not in self._handlers:
-            self._handlers[signal] = []
-        self._handlers[signal].append(EventHandler(callback, data))
 
     def register_signal_source(self, signal_source):
         """Register source of signal for actual event queue.
 
         :param signal_source: Source for future signals.
-        :type signal_source: `simpleline.render.ui_screen.UIScreen`
+        :type signal_source: `simpleline.render.ui_screen.UIScreen`.
         """
+        super().register_signal_source(signal_source)
         self._active_queue.add_source(signal_source)
 
     def run(self):
@@ -81,7 +58,7 @@ class MainLoop(AbstractEventLoop):
         Do not use self.mainloop() directly as run() handles all the required exceptions
         needed to keep nested mainloop working.
         """
-        log.debug("Starting main loop")
+        super().run()
         self._run_loop = True
 
         try:
@@ -100,10 +77,10 @@ class MainLoop(AbstractEventLoop):
 
         This is required for processing a modal screens.
 
-        :param signal: signal passed to the new event loop
-        :type signal: `AbstractSignal` based class
+        :param signal: Signal passed to the new event loop.
+        :type signal: The `AbstractSignal` based class.
         """
-        log.debug("Executing inner loop")
+        super().execute_new_loop(signal)
         self._active_queue = EventQueue()
 
         # TODO: Remove when python3-astroid 1.5.3 will be in Fedora
@@ -120,7 +97,7 @@ class MainLoop(AbstractEventLoop):
 
         Close an event loop created by the `execute_new_loop()` method.
         """
-        log.debug("Closing inner loop")
+        super().close_loop()
         self.process_signals()
 
         # TODO: Remove when python3-astroid 1.5.3 will be in Fedora
@@ -143,10 +120,10 @@ class MainLoop(AbstractEventLoop):
 
         This method is thread safe.
 
-        :param signal: event which you want to add to the event queue for processing
-        :type signal: instance based on AbstractEvent class
+        :param signal: Event which you want to add to the event queue for processing.
+        :type signal: Instance based on AbstractEvent class.
         """
-        log.debug("New signal %s enqueued with source %s", signal, signal.source.__class__.__name__)
+        super().enqueue_signal(signal)
         # TODO: Remove when python3-astroid 1.5.3 will be in Fedora
         # pylint: disable=not-context-manager
         with self._lock:
@@ -181,6 +158,7 @@ class MainLoop(AbstractEventLoop):
         :param return_after: Wait on this signal to be processed.
         :type return_after: Class of the signal.
         """
+        super().process_signals(return_after)
         if return_after is not None:
             self._process_signals_with_return(return_after)
         else:
@@ -232,80 +210,3 @@ class MainLoop(AbstractEventLoop):
 
     def _raise_exception(self, signal):
         raise signal.exception_info[0] from signal.exception_info[1]
-
-    def _register_wait_on_signal(self, wait_on_signal):
-        return self._processed_signals.take_ticket(wait_on_signal.__name__)
-
-    def _mark_signal_processed(self, signal):
-        self._processed_signals.mark_line_to_go(signal.__class__.__name__)
-
-    def _check_if_signal_processed(self, wait_on_signal, unique_id):
-        if wait_on_signal is None:
-            # return false because we are not waiting on specific signal
-            # continue with signal processing
-            return False
-
-        return self._processed_signals.check_ticket(wait_on_signal.__name__, unique_id)
-
-
-class EventHandler(object):
-    """Data class to save event handlers."""
-
-    def __init__(self, callback, data):
-        self.callback = callback
-        self.data = data
-
-
-class TicketMachine(object):
-    """Hold signals processed by the event loop if someone wait on them.
-
-    This is useful when recursive process events will skip required signal.
-    """
-
-    def __init__(self):
-        self._lines = {}
-        self._counter = 0
-
-    def take_ticket(self, line_id):
-        """Take ticket (id) and go line (processing events).
-
-        Use `check_ticket` if you are ready to go.
-
-        :param line_id: Line where you are waiting.
-        :type line_id: Anything.
-        """
-        obj_id = self._counter
-        if line_id not in self._lines:
-            self._lines[line_id] = {obj_id: False}
-        else:
-            self._lines[line_id][obj_id] = False
-
-        self._counter += 1
-        return obj_id
-
-    def check_ticket(self, line, unique_id):
-        """Check if you are ready to go.
-
-        If True the unique_id is not valid anymore.
-
-        :param unique_id: Your id used to identify you in the line.
-        :type unique_id: int
-
-        :param line: Line where you are waiting.
-        :type line: Anything.
-        """
-        if self._lines[line][unique_id]:
-            return self._lines[line].pop(unique_id)
-
-    def mark_line_to_go(self, line):
-        """All in the `line` are ready to go.
-
-        Mark all tickets in the line as True.
-
-        :param line: Line which should processed.
-        :type line: Anything.
-        """
-        if line in self._lines:
-            our_line = self._lines[line]
-            for key in our_line:
-                our_line[key] = True
