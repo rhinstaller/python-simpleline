@@ -100,9 +100,9 @@ class ProcessEvents_TestCase(unittest.TestCase):
 
         loop = self.loop
         loop.register_signal_handler(TestSignal, self._handler_signal_counter)
+        loop.register_signal_handler(TestSignal2, self._handler_process_events_then_register_testsignal, loop)
         loop.enqueue_signal(TestSignal())
         loop.enqueue_signal(TestSignal2())
-        loop.enqueue_signal(TestSignal())
         loop.process_signals(return_after=TestSignal2)
         self.assertEqual(self.signal_counter, 1)
 
@@ -140,19 +140,20 @@ class ProcessEvents_TestCase(unittest.TestCase):
 
     def test_priority_signal_processing(self):
         self.signal_counter = 0
-        self.signal_counter_copied = 0
 
         loop = self.loop
         loop.register_signal_handler(TestSignal, self._handler_signal_counter)
-        loop.register_signal_handler(TestPrioritySignal, self._handler_signal_copy_counter)
+        loop.register_signal_handler(TestPrioritySignal, self._handler_signal_counter)
         loop.enqueue_signal(TestSignal())
         loop.enqueue_signal(TestSignal())
         loop.enqueue_signal(TestPrioritySignal())  # should be processed as first signal because of priority
         loop.enqueue_signal(TestSignal())
         loop.process_signals()
+        self.assertEqual(self.signal_counter, 1)
 
-        self.assertEqual(self.signal_counter, 3)
-        self.assertEqual(self.signal_counter_copied, 0)
+        # process rest of the signals
+        loop.process_signals()
+        self.assertEqual(self.signal_counter, 4)
 
     def test_low_priority_signal_processing(self):
         self.signal_counter = 0
@@ -166,8 +167,10 @@ class ProcessEvents_TestCase(unittest.TestCase):
         loop.enqueue_signal(TestSignal())
         loop.enqueue_signal(TestSignal())
         loop.process_signals()
-
         self.assertEqual(self.signal_counter, 3)
+
+        # process the low priority signal
+        loop.process_signals()
         self.assertEqual(self.signal_counter_copied, 3)
 
     def test_quit_callback(self):
@@ -183,7 +186,6 @@ class ProcessEvents_TestCase(unittest.TestCase):
 
         self.assertTrue(self.callback_called)
         self.assertEqual(msg, self.callback_args)
-
 
     # HANDLERS FOR TESTING
     def _handler_callback(self, signal, data):

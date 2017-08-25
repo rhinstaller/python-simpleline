@@ -94,6 +94,22 @@ class EventQueue(object):
         """
         return self._queue.get()
 
+    def get_top_event_if_priority(self, priority):
+        """Return top enqueued signal if priority is equal to `priority`. Otherwise `None`.
+
+        :param priority: Requested event priority.
+        :type priority: int
+
+        :return: Queued signal if it has requested priority. Otherwise `None`.
+        :rtype: Signal based on class `simpleline.event_loop.signals.AbstractSignal` or `None`.
+        """
+        event = self._queue.get()
+        if event.priority == priority:
+            return event
+        else:
+            self._queue.put(event)
+            return None
+
     def add_source(self, signal_source):
         """Add new source of signals to this queue.
 

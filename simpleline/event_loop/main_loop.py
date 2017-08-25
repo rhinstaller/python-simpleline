@@ -149,9 +149,11 @@ class MainLoop(AbstractEventLoop):
         Process signals enqueued by the `self.enqueue_signal()` method. Call handlers registered to the signals by
         the `self.register_signal_handler()` method.
 
-        When `return_after` is specified then wait to the point when this signal is processed. This could be after
-        some more signals was processed because of recursion in calls.
-        Without `return_after` parameter this method will return after all queued signals will be processed.
+        When `return_after` is specified then wait to the point when this signal is processed.
+        NO warranty that this method will return immediately after the signal was processed!
+
+        Without `return_after` parameter this method will return after all queued signals with the highest priority
+        will be processed.
 
         The method is NOT thread safe!
 
@@ -184,8 +186,21 @@ class MainLoop(AbstractEventLoop):
 
     def _process_signals_iteration(self):
         """Process queued signal and then return."""
+        priority = None
+
         while not self._active_queue.empty() and self._run_loop:
-            signal = self._active_queue.get()
+            if priority is None:
+                # take first signal to find out the highest priority in queue
+                signal = self._active_queue.get()
+                priority = signal.priority
+            else:
+                # get signal with this priority only
+                signal = self._active_queue.get_top_event_if_priority(priority)
+
+            # Signal with this priority is not available anymore
+            if signal is None:
+                return
+
             self._process_signal(signal)
 
     def _process_signals_loop(self):

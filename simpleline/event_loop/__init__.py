@@ -120,9 +120,11 @@ class AbstractEventLoop(metaclass=ABCMeta):
         Process signals enqueued by the `self.enqueue_signal()` method. Call handlers registered to the signals by
         the `self.register_signal_handler()` method.
 
-        When `return_after` is specified then wait to the point when this signal is processed. This could be after
-        some more signals was processed because of recursion in calls.
-        Without `return_after` parameter this method will return after all queued signals will be processed.
+        When `return_after` is specified then wait to the point when this signal is processed.
+        NO warranty that this method will return immediately after the signal was processed!
+
+        Without `return_after` parameter this method will return after all queued signals with the highest priority
+        will be processed.
 
         The method is NOT thread safe!
 
