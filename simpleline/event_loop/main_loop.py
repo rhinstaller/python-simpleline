@@ -220,6 +220,8 @@ class MainLoop(AbstractEventLoop):
                     handler_data.callback(signal, handler_data.data)
                 except ExitMainLoop:
                     raise
+                except Exception:  # pylint: disable=broad-except
+                    self.enqueue_signal(ExceptionSignal(self))
         elif type(signal) is ExceptionSignal:
             self._raise_exception(signal)
 
