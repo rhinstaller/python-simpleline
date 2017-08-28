@@ -1,4 +1,4 @@
-# Event loop test classes.
+# Helper functions for the GLib test classes.
 #
 # Copyright (C) 2017  Red Hat, Inc.
 #
@@ -17,8 +17,8 @@
 # Red Hat, Inc.
 #
 
+from simpleline import App
 from simpleline.event_loop.glib_event_loop import GLibEventLoop
-from tests.event_loop_test import ProcessEvents_TestCase
 
 import gi
 gi.require_version("GLib", "2.0")
@@ -26,17 +26,11 @@ gi.require_version("GLib", "2.0")
 from gi.repository import GLib
 
 
-class GLibProcessEvents_TestCase(ProcessEvents_TestCase):
-    """Run all the tests in ProcessEvents test case but with GLib event loop."""
+class GLibUtilityMixin(object):
 
-    def setUp(self):
-        super().setUp()
+    def __init__(self):
+        self.loop = None
         self.timeout_error = False
-
-    def tearDown(self):
-        super().tearDown()
-        if self.timeout_error:
-            raise AssertionError("Loop was killed by timeout!")
 
     def _quit_loop(self, loop):
         """Kill GLib loop."""
@@ -44,14 +38,26 @@ class GLibProcessEvents_TestCase(ProcessEvents_TestCase):
         self.timeout_error = True
         return True
 
-    def create_loop(self):
+    def create_glib_loop(self):
+        # clear flags
+        self.timeout_error = False
         self.loop = GLibEventLoop()
-        # Kill the loop every 3 seconds
-        # This is prevention from running loop indefinitely
 
         loop = self.loop.active_main_loop
         context = loop.get_context()
 
+        # This is prevention from running loop indefinitely
         source = GLib.timeout_source_new_seconds(2)
         source.set_callback(self._quit_loop, loop)
         source.attach(context)
+
+    def schedule_screen_and_run_with_glib(self, screen):
+        self.create_glib_loop()
+
+        App.initialize(event_loop=self.loop)
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
+
+    def teardown_glib(self):
+        if self.timeout_error:
+            raise AssertionError("Loop was killed by timeout!")
