@@ -21,6 +21,8 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
+import sys
+
 from collections import namedtuple
 
 from simpleline.event_loop import AbstractEventLoop, ExitMainLoop
@@ -90,7 +92,8 @@ class GLibEventLoop(AbstractEventLoop):
         if type(signal) in self._handlers:
             handlers = self._handlers[type(signal)]
         elif type(signal) is ExceptionSignal:
-            handlers = [self._raise_exception]
+            handler_data = self._create_event_handler(self._force_quit_with_exception, None)
+            handlers = [handler_data]
 
         # GLib event source which contains handler callback
         # Every source can hold only one callback
@@ -113,6 +116,8 @@ class GLibEventLoop(AbstractEventLoop):
                 handler.callback(signal, handler.data)
         except ExitMainLoop:
             self._quit_all_loops()
+        except Exception:  # pylint: disable=broad-except
+            self.enqueue_signal(ExceptionSignal(self))
 
         # based on GLib documentation we should clean source
         # source will be removed from event loop context this way
@@ -120,11 +125,12 @@ class GLibEventLoop(AbstractEventLoop):
 
         self._mark_signal_processed(signal)
 
-    def _raise_exception(self, data):
-        signal = data.signal
-        self._quit_all_loops()
-
-        raise signal.exception_info[0] from signal.exception_info[1]
+    def _force_quit_with_exception(self, signal, data):
+        """Kill all loops and save the exception. Exception will be raised outside of callback."""
+        log.debug("Unhandled error in handler raised:")
+        sys.excepthook(*signal.exception_info)
+        log.debug("Killing application!")
+        sys.exit(1)
 
     def _quit_all_loops(self):
         for loop_data in reversed(self._event_loops):

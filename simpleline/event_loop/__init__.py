@@ -69,7 +69,9 @@ class AbstractEventLoop(metaclass=ABCMeta):
         """
         if signal not in self._handlers:
             self._handlers[signal] = []
-        self._handlers[signal].append(EventHandler(callback, data))
+
+        event_handler = self._create_event_handler(callback, data)
+        self._handlers[signal].append(event_handler)
 
     @abstractmethod
     def register_signal_source(self, signal_source):
@@ -143,6 +145,10 @@ class AbstractEventLoop(metaclass=ABCMeta):
         :type args: Anything.
         """
         self._quit_callback = QuitCallback(callback, args)
+
+    def _create_event_handler(self, callback, data):
+        """Create event handler data object and return it."""
+        return EventHandler(callback=callback, data=data)
 
     def _register_wait_on_signal(self, wait_on_signal):
         """Register process waiting on signal `wait_on_signal` and return id for later checking.
