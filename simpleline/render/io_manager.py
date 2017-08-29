@@ -36,9 +36,6 @@ from simpleline.logging import get_simpleline_logger
 log = get_simpleline_logger()
 
 
-RAW_INPUT_LOCK = threading.Lock()
-
-
 class InOutManager(object):
 
     def __init__(self, event_loop):
@@ -48,6 +45,7 @@ class InOutManager(object):
         :type event_loop: Class based on `simpleline.event_loop.AbstractEventLoop`.
         """
         super().__init__()
+        self._input_lock = threading.Lock()
         self._input_error_counter = 0
         self._input_error_threshold = 5
         self._input_thread = None
@@ -208,7 +206,7 @@ class InOutManager(object):
             lines = widget.get_lines()
             sys.stdout.write("\n".join(lines) + " ")
             sys.stdout.flush()
-            if not RAW_INPUT_LOCK.acquire(False):
+            if not self._input_lock.acquire(False):
                 # raw_input is already running
                 return
             else:
@@ -218,7 +216,7 @@ class InOutManager(object):
                 except EOFError:
                     data = ""
                 finally:
-                    RAW_INPUT_LOCK.release()
+                    self._input_lock.release()
 
         self._event_loop.enqueue_signal(InputReadySignal(self, data))
 
