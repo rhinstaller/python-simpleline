@@ -138,7 +138,7 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase):
         out += "TestTitle\n\n"
         self.assertEqual(stdout_mock.getvalue(), out)
 
-    @mock.patch('simpleline.render.io_manager.InOutManager.get_user_input')
+    @mock.patch('simpleline.render.io_manager.InOutManager._get_input')
     def test_basic_input(self, input_mock, _):
         input_mock.return_value = "a"
         screen = InputScreen()

@@ -73,10 +73,5 @@ class RenderScreenSignal(AbstractSignal):
     pass
 
 
-class InputScreenSignal(AbstractSignal):
-    """Input is required by the screen."""
-    pass
-
-
 class CloseScreenSignal(AbstractSignal):
     """Close current screen."""
