@@ -36,9 +36,6 @@ from simpleline.logging import get_simpleline_logger
 log = get_simpleline_logger()
 
 
-RAW_INPUT_LOCK = threading.Lock()
-
-
 class InOutManager(object):
 
     def __init__(self, event_loop):
@@ -48,6 +45,7 @@ class InOutManager(object):
         :type event_loop: Class based on `simpleline.event_loop.AbstractEventLoop`.
         """
         super().__init__()
+        self._input_lock = threading.Lock()
         self._input_error_counter = 0
         self._input_error_threshold = 5
         self._input_thread = None
@@ -57,6 +55,7 @@ class InOutManager(object):
         self._spacer = ""
         self._calculate_spacer()
         self._user_input = ""
+        self._user_input_callback = None
 
         # save user input
         self._event_loop.register_signal_handler(InputReadySignal, self._user_input_received_handler)
@@ -92,6 +91,11 @@ class InOutManager(object):
     def _user_input_received_handler(self, signal, args):
         self._user_input = signal.data
 
+        # call async callback
+        if self._user_input_callback is not None:
+            cb = self._user_input_callback
+            cb(self._user_input)
+
     def set_pass_func(self, getpass_func):
         """Set a function for getting passwords."""
         self._getpass_func = getpass_func
@@ -113,7 +117,7 @@ class InOutManager(object):
         except Exception:    # pylint: disable=broad-except
             self._event_loop.enqueue_signal(ExceptionSignal(self))
 
-    def process_input(self, active_screen):
+    def process_input(self, active_screen, user_input):
         """Process input from the screens.
 
         Result of the processing is saved in the `processed_result` property.
@@ -121,30 +125,43 @@ class InOutManager(object):
         :param active_screen: Screen demanding this input processing.
         :type active_screen: Classed based on `simpleline.render.screen.UIScreen`.
 
+        :param user_input: User input string.
+        :type user_input: String.
+
         :raises: ExitMainLoop or any other kind of exception from screen processing.
 
         :return: Return data object with result status and state.
         :rtype: `simpleline.render.in_out_manager.UserInputResult` class.
         """
-        last_screen = active_screen.ui_screen
-        # get the screen's prompt
-        prompt = last_screen.prompt(active_screen.args)
-
-        # None means prompt handled the input by itself -> continue
-        if prompt is None:
-            return UserInputResult.PROCESSED
-
-        # get the input from user
-        c = self.get_user_input(prompt)
-
         # process the input, if it wasn't processed (valid)
         # increment the error counter
-        result = self._process_input(active_screen, c)
+        result = self._process_input(active_screen, user_input)
         if result.was_successful():
             self._input_error_counter = 0
         else:
             self._input_error_counter += 1
         return result
+
+    def get_user_input_async(self, prompt, callback, hidden=False):
+        """Reads user input asynchronously.
+
+        User input will be retrieved by `simpleline.event_loop.signals.InputReadySignal` and then passed to
+        the `callback` argument.
+
+        :param prompt: Ask user what you want to get.
+        :type prompt: String or Prompt instance.
+
+        :param callback: Callback which will get user input as the only parameter.
+        :type callback: Function with one parameter key.
+
+        :param hidden: Hide echo of the keys from user.
+        :type hidden: bool
+        """
+        self._check_input_thread_running()
+
+        if self._is_input_expected(prompt):
+            self._user_input_callback = callback
+            self._start_user_input_async(prompt, hidden)
 
     def get_user_input(self, prompt, hidden=False):
         """Reads user input.
@@ -161,10 +178,13 @@ class InOutManager(object):
         :returns: User input.
         :rtype: str
         """
-        if self._input_thread is not None and self._input_thread.is_alive():
-            raise KeyError("Can't run multiple input threads at the same time!")
+        if not self._is_input_expected(prompt):
+            return ""
 
-        return self._get_user_input(prompt, hidden)
+        self._check_input_thread_running()
+
+        self._start_user_input_async(prompt, hidden)
+        return self._wait_on_user_input()
 
     def get_user_input_without_check(self, prompt, hidden=False):
         """Reads user input without checking if someone is already waiting for input.
@@ -177,13 +197,36 @@ class InOutManager(object):
 
         See `get_user_input()` method.
         """
-        return self._get_user_input(prompt, hidden)
+        if self._is_input_expected(prompt):
+            self._start_user_input_async(prompt, hidden)
+            return self._wait_on_user_input()
 
-    def _get_user_input(self, prompt, hidden):
+    def _check_input_thread_running(self):
+        if self._input_thread is not None and self._input_thread.is_alive():
+            raise KeyError("Can't run multiple input threads at the same time!")
+
+    def _is_input_expected(self, prompt):
+        """Check if user handled input processing some other way.
+
+        Do nothing if user did handled user input.
+
+        :returns: True if prompt is set and we can use it to get user input.
+                  False if prompt is not available, which means that user handled input on their own.
+        """
+        # None means prompt handled the input by itself -> continue
+        if prompt is None:
+            self._input_error_counter = 0
+            return False
+        else:
+            return True
+
+    def _start_user_input_async(self, prompt, hidden):
         self._input_thread = threading.Thread(target=self._thread_input, name="InputThread",
                                               args=(prompt, hidden))
         self._input_thread.daemon = True
         self._input_thread.start()
+
+    def _wait_on_user_input(self):
         self._event_loop.process_signals(InputReadySignal)
         self._input_thread.join()
         return self._user_input  # return the user input
@@ -208,7 +251,7 @@ class InOutManager(object):
             lines = widget.get_lines()
             sys.stdout.write("\n".join(lines) + " ")
             sys.stdout.flush()
-            if not RAW_INPUT_LOCK.acquire(False):
+            if not self._input_lock.acquire(False):
                 # raw_input is already running
                 return
             else:
@@ -218,7 +261,7 @@ class InOutManager(object):
                 except EOFError:
                     data = ""
                 finally:
-                    RAW_INPUT_LOCK.release()
+                    self._input_lock.release()
 
         self._event_loop.enqueue_signal(InputReadySignal(self, data))
 

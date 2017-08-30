@@ -88,7 +88,7 @@ class ScreenScheduler_TestCase(unittest.TestCase):
         self.assertEqual(modal_render_outer.copied_modal_counter, ModalTestScreen.AFTER_MODAL_RENDER)
         self.assertEqual(modal_render_inner.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_RENDER)
 
-    @mock.patch('simpleline.render.io_manager.InOutManager.get_user_input')
+    @mock.patch('simpleline.render.io_manager.InOutManager._get_input')
     def test_switch_screen_modal_input_order(self, mock_input, mock_stdout):
         modal_screen = InputAndDrawScreen("Modal")
         parent_screen = EmitDrawThenCreateModal(modal_screen, msg="Parent")
@@ -176,13 +176,16 @@ class EmitDrawThenCreateModal(UIScreen):
         super().__init__()
         self._refresh_screen = refresh_screen
         self.title = msg
+        self.input_required = False
 
     def refresh(self, args=None):
         super().refresh(args)
-        self.redraw()
         if self._refresh_screen:
+            self.redraw()
             ScreenHandler.push_screen_modal(self._refresh_screen)
             self._refresh_screen = None
+        else:
+            self.close()
 
 
 class InputAndDrawScreen(UIScreen):
@@ -190,3 +193,8 @@ class InputAndDrawScreen(UIScreen):
     def __init__(self, msg):
         super().__init__()
         self.title = msg
+        self.input_required = False
+
+    def refresh(self, args=None):
+        super().refresh(args)
+        self.close()

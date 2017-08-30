@@ -111,11 +111,11 @@ class ProcessEvents_TestCase(unittest.TestCase):
 
         loop = MainLoop()
         loop.register_signal_handler(TestSignal, self._handler_signal_counter)
-        # run process signals recursively in this handler which will skip processing for wait_on_signal
+        # run process signals recursively in this handler which will skip processing
         loop.register_signal_handler(TestSignal2, self._handler_process_events_then_register_testsignal, loop)
         loop.enqueue_signal(TestSignal2())
         loop.enqueue_signal(TestSignal())
-        # new signal will be registered in handler method but that shouldn't be processed by wait_on_signal
+        # new signal will be registered in handler method but that shouldn't be processed
         # because it should end on the first signal even when it was skipped
         loop.process_signals(return_after=TestSignal)
 

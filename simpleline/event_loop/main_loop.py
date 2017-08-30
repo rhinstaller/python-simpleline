@@ -161,7 +161,7 @@ class MainLoop(AbstractEventLoop):
         # run infinite loop
         # this will always wait on input processing or similar so it should not busy waiting
         while self._run_loop:
-            self.process_signals()
+            self._process_signals_loop()
 
         # set back to True to leave outer loop working
         self._run_loop = True
@@ -181,13 +181,21 @@ class MainLoop(AbstractEventLoop):
         :param return_after: Wait on this signal to be processed.
         :type return_after: Class of the signal.
         """
+        if return_after is not None:
+            self._process_signals_with_return(return_after)
+        else:
+            self._process_signals_iteration()
+
+    def _process_signals_with_return(self, return_after):
+        """Process signals until the return_after signal was processed.
+
+        Or the loop quited.
+        """
         # get unique ID when waiting for the signal
         unique_id = self._register_wait_on_signal(return_after)
 
-        while self._can_process_signals() or return_after is not None:
+        while self._run_loop or return_after is not None:
             signal = self._active_queue.get()
-            # all who is waiting on this signal can stop waiting
-            self._mark_signal_processed(signal)
 
             # do the signal processing (call handlers)
             self._process_signal(signal)
@@ -196,12 +204,23 @@ class MainLoop(AbstractEventLoop):
             if self._check_if_signal_processed(return_after, unique_id):
                 return
 
-    def _can_process_signals(self):
-        """To proceed signal processing, these conditions must be true."""
-        return not self._active_queue.empty() and self._run_loop
+    def _process_signals_iteration(self):
+        """Process queued signal and then return."""
+        while not self._active_queue.empty() and self._run_loop:
+            signal = self._active_queue.get()
+            self._process_signal(signal)
+
+    def _process_signals_loop(self):
+        """Process signal until the event loop quited."""
+        while self._run_loop:
+            signal = self._active_queue.get()
+            self._process_signal(signal)
 
     def _process_signal(self, signal):
         log.debug("Processing signal %s", signal)
+
+        self._mark_signal_processed(signal)
+
         if type(signal) in self._handlers:
             for handler_data in self._handlers[type(signal)]:
                 try:
