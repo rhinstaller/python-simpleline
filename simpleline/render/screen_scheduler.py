@@ -282,6 +282,8 @@ class ScreenScheduler(object):
                     try:
                         if self.quit_screen.answer is True:
                             raise ExitMainLoop()
+                        else:
+                            self.redraw()
                     except AttributeError:
                         raise ExitMainLoop()
                 else:
