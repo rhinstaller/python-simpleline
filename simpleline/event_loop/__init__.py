@@ -49,6 +49,7 @@ class AbstractEventLoop(metaclass=ABCMeta):
         self._quit_callback = None
         # end most inner loop politely by setting to False
         self._run_loop = True
+        self._force_quit = False
 
     def register_signal_handler(self, signal, callback, data=None):
         """Register a callback which will be called when message "event"
@@ -95,6 +96,16 @@ class AbstractEventLoop(metaclass=ABCMeta):
     def run(self):
         """Starts the event loop."""
         log.debug("Starting main loop")
+        self._force_quit = False
+
+    def force_quit(self):
+        """Force quit all running event loops.
+
+        Kill all loop including inner loops (modal window).
+        None of the Simpleline events will be processed anymore.
+        """
+        log.debug("Force quit called. Killing all loops!")
+        self._force_quit = True
 
     @abstractmethod
     def execute_new_loop(self, signal):

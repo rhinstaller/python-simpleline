@@ -72,6 +72,16 @@ class MainLoop(AbstractEventLoop):
             cb = self._quit_callback.callback
             cb(self._quit_callback.args)
 
+    def force_quit(self):
+        """Force quit all running event loops.
+
+        Kill all loop including inner loops (modal window).
+        None of the Simpleline events will be processed anymore.
+        """
+        super().force_quit()
+        self._event_queues.clear()
+        self._run_loop = False
+
     def execute_new_loop(self, signal):
         """Starts the new event loop and pass `signal` in it.
 
@@ -81,6 +91,10 @@ class MainLoop(AbstractEventLoop):
         :type signal: The `AbstractSignal` based class.
         """
         super().execute_new_loop(signal)
+
+        if self._force_quit:
+            return
+
         self._active_queue = EventQueue()
 
         # TODO: Remove when python3-astroid 1.5.3 will be in Fedora
@@ -123,6 +137,9 @@ class MainLoop(AbstractEventLoop):
         :param signal: Event which you want to add to the event queue for processing.
         :type signal: Instance based on AbstractEvent class.
         """
+        if self._force_quit:
+            return
+
         super().enqueue_signal(signal)
         # TODO: Remove when python3-astroid 1.5.3 will be in Fedora
         # pylint: disable=not-context-manager
@@ -140,8 +157,9 @@ class MainLoop(AbstractEventLoop):
         while self._run_loop:
             self._process_signals_loop()
 
-        # set back to True to leave outer loop working
-        self._run_loop = True
+        if not self._force_quit:
+            # set back to True to leave outer loop working
+            self._run_loop = True
 
     def process_signals(self, return_after=None):
         """This method processes incoming async messages.

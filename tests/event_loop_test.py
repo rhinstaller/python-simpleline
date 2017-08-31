@@ -187,6 +187,46 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.assertTrue(self.callback_called)
         self.assertEqual(msg, self.callback_args)
 
+    def test_force_quit(self):
+        self.callback_called = False
+
+        loop = self.loop
+        loop.register_signal_handler(TestSignal, self._handler_callback)
+        loop.register_signal_handler(TestSignal2, self._handler_force_quit_exception)
+        loop.enqueue_signal(TestSignal2())
+        loop.enqueue_signal(TestSignal())
+        loop.run()
+
+        self.assertFalse(self.callback_called)
+
+    def test_force_quit_recursive_loop(self):
+        self.callback_called = False
+
+        loop = self.loop
+        loop.register_signal_handler(TestSignal, self._handler_start_inner_loop_and_enqueue_event, TestSignal3())
+        loop.register_signal_handler(TestSignal2, self._handler_callback)
+        loop.register_signal_handler(TestSignal3, self._handler_force_quit_exception)
+        loop.enqueue_signal(TestSignal())
+        loop.enqueue_signal(TestSignal2())
+        loop.run()
+
+        self.assertFalse(self.callback_called)
+
+    def test_force_quit_when_waiting_on_signal(self):
+        self.callback_called = False
+
+        loop = self.loop
+        loop.register_signal_handler(TestSignal, self._handler_force_quit_exception)
+        loop.register_signal_handler(TestSignal2, self._handler_callback)
+        loop.enqueue_signal(TestSignal())
+        loop.enqueue_signal(TestSignal2())
+
+        # FIXME: Find a better way how to detect infinite loop
+        # if force quit won't work properly this will hang up
+        loop.process_signals(return_after=TestSignal3)
+
+        self.assertFalse(self.callback_called)
+
     # HANDLERS FOR TESTING
     def _handler_callback(self, signal, data):
         self.callback_called = True
@@ -210,8 +250,14 @@ class ProcessEvents_TestCase(unittest.TestCase):
         # This shouldn't be processed
         event_loop.enqueue_signal(TestSignal())
 
+    def _handler_start_inner_loop_and_enqueue_event(self, signal, data):
+        self.loop.execute_new_loop(data)
+
     def _handler_raise_ExitMainLoop_exception(self, signal, data):
         raise ExitMainLoop()
+
+    def _handler_force_quit_exception(self, signal, data):
+        self.loop.force_quit()
 
 
 # TESTING EVENTS
@@ -223,6 +269,13 @@ class TestSignal(AbstractSignal):
 
 
 class TestSignal2(AbstractSignal):
+
+    def __init__(self):
+        # ignore source
+        super().__init__(None)
+
+
+class TestSignal3(AbstractSignal):
 
     def __init__(self):
         # ignore source

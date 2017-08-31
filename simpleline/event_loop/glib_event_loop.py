@@ -72,7 +72,11 @@ class GLibEventLoop(AbstractEventLoop):
         :param signal: signal which you want to add to the event queue for processing
         :type signal: instance based on AbstractEvent class
         """
+        if self._force_quit:
+            return
+
         super().enqueue_signal(signal)
+
         loop_data = self._find_loop_data_for_source(signal.source)
         self._register_handlers_to_loop(loop_data.loop, signal)
 
@@ -111,13 +115,14 @@ class GLibEventLoop(AbstractEventLoop):
         source = data.source
         handlers = data.handlers
 
-        try:
-            for handler in handlers:
-                handler.callback(signal, handler.data)
-        except ExitMainLoop:
-            self._quit_all_loops()
-        except Exception:  # pylint: disable=broad-except
-            self.enqueue_signal(ExceptionSignal(self))
+        if not self._force_quit:
+            try:
+                for handler in handlers:
+                    handler.callback(signal, handler.data)
+            except ExitMainLoop:
+                self._quit_all_loops()
+            except Exception:  # pylint: disable=broad-except
+                self.enqueue_signal(ExceptionSignal(self))
 
         # based on GLib documentation we should clean source
         # source will be removed from event loop context this way
@@ -149,6 +154,15 @@ class GLibEventLoop(AbstractEventLoop):
             cb = self._quit_callback.callback
             cb(self._quit_callback.args)
 
+    def force_quit(self):
+        """Force quit all running event loops.
+
+        Kill all loop including inner loops (modal window).
+        None of the Simpleline events will be processed anymore.
+        """
+        super().force_quit()
+        self._quit_all_loops()
+
     def execute_new_loop(self, signal):
         """Starts the new event loop and pass `signal` in it.
 
@@ -158,6 +172,9 @@ class GLibEventLoop(AbstractEventLoop):
         :type signal: `AbstractSignal` based class
         """
         super().execute_new_loop(signal)
+
+        if self._force_quit:
+            return
 
         new_context = GLib.MainContext()
         new_loop = GLib.MainLoop(new_context)
@@ -199,9 +216,8 @@ class GLibEventLoop(AbstractEventLoop):
         if return_after is not None:
             ticket_id = self._register_wait_on_signal(return_after)
 
-            while not self._check_if_signal_processed(return_after, ticket_id):
+            while not self._check_if_signal_processed(return_after, ticket_id) and not self._force_quit:
                 self._iterate_event_loop(loop_data.loop)
-
         else:
             self._iterate_event_loop(loop_data.loop)
 
