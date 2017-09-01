@@ -56,7 +56,7 @@ class ScreenScheduler(object):
             self._screen_stack = ScreenStack()
         self._register_handlers()
 
-        self.redraw()
+        self._first_screen_scheduled = False
 
     def _register_handlers(self):
         self._event_loop.register_signal_handler(RenderScreenSignal, self._process_screen_callback)
@@ -108,6 +108,12 @@ class ScreenScheduler(object):
         log.debug("Scheduling screen %s", ui_screen)
         screen = ScreenData(ui_screen, args)
         self._screen_stack.add_first(screen)
+        self._redraw_on_first_scheduled_screen()
+
+    def _redraw_on_first_scheduled_screen(self):
+        if not self._first_screen_scheduled:
+            self.redraw()
+            self._first_screen_scheduled = True
 
     def replace_screen(self, ui_screen, args=None):
         """Schedules a screen to replace the current one.
