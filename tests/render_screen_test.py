@@ -114,7 +114,8 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase):
 
     def test_running_empty_loop(self, _):
         App.initialize()
-        App.run()
+        loop = App.get_event_loop()
+        loop.process_signals()
 
     def test_screen_event_loop_processing_with_two_screens(self, _):
         first_screen = EmptyScreen()
