@@ -236,6 +236,8 @@ class InOutManager(object):
 
         :return: Return state result object.
         :rtype: `simpleline.render.in_out_manager.UserInputResult` class.
+
+        :raises: Anything the Screen can raise in the input processing.
         """
         # delegate the handling to active screen first
         try:
@@ -246,9 +248,6 @@ class InOutManager(object):
                 return UserInputResult.ERROR
         except ExitMainLoop:
             raise
-        except Exception:    # pylint: disable=broad-except
-            self._event_loop.enqueue_signal(ExceptionSignal(self))
-            return UserInputResult.ERROR
 
         # global refresh command
         if key == Prompt.REFRESH:
