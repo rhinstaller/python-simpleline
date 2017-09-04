@@ -3,7 +3,7 @@
 Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
-Version: 0.4
+Version: 0.5
 Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
@@ -59,6 +59,12 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Mon Sep 04 2017 Jiri Konecny <jkonecny@redhat.com> - 0.5-1
+- Fix exception in Screen input caused infinite loop (jkonecny)
+- Add test if app is initialized (jkonecny)
+- Redraw on first scheduled screen (#1487326) (jkonecny)
+- Redraw after YesNoDialog modal window close (jkonecny)
+
 * Fri Aug 18 2017 Jiri Konecny <jkonecny@redhat.com> - 0.4-1
 - Screen scheduling is moved to ScreenHandler (jkonecny)
 - Remove merge commits from changelog (jkonecny)
