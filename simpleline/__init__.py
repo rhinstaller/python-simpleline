@@ -67,6 +67,17 @@ class App(object):
         cls.__app = cls.AppPimpl(scheduler, event_loop)
 
     @classmethod
+    def is_initialized(cls):
+        """Is the App already initialized?
+
+        :returns: True if the `App.initialized()` method was called, False otherwise.
+        """
+        if cls.__app is None:
+            return False
+        else:
+            return True
+
+    @classmethod
     def get_scheduler(cls):
         """Get instance of class responsible for rendering of the screen."""
         return cls.__app.scheduler
