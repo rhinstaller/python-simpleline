@@ -19,7 +19,7 @@
 
 from unittest import TestCase
 
-from simpleline.event_loop.main_loop import TicketMachine
+from simpleline.event_loop.ticket_machine import TicketMachine
 
 
 class TicketMachine_TestCase(TestCase):

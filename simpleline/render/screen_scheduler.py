@@ -22,8 +22,7 @@
 import threading
 
 from simpleline.event_loop import ExitMainLoop
-from simpleline.event_loop.signals import ExceptionSignal, RenderScreenSignal, InputScreenSignal, \
-                                          CloseScreenSignal
+from simpleline.event_loop.signals import ExceptionSignal, RenderScreenSignal, CloseScreenSignal
 from simpleline.render import RenderUnexpectedError
 from simpleline.render.io_manager import InOutManager, UserInputResult
 from simpleline.render.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
@@ -60,7 +59,6 @@ class ScreenScheduler(object):
 
     def _register_handlers(self):
         self._event_loop.register_signal_handler(RenderScreenSignal, self._process_screen_callback)
-        self._event_loop.register_signal_handler(InputScreenSignal, self._process_input_callback)
         self._event_loop.register_signal_handler(CloseScreenSignal, self._close_screen_callback)
 
     @property
@@ -253,16 +251,17 @@ class ScreenScheduler(object):
 
     def input_required(self):
         """Register user input to the event loop for processing."""
-        self._event_loop.enqueue_signal(InputScreenSignal(self))
+        top_screen = self._get_last_screen()
+        ui_screen = top_screen.ui_screen
+        prompt = ui_screen.prompt(top_screen.args)
 
-    def _process_input_callback(self, signal, data):
-        self._process_input()
+        self._io_manager.get_user_input_async(prompt, self._process_input)
 
-    def _process_input(self):
+    def _process_input(self, user_input):
         active_screen = self._get_last_screen()
 
         try:
-            input_result = self._io_manager.process_input(active_screen)
+            input_result = self._io_manager.process_input(active_screen, user_input)
         except ExitMainLoop:
             raise
         except Exception:    # pylint: disable=broad-except

@@ -25,7 +25,7 @@ from unittest import mock
 from simpleline import App
 from simpleline.render import RenderUnexpectedError
 from simpleline.render.screen import UIScreen, InputState
-from tests import schedule_screen_and_run, calculate_separator
+from tests import UtilityMixin
 
 
 def _fake_input(queue_instance, prompt, hidden):
@@ -33,14 +33,14 @@ def _fake_input(queue_instance, prompt, hidden):
 
 
 @mock.patch('sys.stdout', new_callable=StringIO)
-class SeparatorPrinting_TestCase(unittest.TestCase):
+class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
 
     def test_separator(self, stdout_mock):
         ui_screen = EmptyScreen()
 
-        schedule_screen_and_run(ui_screen)
+        self.schedule_screen_and_run(ui_screen)
 
-        self.assertEqual(calculate_separator(), stdout_mock.getvalue())
+        self.assertEqual(self.calculate_separator(), stdout_mock.getvalue())
 
     def test_other_width_separator(self, stdout_mock):
         ui_screen = EmptyScreen()
@@ -51,7 +51,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase):
         App.get_scheduler().schedule_screen(ui_screen)
         App.run()
 
-        self.assertEqual(calculate_separator(width), stdout_mock.getvalue())
+        self.assertEqual(self.calculate_separator(width), stdout_mock.getvalue())
 
     def test_no_separator(self, stdout_mock):
         ui_screen = EmptyScreen()
@@ -100,15 +100,15 @@ class SimpleUIScreenFeatures_TestCase(unittest.TestCase):
 
 
 @mock.patch('sys.stdout', new_callable=StringIO)
-class SimpleUIScreenProcessing_TestCase(unittest.TestCase):
+class SimpleUIScreenProcessing_TestCase(unittest.TestCase, UtilityMixin):
 
     def setUp(self):
-        self._default_separator = calculate_separator(80)
+        self._default_separator = self.calculate_separator(80)
 
     def test_screen_event_loop_processing(self, _):
         ui_screen = EmptyScreen()
 
-        schedule_screen_and_run(ui_screen)
+        self.schedule_screen_and_run(ui_screen)
 
         self.assertTrue(ui_screen.is_closed)
 
@@ -133,36 +133,36 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase):
         screen = NoInputScreen()
         screen.title = u"TestTitle"
 
-        schedule_screen_and_run(screen)
+        self.schedule_screen_and_run(screen)
 
         out = self._default_separator
         out += "TestTitle\n\n"
         self.assertEqual(stdout_mock.getvalue(), out)
 
-    @mock.patch('simpleline.render.io_manager.InOutManager.get_user_input')
+    @mock.patch('simpleline.render.io_manager.InOutManager._get_input')
     def test_basic_input(self, input_mock, _):
         input_mock.return_value = "a"
         screen = InputScreen()
 
-        schedule_screen_and_run(screen)
+        self.schedule_screen_and_run(screen)
 
         self.assertTrue(screen.input_processed)
 
 
 @mock.patch('sys.stdout', new_callable=StringIO)
-class ScreenException_TestCase(unittest.TestCase):
+class ScreenException_TestCase(unittest.TestCase, UtilityMixin):
 
     def test_raise_exception_in_refresh(self, _):
         screen = ExceptionTestScreen(ExceptionTestScreen.REFRESH)
 
         with self.assertRaises(TestRefreshException):
-            schedule_screen_and_run(screen)
+            self.schedule_screen_and_run(screen)
 
     def test_raise_exception_in_rendering(self, _):
         screen = ExceptionTestScreen(ExceptionTestScreen.REDRAW)
 
         with self.assertRaises(TestRedrawException):
-            schedule_screen_and_run(screen)
+            self.schedule_screen_and_run(screen)
 
 
 @mock.patch('sys.stdout')
@@ -178,11 +178,12 @@ class InputProcessing_TestCase(unittest.TestCase):
         self.pass_called = False
         self.pass_prompt = None
 
+        App.initialize()
+
     def test_quit_input(self, mock_stdin, mock_stdout):
         mock_stdin.return_value = "q"
         screen = UIScreen()
 
-        App.initialize()
         App.get_scheduler().schedule_screen(screen)
         App.run()
 
@@ -191,7 +192,6 @@ class InputProcessing_TestCase(unittest.TestCase):
         screen = UIScreen()
         screen2 = EmptyScreen()
 
-        App.initialize()
         App.get_scheduler().schedule_screen(screen)
         App.get_scheduler().schedule_screen(screen2)
         App.run()
@@ -203,7 +203,6 @@ class InputProcessing_TestCase(unittest.TestCase):
         mock_stdin.return_value = "r"
         screen = RefreshTestScreen()
 
-        App.initialize()
         App.get_scheduler().schedule_screen(screen)
         App.run()
 
@@ -214,7 +213,6 @@ class InputProcessing_TestCase(unittest.TestCase):
         threshold = 5
         screen = InputErrorTestScreen(threshold)
 
-        App.initialize()
         App.get_scheduler().schedule_screen(screen)
         App.run()
 
@@ -226,7 +224,6 @@ class InputProcessing_TestCase(unittest.TestCase):
         threshold = 12
         screen = InputErrorTestScreen(threshold)
 
-        App.initialize()
         App.get_scheduler().schedule_screen(screen)
         App.run()
 
@@ -236,7 +233,6 @@ class InputProcessing_TestCase(unittest.TestCase):
     def test_input_no_prompt(self, mock_stdin, mock_stdout):
         screen = InputWithNoPrompt()
 
-        App.initialize()
         App.get_scheduler().schedule_screen(screen)
         App.run()
 
@@ -245,7 +241,7 @@ class InputProcessing_TestCase(unittest.TestCase):
     @mock.patch('simpleline.event_loop.main_loop.MainLoop.process_signals')
     def test_custom_getpass(self, mock_stdin, mock_stdout, process_signals):
         prompt = mock.MagicMock()
-        App.initialize()
+
         App.get_scheduler().io_manager.set_pass_func(self._test_getpass)
         App.get_scheduler().io_manager.get_user_input(prompt=prompt, hidden=True)
 

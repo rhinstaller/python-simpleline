@@ -1,4 +1,4 @@
-# Helper functions for the test classes.
+# Event loop test classes for GLib implementation.
 #
 # Copyright (C) 2017  Red Hat, Inc.
 #
@@ -17,25 +17,16 @@
 # Red Hat, Inc.
 #
 
-from simpleline import App
+from tests.event_loop_test import ProcessEvents_TestCase
+from tests.glib_tests import GLibUtilityMixin
 
 
-class UtilityMixin(object):
+class GLibProcessEvents_TestCase(ProcessEvents_TestCase, GLibUtilityMixin):
+    """Run all the tests in ProcessEvents test case but with GLib event loop."""
 
-    def calculate_separator(self, width=80):
-        separator = "\n".join(2 * [width * "="])
-        separator += "\n"  # print adds another newline
-        return separator
+    def tearDown(self):
+        super().tearDown()
+        self.teardown_glib()
 
-    def create_output_with_separators(self, screens_text):
-        msg = ""
-        for screen_txt in screens_text:
-            msg += self.calculate_separator()
-            msg += screen_txt + "\n\n"
-
-        return msg
-
-    def schedule_screen_and_run(self, screen):
-        App.initialize()
-        App.get_scheduler().schedule_screen(screen)
-        App.run()
+    def create_loop(self):
+        self.create_glib_loop()

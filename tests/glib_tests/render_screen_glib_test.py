@@ -1,4 +1,4 @@
-# Helper functions for the test classes.
+# Rendering screen test classes for GLib implementation.
 #
 # Copyright (C) 2017  Red Hat, Inc.
 #
@@ -17,25 +17,37 @@
 # Red Hat, Inc.
 #
 
+
+from tests.render_screen_test import SimpleUIScreenProcessing_TestCase, InputProcessing_TestCase
+from tests.glib_tests import GLibUtilityMixin
+
 from simpleline import App
 
 
-class UtilityMixin(object):
+class GLibSimpleUIScreenProcessing_TestCase(SimpleUIScreenProcessing_TestCase, GLibUtilityMixin):
+    """Run all the tests in ProcessEvents test case but with GLib event loop."""
 
-    def calculate_separator(self, width=80):
-        separator = "\n".join(2 * [width * "="])
-        separator += "\n"  # print adds another newline
-        return separator
+    def setUp(self):
+        super().setUp()
+        self.loop = None
+        self.timeout_error = False
 
-    def create_output_with_separators(self, screens_text):
-        msg = ""
-        for screen_txt in screens_text:
-            msg += self.calculate_separator()
-            msg += screen_txt + "\n\n"
-
-        return msg
+    def tearDown(self):
+        super().tearDown()
+        self.teardown_glib()
 
     def schedule_screen_and_run(self, screen):
-        App.initialize()
-        App.get_scheduler().schedule_screen(screen)
-        App.run()
+        self.schedule_screen_and_run_with_glib(screen)
+
+
+class GLibInputProcessing_TestCase(InputProcessing_TestCase, GLibUtilityMixin):
+
+    def setUp(self):
+        super().setUp()
+        # re-initialize with GLib event loop
+        loop = self.create_glib_loop()
+        App.initialize(event_loop=loop)
+
+    def tearDown(self):
+        super().tearDown()
+        self.teardown_glib()

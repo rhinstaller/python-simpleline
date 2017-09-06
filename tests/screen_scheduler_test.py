@@ -23,17 +23,17 @@ from unittest import mock
 
 from simpleline.render.screen import UIScreen
 from simpleline.render.screen_handler import ScreenHandler
-from tests import schedule_screen_and_run, create_output_with_separators
+from tests import UtilityMixin
 
 
 @mock.patch('sys.stdout', new_callable=StringIO)
-class ScreenScheduler_TestCase(unittest.TestCase):
+class ScreenScheduler_TestCase(unittest.TestCase, UtilityMixin):
 
     def test_replace_screen(self, _):
         replace_screen = ShowedCounterScreen()
         screen = ShowedCounterScreen(replace_screen=replace_screen)
 
-        schedule_screen_and_run(screen)
+        self.schedule_screen_and_run(screen)
 
         self.assertEqual(screen.counter, 1)
         self.assertEqual(replace_screen.counter, 1)
@@ -42,7 +42,7 @@ class ScreenScheduler_TestCase(unittest.TestCase):
         switched_screen = ShowedCounterScreen()
         screen = ShowedCounterScreen(switched_screen)
 
-        schedule_screen_and_run(screen)
+        self.schedule_screen_and_run(screen)
 
         self.assertEqual(screen.counter, 2)
         self.assertEqual(switched_screen.counter, 1)
@@ -51,7 +51,7 @@ class ScreenScheduler_TestCase(unittest.TestCase):
         modal_screen = ModalTestScreen()
         screen = ModalTestScreen(modal_screen_render=modal_screen)
 
-        schedule_screen_and_run(screen)
+        self.schedule_screen_and_run(screen)
 
         self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_RENDER)
         self.assertEqual(modal_screen.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_RENDER)
@@ -60,7 +60,7 @@ class ScreenScheduler_TestCase(unittest.TestCase):
         modal_screen = ModalTestScreen()
         screen = ModalTestScreen(modal_screen_refresh=modal_screen)
 
-        schedule_screen_and_run(screen)
+        self.schedule_screen_and_run(screen)
 
         self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_REFRESH)
         self.assertEqual(modal_screen.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_REFRESH)
@@ -70,7 +70,7 @@ class ScreenScheduler_TestCase(unittest.TestCase):
         modal_render = ModalTestScreen()
         screen = ModalTestScreen(modal_screen_refresh=modal_refresh, modal_screen_render=modal_render)
 
-        schedule_screen_and_run(screen)
+        self.schedule_screen_and_run(screen)
 
         self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_RENDER)
         self.assertEqual(modal_refresh.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_REFRESH)
@@ -81,14 +81,14 @@ class ScreenScheduler_TestCase(unittest.TestCase):
         modal_render_outer = ModalTestScreen(modal_screen_render=modal_render_inner)
         screen = ModalTestScreen(modal_screen_render=modal_render_outer)
 
-        schedule_screen_and_run(screen)
+        self.schedule_screen_and_run(screen)
 
         self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_RENDER)
         # outer modal screen has AFTER_MODAL_RENDER because it was set before by inner loop
         self.assertEqual(modal_render_outer.copied_modal_counter, ModalTestScreen.AFTER_MODAL_RENDER)
         self.assertEqual(modal_render_inner.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_RENDER)
 
-    @mock.patch('simpleline.render.io_manager.InOutManager.get_user_input')
+    @mock.patch('simpleline.render.io_manager.InOutManager._get_input')
     def test_switch_screen_modal_input_order(self, mock_input, mock_stdout):
         modal_screen = InputAndDrawScreen("Modal")
         parent_screen = EmitDrawThenCreateModal(modal_screen, msg="Parent")
@@ -97,10 +97,10 @@ class ScreenScheduler_TestCase(unittest.TestCase):
                     "Parent",   # draw enqueued draw signal -- manually registered in refresh()
                     "Parent"]   # draw because modal screen was closed
 
-        schedule_screen_and_run(parent_screen)
+        self.schedule_screen_and_run(parent_screen)
 
         self.maxDiff = None
-        self.assertEqual(create_output_with_separators(expected), mock_stdout.getvalue())
+        self.assertEqual(self.create_output_with_separators(expected), mock_stdout.getvalue())
 
 
 class ShowedCounterScreen(UIScreen):
@@ -176,13 +176,16 @@ class EmitDrawThenCreateModal(UIScreen):
         super().__init__()
         self._refresh_screen = refresh_screen
         self.title = msg
+        self.input_required = False
 
     def refresh(self, args=None):
         super().refresh(args)
-        self.redraw()
         if self._refresh_screen:
+            self.redraw()
             ScreenHandler.push_screen_modal(self._refresh_screen)
             self._refresh_screen = None
+        else:
+            self.close()
 
 
 class InputAndDrawScreen(UIScreen):
@@ -190,3 +193,8 @@ class InputAndDrawScreen(UIScreen):
     def __init__(self, msg):
         super().__init__()
         self.title = msg
+        self.input_required = False
+
+    def refresh(self, args=None):
+        super().refresh(args)
+        self.close()
