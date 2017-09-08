@@ -3,7 +3,7 @@
 Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
-Version: 0.5
+Version: 0.6
 Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
@@ -60,6 +60,18 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Fri Sep 08 2017 Jiri Konecny <jkonecny@redhat.com> - 0.6-1
+- Implement the force quit all loops feature (jkonecny)
+- Improved GLib event loop testing (jkonecny)
+- Handle GLib event loop exceptions better (jkonecny)
+- Support for GLib event loop (jkonecny)
+- Wrap exceptions from handlers as ExceptionSignal (jkonecny)
+- Only highest priority events are processed in one iteration (jkonecny)
+- Move parts from MainLoop to AbstractEventLoop (jkonecny)
+- MainLoop won't wait in busy loop anymore (jkonecny)
+- Don't block loop when waiting on user input (jkonecny)
+- Fix user input lock (jkonecny)
+
 * Mon Sep 04 2017 Jiri Konecny <jkonecny@redhat.com> - 0.5-1
 - Fix exception in Screen input caused infinite loop (jkonecny)
 - Add test if app is initialized (jkonecny)
