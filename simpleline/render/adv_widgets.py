@@ -148,14 +148,13 @@ class YesNoDialog(UIScreen):
 class HelpScreen(UIScreen):
     """Screen to display a help message."""
 
-    title = N_("Help")
-
     def __init__(self, help_path):
         """
         :param help_path: help file name
         :type help_path: str
         """
         super().__init__()
+        self.title = N_("Help")
         self.help_path = help_path
 
     def refresh(self, args=None):
