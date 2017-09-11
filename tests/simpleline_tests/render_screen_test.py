@@ -257,7 +257,7 @@ class InputProcessing_TestCase(unittest.TestCase):
         App.get_scheduler().io_manager.get_user_input(prompt=prompt, hidden=True)
 
         self.assertTrue(self.pass_called)
-        self.assertEqual(self.pass_prompt, prompt)
+        self.assertEqual(self.pass_prompt.rstrip(), str(prompt))
 
 
 # HELPER CLASSES
