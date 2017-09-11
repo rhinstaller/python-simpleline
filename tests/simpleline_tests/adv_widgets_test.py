@@ -24,7 +24,7 @@ from io import StringIO
 
 from tests.simpleline_tests import UtilityMixin
 
-from simpleline.render.adv_widgets import GetInputScreen
+from simpleline.render.adv_widgets import GetInputScreen, GetPasswordInputScreen
 
 
 @patch('simpleline.render.io_manager.InOutManager._get_input')
@@ -78,6 +78,31 @@ class AdvWidgets_TestCase(unittest.TestCase, UtilityMixin):
 
         self.assertEqual(expected_output, stdout_mock.getvalue())
         self.assertTrue(self.args_used)
+
+    @patch("getpass.getpass")
+    def test_getpass(self, hiden_stdin_mock, stdout_mock, stdin_mock):
+        prompt = "Type input"
+        input_text = "user input"
+        screen = GetPasswordInputScreen(message=prompt)
+        hiden_stdin_mock.return_value = input_text
+
+        self.schedule_screen_and_run(screen)
+
+        self.assertEqual(screen.value, input_text)
+
+    @patch("getpass.getpass")
+    def test_getpass_with_condition(self, hiden_stdin_mock, stdout_mock, stdin_mock):
+        prompt = "Type input"
+        wrong_input = "wrong"
+        condition = lambda x, _: x != wrong_input
+        hiden_stdin_mock.side_effect = self.input_generator()
+
+        screen = GetPasswordInputScreen(message=prompt)
+        screen.add_acceptance_condition(condition)
+
+        self.schedule_screen_and_run(screen)
+
+        self.assertTrue(self.correct_input)
 
     def input_generator(self):
         for i in ("wrong", "correct"):

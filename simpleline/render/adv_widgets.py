@@ -235,3 +235,11 @@ class GetInputScreen(UIScreen):
                 return False
 
         return True
+
+
+class GetPasswordInputScreen(GetInputScreen):
+    """Screen for getting user password input."""
+
+    def __init__(self, message):
+        super().__init__(message)
+        self.hide_user_input = True
