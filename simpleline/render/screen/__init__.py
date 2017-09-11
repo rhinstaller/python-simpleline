@@ -48,6 +48,9 @@ class UIScreen(SignalHandler):
         self._screen_height = screen_height
         self._screen_ready = False
 
+        # do not print separator for this screen
+        self._no_separator = False
+
         # list that holds the content to be printed out
         self._window = WindowContainer(self.title)
 
@@ -94,6 +97,24 @@ class UIScreen(SignalHandler):
     def input_required(self, input_required):
         """Set if the screen should require input."""
         self._input_required = input_required
+
+    @property
+    def no_separator(self):
+        """Should we print separator for this screen?
+
+        :returns: True to print separator before this screen.
+                  False do not print separator.
+        """
+        return self._no_separator
+
+    @no_separator.setter
+    def no_separator(self, no_separator):
+        """Print or do not print separator.
+
+        :param no_separator: Specify if the separator should be printed.
+        :type no_separator: bool
+        """
+        self._no_separator = no_separator
 
     @property
     def window(self):

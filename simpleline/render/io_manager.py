@@ -112,8 +112,10 @@ class InOutManager(object):
         """
         # get the widget tree from the screen and show it in the screen
         try:
-            # separate the content on the screen from the stuff we are about to display now
-            print(self._spacer)
+            if not active_screen.ui_screen.no_separator:
+                # separate the content on the screen from the stuff we are about to display now
+                print(self._spacer)
+
             # print UIScreen content
             active_screen.ui_screen.show_all()
         except ExitMainLoop:
