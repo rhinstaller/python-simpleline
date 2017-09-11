@@ -48,6 +48,9 @@ class UIScreen(SignalHandler):
         self._screen_height = screen_height
         self._screen_ready = False
 
+        # ask for password
+        self._hide_user_input = False
+
         # do not print separator for this screen
         self._no_separator = False
 
@@ -102,7 +105,7 @@ class UIScreen(SignalHandler):
     def no_separator(self):
         """Should we print separator for this screen?
 
-        :returns: True to print separator before this screen.
+        :returns: True to print separator before this screen (default).
                   False do not print separator.
         """
         return self._no_separator
@@ -112,9 +115,30 @@ class UIScreen(SignalHandler):
         """Print or do not print separator.
 
         :param no_separator: Specify if the separator should be printed.
-        :type no_separator: bool
+        :type no_separator: bool (default: False).
         """
         self._no_separator = no_separator
+
+    @property
+    def hide_user_input(self):
+        """Hide typed user input.
+
+        This is main solution how to ask for password.
+
+        :returns: True if user input should be hidden.
+                  False otherwise (default).
+        """
+        return self._hide_user_input
+
+    @hide_user_input.setter
+    def hide_user_input(self, hide_input):
+        """Should be the user input hidden.
+
+        :param hide_input: True if user input should be hidden.
+                          False if not (default).
+        :type hide_input: bool (default: False).
+        """
+        self._hide_user_input = hide_input
 
     @property
     def window(self):
