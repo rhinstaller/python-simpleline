@@ -177,6 +177,9 @@ class UIScreen(SignalHandler):
         lines = widget.get_lines()
         num_lines = len(lines)
 
+        if num_lines == 0:
+            return
+
         prompt_height = 2
         real_screen_height = self._screen_height - prompt_height
 
