@@ -2,20 +2,22 @@
 
 from simpleline import App
 from simpleline.render.screen import UIScreen
+from simpleline.render.screen_handler import ScreenHandler
 from simpleline.render.widgets import TextWidget
 
 
 class HelloWorld(UIScreen):
-    title = u"Hello World"  # title is printed if there is nothing else
+
+    def __init__(self):
+        super().__init__(title=u"Hello World")
 
     def refresh(self, args=None):
         super().refresh()
-        self.window.add(TextWidget("Hello World"))
-        self.window.add_separator()
+        self.window.add_with_separator(TextWidget("Body text"))
 
 
 if __name__ == "__main__":
     App.initialize()
     screen = HelloWorld()
-    App.get_scheduler().schedule_screen(screen)
+    ScreenHandler.schedule_screen(screen)
     App.run()

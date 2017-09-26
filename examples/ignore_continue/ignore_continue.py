@@ -3,12 +3,12 @@
 from simpleline import App
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen import UIScreen, InputState
+from simpleline.render.screen_handler import ScreenHandler
 from simpleline.render.widgets import TextWidget, CenterWidget
 
 
-class MyApp(App):
-    def application_quit_cb(self):
-        print("Application is closing. Bye!")
+def application_quit_cb(args):
+    print("Application is closing. Bye!")
 
 
 class InfiniteScreen(UIScreen):
@@ -18,13 +18,13 @@ class InfiniteScreen(UIScreen):
         self.continue_count = 0
 
     def refresh(self, args=None):
-        """Print text to user with number of continue clicked"""
+        """Print text to user with number of continue clicked."""
         super().refresh(args)
         text = TextWidget("You pressed {} times on continue".format(self.continue_count))
         self.window.add(CenterWidget(text))
 
     def input(self, args, key):
-        """Catch 'c' keys for continue and increase counter"""
+        """Catch 'c' keys for continue and increase counter."""
         if key == Prompt.CONTINUE:
             self.continue_count += 1
             self.redraw()
@@ -36,5 +36,7 @@ class InfiniteScreen(UIScreen):
 if __name__ == "__main__":
     App.initialize()
     screen = InfiniteScreen()
-    App.get_scheduler().schedule_screen(screen)
+    loop = App.get_event_loop()
+    loop.set_quit_callback(application_quit_cb)
+    ScreenHandler.schedule_screen(screen)
     App.run()

@@ -2,62 +2,80 @@
 
 from simpleline import App
 from simpleline.render.adv_widgets import PasswordDialog
+from simpleline.render.containers import ListRowContainer
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen import UIScreen, InputState
-from simpleline.render.widgets import TextWidget, ColumnWidget, CenterWidget
+from simpleline.render.screen_handler import ScreenHandler
+from simpleline.render.widgets import TextWidget, CenterWidget
 
 
 class Hub(UIScreen):
-
-    KEY_USER = "1"
-    KEY_SURNAME = "2"
-    KEY_PASSWORD = "3"
 
     def __init__(self):
         super().__init__("Hub")
         self._name_spoke = SetNameScreen("First name", "John")
         self._surname_spoke = SetNameScreen("Surname", "Doe")
-        self._pass_spoke = PasswordDialog()
+        self._password_spoke = PasswordDialog()
+        self._container = None
 
     def refresh(self, args=None):
         super().refresh(args)
 
+        # Add special header before our items
         header = TextWidget("Please complete all the spokes to continue")
         header = CenterWidget(header)
-        self.window.add(header)
+        self.window.add_with_separator(header, blank_lines=2)
 
-        left = [TextWidget("{}) First name".format(self.KEY_USER)),
-                TextWidget("   {}".format(self._name_spoke.value)),
-                TextWidget("{}) Surname".format(self.KEY_SURNAME)),
-                TextWidget("   {}".format(self._surname_spoke.value))]
-        right = [TextWidget("{}) Password".format(self.KEY_PASSWORD))]
+        # Create a container and add items to it
+        # It will add numbering, process user input and positioning for us.
+        self._container = ListRowContainer(2)
 
-        if self._pass_spoke.answer:
-            right.append(TextWidget("   Password is set"))
+        widget = self._create_name_widget()
+        self._container.add(widget, self._push_screen_callback, self._name_spoke)
 
-        col = ColumnWidget([(30, left), (30, right)], 5)
-        self.window.add_separator(2)
-        self.window.add(col)
-        self.window.add_separator()
+        widget = self._create_surname_widget()
+        self._container.add(widget, self._push_screen_callback, self._surname_spoke)
+
+        widget = self._create_password_widget()
+        self._container.add(widget, self._push_screen_callback, self._password_spoke)
+
+        self.window.add_with_separator(self._container)
+
+    def _create_name_widget(self):
+        msg = "First name"
+        if self._name_spoke.value:
+            msg += "\n{}".format(self._name_spoke.value)
+
+        return TextWidget(msg)
+
+    def _create_surname_widget(self):
+        msg = "Surname"
+        if self._surname_spoke.value:
+            msg += "\n{}".format(self._surname_spoke.value)
+
+        return TextWidget(msg)
+
+    def _create_password_widget(self):
+        msg = "Password"
+        if self._password_spoke.answer:
+            msg += "\nPassword set."
+
+        return TextWidget(msg)
 
     def input(self, args, key):
         """Run spokes based on the user choice."""
-        if key == self.KEY_USER:  # set first name
-            App.get_scheduler().push_screen(self._name_spoke)
-            return InputState.PROCESSED
-        elif key == self.KEY_SURNAME:  # set surname
-            App.get_scheduler().push_screen(self._surname_spoke)
-            return InputState.PROCESSED
-        elif key == self.KEY_PASSWORD:  # set password
-            App.get_scheduler().push_screen(self._pass_spoke)
+        if self._container.process_user_input(key):
             return InputState.PROCESSED
         elif key == Prompt.CONTINUE:
-            if self._name_spoke and self._surname_spoke and self._pass_spoke.answer:
+            if self._name_spoke and self._surname_spoke and self._password_spoke.answer:
                 return key
             else:  # catch 'c' key if not everything set
                 return InputState.DISCARDED
         else:
             return key
+
+    def _push_screen_callback(self, target_screen):
+        ScreenHandler.push_screen(target_screen)
 
     def prompt(self, args=None):
         """Add information to prompt for user."""
@@ -92,5 +110,5 @@ class SetNameScreen(UIScreen):
 if __name__ == "__main__":
     App.initialize()
     screen = Hub()
-    App.get_scheduler().schedule_screen(screen)
+    ScreenHandler.schedule_screen(screen)
     App.run()
