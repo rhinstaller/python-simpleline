@@ -24,8 +24,10 @@ elif [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
     exit 0
 fi
 
+PROJECT_NAME=${1%%/}
+
 pushd $(pwd)
-cd $(dirname $0)
-PYTHONPATH="..:." python3 ./$1/$1.py
+cd $(dirname $0)/
+PYTHONPATH="..:." python3 ./$PROJECT_NAME/$PROJECT_NAME.py
 popd
 
