@@ -14,6 +14,6 @@ from simpleline.render.adv_widgets import HelpScreen
 if __name__ == "__main__":
     App.initialize()
     # You need to pass file with help text to the screen.
-    s = HelpScreen("./help/example_help.txt")
+    s = HelpScreen("./03_help/example_help.txt")
     ScreenHandler.schedule_screen(s)
     App.run()
