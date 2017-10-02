@@ -1,4 +1,4 @@
-# Screen scheduling GLib test classes.
+# Helper functions for the test classes.
 #
 # Copyright (C) 2017  Red Hat, Inc.
 #
@@ -17,21 +17,25 @@
 # Red Hat, Inc.
 #
 
-
-from tests.screen_scheduler_test import ScreenScheduler_TestCase
-from tests.glib_tests import GLibUtilityMixin
+from simpleline import App
 
 
-class GLibScrenScheduler_TestCase(ScreenScheduler_TestCase, GLibUtilityMixin):
+class UtilityMixin(object):
 
-    def setUp(self):
-        super().setUp()
-        self.loop = None
-        self.timeout_error = False
+    def calculate_separator(self, width=80):
+        separator = "\n".join(2 * [width * "="])
+        separator += "\n"  # print adds another newline
+        return separator
 
-    def tearDown(self):
-        super().tearDown()
-        self.teardown_glib()
+    def create_output_with_separators(self, screens_text):
+        msg = ""
+        for screen_txt in screens_text:
+            msg += self.calculate_separator()
+            msg += screen_txt + "\n\n"
+
+        return msg
 
     def schedule_screen_and_run(self, screen):
-        self.schedule_screen_and_run_with_glib(screen)
+        App.initialize()
+        App.get_scheduler().schedule_screen(screen)
+        App.run()

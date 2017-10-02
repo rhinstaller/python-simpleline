@@ -18,10 +18,9 @@
 #
 
 
-from tests.render_screen_test import SimpleUIScreenProcessing_TestCase, InputProcessing_TestCase
-from tests.glib_tests import GLibUtilityMixin
-
 from simpleline import App
+from tests.simpleline_tests.glib_tests import GLibUtilityMixin
+from tests.simpleline_tests.render_screen_test import SimpleUIScreenProcessing_TestCase, InputProcessing_TestCase
 
 
 class GLibSimpleUIScreenProcessing_TestCase(SimpleUIScreenProcessing_TestCase, GLibUtilityMixin):
