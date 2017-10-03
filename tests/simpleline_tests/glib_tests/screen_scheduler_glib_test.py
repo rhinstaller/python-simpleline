@@ -22,7 +22,7 @@ from tests.simpleline_tests.glib_tests import GLibUtilityMixin
 from tests.simpleline_tests.screen_scheduler_test import ScreenScheduler_TestCase
 
 
-class GLibScrenScheduler_TestCase(ScreenScheduler_TestCase, GLibUtilityMixin):
+class GLibScreenScheduler_TestCase(ScreenScheduler_TestCase, GLibUtilityMixin):
 
     def setUp(self):
         super().setUp()
