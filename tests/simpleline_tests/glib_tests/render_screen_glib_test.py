@@ -39,6 +39,10 @@ class GLibSimpleUIScreenProcessing_TestCase(SimpleUIScreenProcessing_TestCase, G
         self.schedule_screen_and_run_with_glib(screen)
 
 
+# Hack to avoid running the original class thanks to import
+del SimpleUIScreenProcessing_TestCase
+
+
 class GLibInputProcessing_TestCase(InputProcessing_TestCase, GLibUtilityMixin):
 
     def setUp(self):
@@ -50,3 +54,7 @@ class GLibInputProcessing_TestCase(InputProcessing_TestCase, GLibUtilityMixin):
     def tearDown(self):
         super().tearDown()
         self.teardown_glib()
+
+
+# Hack to avoid running the original class thanks to import
+del InputProcessing_TestCase

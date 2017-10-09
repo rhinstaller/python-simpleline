@@ -30,3 +30,7 @@ class GLibProcessEvents_TestCase(ProcessEvents_TestCase, GLibUtilityMixin):
 
     def create_loop(self):
         self.create_glib_loop()
+
+
+# Hack to avoid running the original class thanks to import
+del ProcessEvents_TestCase

@@ -35,3 +35,7 @@ class GLibScreenScheduler_TestCase(ScreenScheduler_TestCase, GLibUtilityMixin):
 
     def schedule_screen_and_run(self, screen):
         self.schedule_screen_and_run_with_glib(screen)
+
+
+# Hack to avoid running the original class thanks to import
+del ScreenScheduler_TestCase
