@@ -1,4 +1,4 @@
-python-simpleline
+Python Simpleline
 =================
 
 This is a text UI framework originally which was a part of the
@@ -27,7 +27,16 @@ Dependencies
 This is a Python3-only project. This code should not be difficult to migrate to
 Python2. However, there is no need from the community, so it is only compatible
 with Python3 at the moment.
-No special libraries are required to use this library.
+No special libraries are required to use this library. If you want to use glib
+event loop instead of the original one you need to install glib and Python3
+gobject introspection.
 
 If you want to run tests (`make ci`), you need to install
-[Pocketlint](https://github.com/rhinstaller/pocketlint).
+[Pocketlint](https://github.com/rhinstaller/pocketlint) and glib with gobject
+introspection for Python3.
+
+Note
+====
+
+Thanks to Martin Sivák for the original Anaconda project. It was really nice
+starting place for the new Simpleline's form.
