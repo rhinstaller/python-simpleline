@@ -25,7 +25,8 @@ from unittest.mock import patch
 from simpleline import App
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen import UIScreen
-from simpleline.render.widgets import TextWidget, SeparatorWidget, CheckboxWidget, CenterWidget, ColumnWidget
+from simpleline.render.widgets import TextWidget, SeparatorWidget, CheckboxWidget, CenterWidget, ColumnWidget, \
+                                      EntryWidget
 
 
 class BaseWidgets_TestCase(unittest.TestCase):
@@ -197,6 +198,42 @@ class Widgets_TestCase(BaseWidgets_TestCase):
         expected_result = [u"   Test"]
 
         self.evaluate_result(w.get_lines(), expected_result)
+
+    def test_entry_widget(self):
+        title = "Title"
+        value = "Value"
+        w = EntryWidget(title=title, value=value)
+
+        w.render(30)
+
+        expected_result = [title,
+                           value]
+
+        self.evaluate_result(w.get_lines(), expected_result)
+
+    def test_entry_too_long(self):
+        title = "Title too long"
+        value = "Value also too long"
+        w = EntryWidget(title=title, value=value)
+
+        w.render(10)
+
+        expected_result = [u"Title too",
+                           u"long",
+                           u"Value also",
+                           u"too long"]
+
+        self.evaluate_result(w.get_lines(), expected_result)
+
+    def test_entry_value_empty(self):
+        title = "Title"
+        w = EntryWidget(title=title)
+
+        w.render(20)
+
+        expected_result = [title]
+
+        self.evaluate_result(w.get_lines(), expected_result=expected_result)
 
 
 @patch('simpleline.render.io_manager.InOutManager._get_input')

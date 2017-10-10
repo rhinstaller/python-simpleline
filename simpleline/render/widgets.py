@@ -265,6 +265,42 @@ class TextWidget(Widget):
         self.write(self._text, width=width, wordwrap=True)
 
 
+class EntryWidget(TextWidget):
+    """This is the easy way how to generate entry items for containers.
+
+    If the numbering in a container is turned on the output looks like:
+
+    N) title
+       value
+
+    Without numbering turned on:
+
+    title
+    value
+    """
+
+    def __init__(self, title, value=None):
+        """ Create Entry widget instance.
+
+        :param title: Title of this entry.
+        :type title: String.
+
+        :param value: Actual value printed in second line below the title.
+        :type value: String.
+        """
+        text = self._create_text(title=title, value=value)
+        super().__init__(text)
+
+    def _create_text(self, title, value):
+        msg = title
+
+        if value:
+            msg += "\n"
+            msg += value
+
+        return msg
+
+
 class SeparatorWidget(Widget):
     """Print empty line."""
 
