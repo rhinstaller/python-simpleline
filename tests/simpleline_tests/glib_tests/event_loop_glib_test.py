@@ -1,4 +1,4 @@
-# Rendering screen test classes for GLib implementation.
+# Event loop test classes for GLib implementation.
 #
 # Copyright (C) 2017  Red Hat, Inc.
 #
@@ -17,37 +17,20 @@
 # Red Hat, Inc.
 #
 
-
-from tests.render_screen_test import SimpleUIScreenProcessing_TestCase, InputProcessing_TestCase
-from tests.glib_tests import GLibUtilityMixin
-
-from simpleline import App
+from tests.simpleline_tests.event_loop_test import ProcessEvents_TestCase
+from tests.simpleline_tests.glib_tests import GLibUtilityMixin
 
 
-class GLibSimpleUIScreenProcessing_TestCase(SimpleUIScreenProcessing_TestCase, GLibUtilityMixin):
+class GLibProcessEvents_TestCase(ProcessEvents_TestCase, GLibUtilityMixin):
     """Run all the tests in ProcessEvents test case but with GLib event loop."""
 
-    def setUp(self):
-        super().setUp()
-        self.loop = None
-        self.timeout_error = False
-
     def tearDown(self):
         super().tearDown()
         self.teardown_glib()
 
-    def schedule_screen_and_run(self, screen):
-        self.schedule_screen_and_run_with_glib(screen)
+    def create_loop(self):
+        self.create_glib_loop()
 
 
-class GLibInputProcessing_TestCase(InputProcessing_TestCase, GLibUtilityMixin):
-
-    def setUp(self):
-        super().setUp()
-        # re-initialize with GLib event loop
-        loop = self.create_glib_loop()
-        App.initialize(event_loop=loop)
-
-    def tearDown(self):
-        super().tearDown()
-        self.teardown_glib()
+# Hack to avoid running the original class thanks to import
+del ProcessEvents_TestCase
