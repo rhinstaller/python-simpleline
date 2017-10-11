@@ -53,7 +53,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
 
         self.assertEqual(self.calculate_separator(width), stdout_mock.getvalue())
 
-    def test_no_separator(self, stdout_mock):
+    def test_zero_width_no_separator(self, stdout_mock):
         ui_screen = EmptyScreen()
         width = 0
 
@@ -72,6 +72,17 @@ class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
         App.run()
 
         self.assertEqual("", stdout_mock.getvalue())
+
+    def test_no_separator(self, stdout_mock):
+        print_text = "testing"
+        screen = NoSeparatorScreen(print_text)
+
+        self.schedule_screen_and_run(screen)
+        self.schedule_screen_and_run(screen)
+
+        expected_output = print_text + "\n" + print_text + "\n"
+
+        self.assertEqual(expected_output, stdout_mock.getvalue())
 
 
 class SimpleUIScreenFeatures_TestCase(unittest.TestCase):
@@ -246,7 +257,7 @@ class InputProcessing_TestCase(unittest.TestCase):
         App.get_scheduler().io_manager.get_user_input(prompt=prompt, hidden=True)
 
         self.assertTrue(self.pass_called)
-        self.assertEqual(self.pass_prompt, prompt)
+        self.assertEqual(self.pass_prompt.rstrip(), str(prompt))
 
 
 # HELPER CLASSES
@@ -334,6 +345,19 @@ class FailedSetupScreen(UIScreen):
     def setup(self, args):
         super().setup(args)
         return False
+
+
+class NoSeparatorScreen(UIScreen):
+
+    def __init__(self, print_string):
+        super().__init__()
+        self.input_required = False
+        self.no_separator = True
+        self._print_string = print_string
+
+    def show_all(self):
+        print(self._print_string)
+        self.close()
 
 
 class NoInputScreen(UIScreen):

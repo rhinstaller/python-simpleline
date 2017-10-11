@@ -254,8 +254,9 @@ class ScreenScheduler(object):
         top_screen = self._get_last_screen()
         ui_screen = top_screen.ui_screen
         prompt = ui_screen.prompt(top_screen.args)
+        hide_user_input = ui_screen.hide_user_input
 
-        self._io_manager.get_user_input_async(prompt, self._process_input)
+        self._io_manager.get_user_input_async(prompt, self._process_input, hidden=hide_user_input)
 
     def _process_input(self, user_input):
         active_screen = self._get_last_screen()

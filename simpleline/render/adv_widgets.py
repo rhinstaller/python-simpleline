@@ -21,6 +21,7 @@ import sys
 
 from simpleline import App
 from simpleline.render import widgets
+from simpleline.render.containers import WindowContainer
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen import UIScreen, InputState
 from simpleline.utils.i18n import _, N_, C_
@@ -148,14 +149,13 @@ class YesNoDialog(UIScreen):
 class HelpScreen(UIScreen):
     """Screen to display a help message."""
 
-    title = N_("Help")
-
     def __init__(self, help_path):
         """
         :param help_path: help file name
         :type help_path: str
         """
         super().__init__()
+        self.title = N_("Help")
         self.help_path = help_path
 
     def refresh(self, args=None):
@@ -176,3 +176,70 @@ class HelpScreen(UIScreen):
 
     def prompt(self, args=None):
         return Prompt(_("Press %s to return") % Prompt.ENTER)
+
+
+class GetInputScreen(UIScreen):
+    """Screen for getting user input."""
+
+    def __init__(self, message):
+        """
+        :param message: Prompt printed before user input.
+        :type message: str
+        """
+        super().__init__()
+        self._message = message
+        self._value = None
+        self._conditions = []
+
+    @property
+    def value(self):
+        """User input."""
+        return self._value
+
+    def add_acceptance_condition(self, acceptance_function, args=None):
+        """Add acceptance condition to the conditions list.
+
+        :param acceptance_function: Functions that accepts or rejects a user input.
+        :type acceptance_function: `function(input, args) -> bool`  - function which takes
+                                   user input (string) and arguments (`args`) and return True when input is accepted or
+                                   False if rejected so we will ask for a new input.
+
+        :param args: Second argument for `acceptance_function` the first one will be user input.
+        :type args: Anything.
+        """
+        self._conditions.append((acceptance_function, args))
+
+    def clear_acceptance_conditions(self):
+        """Clear list of the acceptance conditions."""
+        self._conditions.clear()
+
+    def refresh(self, args=None):
+        super().refresh(args)
+        self._window = WindowContainer()
+
+    def prompt(self, args=None):
+        return Prompt(message=self._message)
+
+    def input(self, args, key):
+        if not self._test_input(key):
+            return InputState.DISCARDED
+
+        self._value = key
+        self.close()
+
+        return InputState.PROCESSED
+
+    def _test_input(self, key):
+        for f, args in self._conditions:
+            if not f(key, args):
+                return False
+
+        return True
+
+
+class GetPasswordInputScreen(GetInputScreen):
+    """Screen for getting user password input."""
+
+    def __init__(self, message):
+        super().__init__(message)
+        self.hide_user_input = True

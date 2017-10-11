@@ -112,8 +112,10 @@ class InOutManager(object):
         """
         # get the widget tree from the screen and show it in the screen
         try:
-            # separate the content on the screen from the stuff we are about to display now
-            print(self._spacer)
+            if not active_screen.ui_screen.no_separator:
+                # separate the content on the screen from the stuff we are about to display now
+                print(self._spacer)
+
             # print UIScreen content
             active_screen.ui_screen.show_all()
         except ExitMainLoop:
@@ -246,27 +248,34 @@ class InOutManager(object):
         :param hidden: whether typed characters should be echoed or not
         :type hidden: bool
         """
-        if hidden:
-            data = self._getpass_func(prompt)
-        else:
-            widget = TextWidget(str(prompt))
-            widget.render(self._width)
-            lines = widget.get_lines()
-            sys.stdout.write("\n".join(lines) + " ")
+        text_prompt = self._prompt_to_text(prompt)
+
+        if not hidden:
+            sys.stdout.write(text_prompt)
             sys.stdout.flush()
-            if not self._input_lock.acquire(False):
-                # raw_input is already running
-                return
-            else:
-                # lock acquired, we can run input
-                try:
+
+        if not self._input_lock.acquire(False):
+            # raw_input is already running
+            return
+        else:
+            # lock acquired, we can run input
+            try:
+                if hidden:
+                    data = self._getpass_func(text_prompt)
+                else:
                     data = self._get_input()
-                except EOFError:
-                    data = ""
-                finally:
-                    self._input_lock.release()
+            except EOFError:
+                data = ""
+            finally:
+                self._input_lock.release()
 
         self._event_loop.enqueue_signal(InputReadySignal(self, data))
+
+    def _prompt_to_text(self, prompt):
+        widget = TextWidget(str(prompt))
+        widget.render(self._width)
+        lines = widget.get_lines()
+        return "\n".join(lines) + " "
 
     def _get_input(self):
         return input()
