@@ -241,7 +241,4 @@ class MainLoop(AbstractEventLoop):
                 except Exception:  # pylint: disable=broad-except
                     self.enqueue_signal(ExceptionSignal(self))
         elif type(signal) is ExceptionSignal:
-            self._raise_exception(signal)
-
-    def _raise_exception(self, signal):
-        raise signal.exception_info[0] from signal.exception_info[1]
+            self.kill_app_with_traceback(signal)

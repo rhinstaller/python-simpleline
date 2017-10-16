@@ -21,6 +21,8 @@
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
 
+import sys
+
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 
@@ -156,6 +158,28 @@ class AbstractEventLoop(metaclass=ABCMeta):
         :type args: Anything.
         """
         self._quit_callback = QuitCallback(callback, args)
+
+    def kill_app_with_traceback(self, exception_signal, data=None):
+        """Print exception and screen stack and kill the application.
+
+        :param exception_signal: ExceptionSignal encapsulating the original exception which will be passed to
+                                 the sys.excepthook method.
+        :type exception_signal: Instance of `simpleline.event_loop.signals.ExceptionSignal` class.
+
+        :param data: To be usable as signal handler.
+        :type data: Anything will be ignored.
+        """
+        log.debug("Unhandled error in handler raised:")
+        sys.excepthook(*exception_signal.exception_info)
+
+        from simpleline import App
+        stack_dump = App.get_scheduler().dump_stack()
+        print("")
+        print(stack_dump)
+        log.error(stack_dump)
+
+        log.debug("Killing application!")
+        sys.exit(1)
 
     def _create_event_handler(self, callback, data):
         """Create event handler data object and return it."""

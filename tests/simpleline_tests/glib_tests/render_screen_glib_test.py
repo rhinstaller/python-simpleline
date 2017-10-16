@@ -20,7 +20,8 @@
 
 from simpleline import App
 from tests.simpleline_tests.glib_tests import GLibUtilityMixin
-from tests.simpleline_tests.render_screen_test import SimpleUIScreenProcessing_TestCase, InputProcessing_TestCase
+from tests.simpleline_tests.render_screen_test import SimpleUIScreenProcessing_TestCase, InputProcessing_TestCase, \
+                                                      ScreenException_TestCase
 
 
 class GLibSimpleUIScreenProcessing_TestCase(SimpleUIScreenProcessing_TestCase, GLibUtilityMixin):
@@ -41,6 +42,20 @@ class GLibSimpleUIScreenProcessing_TestCase(SimpleUIScreenProcessing_TestCase, G
 
 # Hack to avoid running the original class thanks to import
 del SimpleUIScreenProcessing_TestCase
+
+
+class GLibScreenException_TestCase(ScreenException_TestCase, GLibUtilityMixin):
+
+    def tearDown(self):
+        super().tearDown()
+        self.teardown_glib()
+
+    def schedule_screen_and_run(self, screen):
+        self.schedule_screen_and_run_with_glib(screen)
+
+
+# Hack to avoid running the original class thanks to import
+del ScreenException_TestCase
 
 
 class GLibInputProcessing_TestCase(InputProcessing_TestCase, GLibUtilityMixin):

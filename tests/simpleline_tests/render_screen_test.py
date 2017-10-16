@@ -161,19 +161,31 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase, UtilityMixin):
 
 
 @mock.patch('sys.stdout', new_callable=StringIO)
+@mock.patch('simpleline.event_loop.AbstractEventLoop.kill_app_with_traceback')
 class ScreenException_TestCase(unittest.TestCase, UtilityMixin):
 
-    def test_raise_exception_in_refresh(self, _):
+    def setUp(self):
+        self._force_quit_called = False
+
+    # The original method calls sys.exit(1) so we don't need to test this functionality
+    def force_quit_mock(self, signal, data=None):
+        self._force_quit_called = True
+        loop = App.get_event_loop()
+        loop.force_quit()
+
+    def test_raise_exception_in_refresh(self, mock_kill_app, _):
         screen = ExceptionTestScreen(ExceptionTestScreen.REFRESH)
+        mock_kill_app.side_effect = self.force_quit_mock
 
-        with self.assertRaises(TestRefreshException):
-            self.schedule_screen_and_run(screen)
+        self.schedule_screen_and_run(screen)
+        self.assertTrue(self._force_quit_called)
 
-    def test_raise_exception_in_rendering(self, _):
+    def test_raise_exception_in_rendering(self, mock_kill_app, _):
         screen = ExceptionTestScreen(ExceptionTestScreen.REDRAW)
+        mock_kill_app.side_effect = self.force_quit_mock
 
-        with self.assertRaises(TestRedrawException):
-            self.schedule_screen_and_run(screen)
+        self.schedule_screen_and_run(screen)
+        self.assertTrue(self._force_quit_called)
 
 
 @mock.patch('sys.stdout')
