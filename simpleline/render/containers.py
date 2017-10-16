@@ -109,7 +109,8 @@ class Container(Widget):
         if res is not None and res >= 0:
             try:
                 item = self._items[res]
-                item.callback(item.data)
+                if item.callback is not None:
+                    item.callback(item.data)
                 return True
             except IndexError:  # container widget with this id doesn't exists
                 return False
