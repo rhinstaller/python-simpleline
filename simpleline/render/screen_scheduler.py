@@ -93,6 +93,10 @@ class ScreenScheduler(object):
         """
         return self._screen_stack.empty()
 
+    def dump_stack(self):
+        """Get string representation of actual screen stack."""
+        return self._screen_stack.dump_stack()
+
     def schedule_screen(self, ui_screen, args=None):
         """Add screen to the bottom of the stack.
 
