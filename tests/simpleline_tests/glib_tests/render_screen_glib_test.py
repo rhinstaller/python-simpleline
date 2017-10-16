@@ -18,7 +18,6 @@
 #
 
 
-from simpleline import App
 from tests.simpleline_tests.glib_tests import GLibUtilityMixin
 from tests.simpleline_tests.render_screen_test import SimpleUIScreenProcessing_TestCase, InputProcessing_TestCase, \
                                                       ScreenException_TestCase
@@ -62,9 +61,7 @@ class GLibInputProcessing_TestCase(InputProcessing_TestCase, GLibUtilityMixin):
 
     def setUp(self):
         super().setUp()
-        # re-initialize with GLib event loop
-        loop = self.create_glib_loop()
-        App.initialize(event_loop=loop)
+        self.setup_glib()
 
     def tearDown(self):
         super().tearDown()
