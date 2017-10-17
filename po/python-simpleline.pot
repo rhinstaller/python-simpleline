@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-09-08 15:15+0200\n"
+"POT-Creation-Date: 2017-10-17 12:15+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,37 +17,37 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../simpleline/render/adv_widgets.py:38
+#: ../simpleline/render/adv_widgets.py:39
 msgid "Error"
 msgstr ""
 
-#: ../simpleline/render/adv_widgets.py:47
+#: ../simpleline/render/adv_widgets.py:48
 #, python-format
 msgid "Press %s to exit"
 msgstr ""
 
-#: ../simpleline/render/adv_widgets.py:66
+#: ../simpleline/render/adv_widgets.py:67
 msgid "Password"
 msgstr ""
 
-#: ../simpleline/render/adv_widgets.py:67
+#: ../simpleline/render/adv_widgets.py:68
 msgid "Enter your passphrase"
 msgstr ""
 
-#: ../simpleline/render/adv_widgets.py:76
+#: ../simpleline/render/adv_widgets.py:77
 msgid "Passphrase: "
 msgstr ""
 
-#: ../simpleline/render/adv_widgets.py:109
+#: ../simpleline/render/adv_widgets.py:110
 msgid "Question"
 msgstr ""
 
-#: ../simpleline/render/adv_widgets.py:119
+#: ../simpleline/render/adv_widgets.py:120
 #, python-format
 msgid "Please respond '%(yes)s' or '%(no)s'"
 msgstr ""
 
-#: ../simpleline/render/adv_widgets.py:151
+#: ../simpleline/render/adv_widgets.py:158
 msgid "Help"
 msgstr ""
 

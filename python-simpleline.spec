@@ -3,7 +3,7 @@
 Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
-Version: 0.6
+Version: 0.7
 Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
@@ -60,6 +60,28 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Tue Oct 17 2017 Jiri Konecny <jkonecny@redhat.com> - 0.7-1
+- Fix crash when container callback is not set (jkonecny)
+- Add EntryWidget to show item title and value (jkonecny)
+- Add GetPasswordInputScreen for getting passwords (jkonecny)
+- UIScreen can have hidden input (jkonecny)
+- Move getpass func inside locks (jkonecny)
+- Implement GetInputScreen (jkonecny)
+- Do not print new line with empty container (jkonecny)
+- Add no_separator to UIScreen (jkonecny)
+- Fix HelpScreen title (jkonecny)
+- Remove original classes from GLib tests (jkonecny)
+- Fix test case name (jkonecny)
+- Move tests to subfolder (jkonecny)
+- Move base widgets as second example (jkonecny)
+- Add example with basic widgets usage (jkonecny)
+- Improve README.md (jkonecny)
+- Improve example starting script (jkonecny)
+- Add glib loop example (jkonecny)
+- Add prefixes to examples to impress difficulty (jkonecny)
+- Add comments to the examples (jkonecny)
+- Update examples to use new features (jkonecny)
+
 * Fri Sep 08 2017 Jiri Konecny <jkonecny@redhat.com> - 0.6-1
 - Implement the force quit all loops feature (jkonecny)
 - Improved GLib event loop testing (jkonecny)
