@@ -301,6 +301,21 @@ class ContainerInput_TestCase(unittest.TestCase):
 
         self.assertFalse(c.process_user_input("3"))
 
+    def test_list_without_callback(self, out_mock, in_mock):
+        c = ListRowContainer(1)
+
+        c.add(TextWidget("Test"))
+
+        self.assertTrue(c.process_user_input("1"))
+
+    def test_list_callback_without_data(self, out_mock, in_mock):
+        c = ListRowContainer(1)
+
+        c.add(TextWidget("Test"), self._callback)
+
+        self.assertTrue(c.process_user_input("1"))
+        self.assertIsNone(self._callback_called)
+
     def test_list_correct_input_processing(self, out_mock, in_mock):
         c = ListRowContainer(1)
 
