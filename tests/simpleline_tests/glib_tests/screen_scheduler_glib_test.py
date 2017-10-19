@@ -24,11 +24,6 @@ from tests.simpleline_tests.screen_scheduler_test import ScreenScheduler_TestCas
 
 class GLibScreenScheduler_TestCase(ScreenScheduler_TestCase, GLibUtilityMixin):
 
-    def setUp(self):
-        super().setUp()
-        self.loop = None
-        self.timeout_error = False
-
     def tearDown(self):
         super().tearDown()
         self.teardown_glib()

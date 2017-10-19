@@ -84,6 +84,23 @@ class ScreenStack(object):
         """
         self._screens.insert(0, screen)
 
+    def dump_stack(self):
+        """Dump screen stack structure.
+
+        :returns: Screen stack representation.
+        :rtype: str
+        """
+        msg = '======= Screen stack =======\n'
+        msg += '----------- TOP ------------\n'
+
+        for screen in reversed(self._screens):
+            msg += str(screen)
+            msg += "\n"
+
+        msg += '============================\n'
+
+        return msg
+
 
 class ScreenData(object):
     """Inner data class to store screen data."""

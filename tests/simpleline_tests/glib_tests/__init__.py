@@ -51,13 +51,16 @@ class GLibUtilityMixin(object):
         source.set_callback(self._quit_loop, loop)
         source.attach(context)
 
-    def schedule_screen_and_run_with_glib(self, screen):
+    def setup_glib(self):
         self.create_glib_loop()
-
         App.initialize(event_loop=self.loop)
-        App.get_scheduler().schedule_screen(screen)
-        App.run()
 
     def teardown_glib(self):
         if self.timeout_error:
             raise AssertionError("Loop was killed by timeout!")
+
+    def schedule_screen_and_run_with_glib(self, screen):
+        self.setup_glib()
+
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
