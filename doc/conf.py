@@ -58,9 +58,21 @@ author = 'Jiri Konecny'
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-#
+
+
+def get_version():
+    """Read version from ../python-simpleline.spec ."""
+    import re
+    version_re = re.compile(r"^Version: *([\d.]+)$")
+    with open("../python-simpleline.spec", "r") as f:
+        for line in f:
+            m = version_re.match(line)
+            if m:
+                return m.group(1)
+
+
 # The short X.Y version.
-version = '0.8'
+version = get_version()
 # The full version, including alpha/beta/rc tags.
 release = version
 
