@@ -7,9 +7,12 @@ Welcome to Simpleline's documentation!
 ======================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
+   introduction
+   guide
+   api
 
 
 Indices and tables
