@@ -27,6 +27,8 @@ from simpleline.render.prompt import Prompt
 from simpleline.render.screen.signal_handler import SignalHandler
 from simpleline.utils.i18n import _
 
+__all__ = ["UIScreen", "InputState"]
+
 
 class UIScreen(SignalHandler):
     """Base class representing one TUI Screen.

@@ -24,4 +24,5 @@
 
 
 class SimplelineError(Exception):
+    """Base exception for all other exceptions."""
     pass

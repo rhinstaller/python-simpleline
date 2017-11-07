@@ -25,13 +25,16 @@ from textwrap import wrap
 from simpleline.utils.i18n import _
 from simpleline.utils import ensure_str
 
-__all__ = ["Widget", "TextWidget", "SeparatorWidget", "ColumnWidget", "CheckboxWidget", "CenterWidget"]
+__all__ = ["Widget", "TextWidget", "SeparatorWidget", "EntryWidget", "ColumnWidget",
+           "CheckboxWidget", "CenterWidget"]
 
 
 class Widget(object):
 
     def __init__(self, max_width=None, default=None):
         """Initializes base Widgets buffer.
+
+        This class can be subclassed to create customized widgets.
 
         :param max_width: serves as a hint about screen size to write method with default arguments
         :type max_width: int
@@ -256,7 +259,9 @@ class TextWidget(Widget):
         return self._text
 
     def render(self, width):
-        """Renders the text widget limited to width number of columns (wraps to the next line when the text is longer).
+        """Renders the text widget limited to width number of columns.
+
+        Wraps to the next line when the text is longer.
 
         :param width: maximum width allocated to the string
         :type width: int
@@ -432,6 +437,8 @@ class ColumnWidget(Widget):
 
     def __init__(self, columns, spacing=0):
         """Create text columns
+
+        Deprecated. Please do not use this widget, use containers instead.
 
         :param columns: list containing (column width, [list of widgets to put into this column])
         :type columns: [(int, [...]), ...]

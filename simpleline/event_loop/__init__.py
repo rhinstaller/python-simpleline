@@ -227,7 +227,7 @@ class AbstractSignal(metaclass=ABCMeta):
     """This class is base class for signals.
 
     .. NOTE:
-    Ordering and equality is based on priority.
+            Ordering and equality is based on priority.
     """
 
     def __init__(self, source, priority=0):

@@ -36,7 +36,7 @@ class SignalHandler(object):
         """Connect this class method with given signal.
 
         :param signal: signal class which you want to connect
-        :type signal: class based on `simpleline.event_loop.AbstractSignal
+        :type signal: class based on `simpleline.event_loop.AbstractSignal`
 
         :param callback: the callback function
         :type callback: func(event_message, data)
