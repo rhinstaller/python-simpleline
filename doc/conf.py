@@ -19,6 +19,9 @@
 #
 import os
 import sys
+from unittest.mock import MagicMock
+
+
 sys.path.insert(0, os.path.abspath('..'))
 
 
@@ -196,3 +199,16 @@ epub_exclude_files = ['search.html']
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/3': None}
+
+
+# -- Mock missing stuff in readthedocs ------------------------------------
+
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+        return MagicMock()
+
+
+MOCK_MODULES = ['gi', 'gi.repository']
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
