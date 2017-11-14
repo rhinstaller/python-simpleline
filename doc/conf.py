@@ -55,7 +55,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Simpleline'
-copyright = '2017, Jiri Konecny'
+copyright = '2017, Jiri Konecny'  # pylint: disable=redefined-builtin
 author = 'Jiri Konecny'
 
 # The version info for the project you're documenting, acts as replacement for
