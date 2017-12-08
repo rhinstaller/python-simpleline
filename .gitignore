@@ -15,3 +15,5 @@ pylint-log
 build/
 
 .directory
+
+doc/_build

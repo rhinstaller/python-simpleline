@@ -23,8 +23,10 @@ from simpleline.errors import SimplelineError
 
 
 class RenderError(SimplelineError):
+    """Exception raised when error in rendering happens."""
     pass
 
 
 class RenderUnexpectedError(RenderError):
+    """Exception raised when something goes really wrong."""
     pass

@@ -20,8 +20,10 @@ class HelloWorld(UIScreen):
         super().__init__(title=u"Hello World")
 
     def refresh(self, args=None):
+        # Fill the self.window attribute by the WindowContainer and set screen title as header.
         super().refresh()
-        self.window.add_with_separator(TextWidget("Body text"))
+        widget = TextWidget("Body text")
+        self.window.add_with_separator(widget)
 
 
 if __name__ == "__main__":
