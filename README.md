@@ -11,7 +11,7 @@ to the bottom of the screen. Printed lines are never rewritten!
 How to
 ======
 
-[Link](python-simpleline.readthedocs.io) to the documentation.
+[Link](https://python-simpleline.readthedocs.io) to the documentation.
 
 Another way to learn how to use this library is to view the examples directory.
 Examples can be run without installing Simpleline to the system. You can test
