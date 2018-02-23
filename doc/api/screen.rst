@@ -78,9 +78,13 @@ For this purpose there is :meth:`UIScreen.input`, which is called when a user pa
 to a screen. The screen needs to react upon user input and return one of the options from the
 :class:`InputState` enum or the user input string.
 
-To accept the user input, :attr:`InputState.PROCESSED` should be returned.
-In this case the :class:`UIScreen` needs to :meth:`close <UIScreen.close>` the screen or
-:meth:`redraw <UIScreen.redraw>` it, otherwise it will stay in an infinite loop.
+To accept the user input, :attr:`InputState.PROCESSED`, :attr:`InputState.PROCESSED_AND_REDRAW` or
+:attr:`InputState.PROCESSED_AND_CLOSE` should be returned. Addition to accepting user input the
+:attr:`InputState.PROCESSED_AND_REDRAW` value will also redraw active screen and
+:attr:`InputState.PROCESSED_AND_CLOSE` will close active screen. However, if
+:attr:`InputState.PROCESSED` is used then the developer is responsible for not ending in frozen
+application. The :meth:`UIScreen.refresh` or the :meth:`UIScreen.close` methods must be called
+manually.
 
 In case the user input is invalid, the :attr:`InputState.DISCARDED` value should be returned.
 This will reject the user input and wait for another attempt. The :class:`UIScreen.refresh`
