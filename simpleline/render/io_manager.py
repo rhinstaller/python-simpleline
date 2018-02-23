@@ -298,39 +298,39 @@ class InOutManager(object):
         try:
             key = active_screen.ui_screen.input(active_screen.args, key)
             if key == InputState.PROCESSED:
-                return UserInputResult.PROCESSED
+                return UserInputAction.NOOP
             elif key == InputState.PROCESSED_AND_REDRAW:
-                return UserInputResult.REFRESH
+                return UserInputAction.REDRAW
             elif key == InputState.DISCARDED:
-                return UserInputResult.ERROR
+                return UserInputAction.INPUT_ERROR
         except ExitMainLoop:
             raise
 
         # global refresh command
         if key == Prompt.REFRESH:
-            return UserInputResult.REFRESH
+            return UserInputAction.REDRAW
 
         # global close command
         if key == Prompt.CONTINUE:
-            return UserInputResult.CONTINUE
+            return UserInputAction.CLOSE
 
         # global quit command
         if key == Prompt.QUIT:
-            return UserInputResult.QUIT
+            return UserInputAction.QUIT
 
         if key is None:
             log.warning("Returned key from screen is None. This could be missing return in a screen input method?")
 
-        return UserInputResult.ERROR
+        return UserInputAction.INPUT_ERROR
 
 
-class UserInputResult(Enum):
+class UserInputAction(Enum):
     """Store user input result."""
-    ERROR = -1
-    PROCESSED = 0
-    REFRESH = 5
-    CONTINUE = 6
+    INPUT_ERROR = -1
+    NOOP = 0
+    REDRAW = 5
+    CLOSE = 6
     QUIT = 7
 
     def was_successful(self):
-        return self != UserInputResult.ERROR
+        return self != UserInputAction.INPUT_ERROR
