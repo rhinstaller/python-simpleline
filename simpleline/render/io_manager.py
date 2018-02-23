@@ -301,6 +301,8 @@ class InOutManager(object):
                 return UserInputAction.NOOP
             elif key == InputState.PROCESSED_AND_REDRAW:
                 return UserInputAction.REDRAW
+            elif key == InputState.PROCESSED_AND_CLOSE:
+                return UserInputAction.CLOSE
             elif key == InputState.DISCARDED:
                 return UserInputAction.INPUT_ERROR
         except ExitMainLoop:
