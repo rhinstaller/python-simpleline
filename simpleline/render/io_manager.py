@@ -299,6 +299,8 @@ class InOutManager(object):
             key = active_screen.ui_screen.input(active_screen.args, key)
             if key == InputState.PROCESSED:
                 return UserInputResult.PROCESSED
+            elif key == InputState.PROCESSED_AND_REDRAW:
+                return UserInputResult.REFRESH
             elif key == InputState.DISCARDED:
                 return UserInputResult.ERROR
         except ExitMainLoop:
