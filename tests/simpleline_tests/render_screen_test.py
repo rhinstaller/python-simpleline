@@ -150,15 +150,6 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase, UtilityMixin):
         out += "TestTitle\n\n"
         self.assertEqual(stdout_mock.getvalue(), out)
 
-    @mock.patch('simpleline.render.io_manager.InOutManager._get_input')
-    def test_basic_input(self, input_mock, _):
-        input_mock.return_value = "a"
-        screen = InputScreen()
-
-        self.schedule_screen_and_run(screen)
-
-        self.assertTrue(screen.input_processed)
-
 
 @mock.patch('sys.stdout', new_callable=StringIO)
 @mock.patch('simpleline.event_loop.AbstractEventLoop.kill_app_with_traceback')
@@ -202,6 +193,33 @@ class InputProcessing_TestCase(unittest.TestCase):
         self.pass_prompt = None
 
         App.initialize()
+
+    def test_basic_input(self, input_mock, mock_stdout):
+        input_mock.return_value = "a"
+        screen = InputScreen()
+
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
+
+        self.assertTrue(screen.input_processed)
+
+    def test_process_input_and_redraw(self, input_mock, mock_stdout):
+        input_mock.return_value = "a"
+        screen = InputStateRedrawScreen()
+
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
+
+        self.assertTrue(screen.refreshed)
+
+    def test_process_input_and_close(self, input_mock, mock_stdout):
+        input_mock.return_value = "a"
+        screen = InputStateCloseScreen()
+
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
+
+        self.assertTrue(screen.input_processed)
 
     def test_quit_input(self, mock_stdin, mock_stdout):
         mock_stdin.return_value = "q"
@@ -394,6 +412,33 @@ class InputScreen(UIScreen):
             self.input_processed = True
         self.close()
         return InputState.PROCESSED
+
+
+class InputStateCloseScreen(UIScreen):
+
+    def __init__(self):
+        super().__init__()
+        self.input_processed = False
+
+    def input(self, args, key):
+        self.input_processed = not self.input_processed
+        return InputState.PROCESSED_AND_CLOSE
+
+
+class InputStateRedrawScreen(UIScreen):
+
+    def __init__(self):
+        super().__init__()
+        self._refreshing = False
+        self.refreshed = False
+
+    def input(self, args, key):
+        if not self._refreshing:
+            self._refreshing = True
+            return InputState.PROCESSED_AND_REDRAW
+        else:
+            self.refreshed = True
+            return InputState.PROCESSED_AND_CLOSE
 
 
 class ExceptionTestScreen(UIScreen):

@@ -39,13 +39,9 @@ class InfiniteScreen(UIScreen):
         """Catch 'c' keys for continue and increase counter."""
         if key == Prompt.CONTINUE:
             self.continue_count += 1
-            # Redraw this screen again. This is required because the processing is stopped
-            # without a new screen pushed. Without this redraw call the application will stay in
-            # an infinite loop.
-            # This will add the event to the event loop for later processing.
-            self.redraw()
             # Do not process 'c' continue anymore.
-            return InputState.PROCESSED
+            # This will refresh screen to refresh counter number
+            return InputState.PROCESSED_AND_REDRAW
 
         # Process other input e.g.: 'r' refresh and 'q' quit.
         return key

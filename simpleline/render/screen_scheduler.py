@@ -24,7 +24,7 @@ import threading
 from simpleline.event_loop import ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal, RenderScreenSignal, CloseScreenSignal
 from simpleline.render import RenderUnexpectedError
-from simpleline.render.io_manager import InOutManager, UserInputResult
+from simpleline.render.io_manager import InOutManager, UserInputAction
 from simpleline.render.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
 
 from simpleline.logging import get_simpleline_logger
@@ -280,13 +280,13 @@ class ScreenScheduler(object):
                 log.debug("Input was not successful, ask for new input.")
                 self.input_required()
         else:
-            if input_result == UserInputResult.PROCESSED:
+            if input_result == UserInputAction.NOOP:
                 return
-            elif input_result == UserInputResult.REFRESH:
+            elif input_result == UserInputAction.REDRAW:
                 self.redraw()
-            elif input_result == UserInputResult.CONTINUE:
+            elif input_result == UserInputAction.CLOSE:
                 self.close_screen()
-            elif input_result == UserInputResult.QUIT:
+            elif input_result == UserInputAction.QUIT:
                 if self.quit_screen:
                     self.push_screen_modal(self.quit_screen)
                     try:

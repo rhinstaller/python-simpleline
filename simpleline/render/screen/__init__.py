@@ -271,5 +271,7 @@ class UIScreen(SignalHandler):
 
 
 class InputState(Enum):
-    PROCESSED = True
-    DISCARDED = False
+    PROCESSED = 1
+    PROCESSED_AND_REDRAW = 2
+    PROCESSED_AND_CLOSE = 3
+    DISCARDED = 0

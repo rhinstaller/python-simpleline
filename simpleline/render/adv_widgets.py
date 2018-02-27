@@ -94,8 +94,7 @@ class PasswordDialog(UIScreen):
     def input(self, args, key):
         if key:
             self._password = key
-            self.close()
-            return InputState.PROCESSED
+            return InputState.PROCESSED_AND_CLOSE
         else:
             return InputState.DISCARDED
 
@@ -130,14 +129,12 @@ class YesNoDialog(UIScreen):
         # TRANSLATORS: 'yes' as positive reply
         if key == C_('TUI|Spoke Navigation', 'yes'):
             self._response = True
-            self.close()
-            return InputState.PROCESSED
+            return InputState.PROCESSED_AND_CLOSE
 
         # TRANSLATORS: 'no' as negative reply
         elif key == C_('TUI|Spoke Navigation', 'no'):
             self._response = False
-            self.close()
-            return InputState.PROCESSED
+            return InputState.PROCESSED_AND_CLOSE
 
         else:
             return InputState.DISCARDED
@@ -173,8 +170,7 @@ class HelpScreen(UIScreen):
 
     def input(self, args, key):
         """ Handle user input. """
-        self.close()
-        return InputState.PROCESSED
+        return InputState.PROCESSED_AND_CLOSE
 
     def prompt(self, args=None):
         return Prompt(_("Press %s to return") % Prompt.ENTER)
@@ -227,9 +223,8 @@ class GetInputScreen(UIScreen):
             return InputState.DISCARDED
 
         self._value = key
-        self.close()
 
-        return InputState.PROCESSED
+        return InputState.PROCESSED_AND_CLOSE
 
     def _test_input(self, key):
         for f, args in self._conditions:

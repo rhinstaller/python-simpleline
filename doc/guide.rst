@@ -126,10 +126,10 @@ or :ref:`push <screen_handling_label>` a new screen manually. This can be done, 
                 self._message = int(num1 / num2)
 
                 # Because this input is processed we need to show this screen (show the result)
-                # manually by calling the redraw() method. This will call refresh so our new result
-                # will be processed inside of the refresh() method.
-                self.redraw()
-                return InputState.PROCESSED
+                # again by returning PROCESSED_AND_REDRAW.
+                # This will call the refresh method so our new result will be processed inside
+                # of the refresh() method.
+                return InputState.PROCESSED_AND_REDRAW
             else:
                 # Not input for our screen, try other default inputs. This will result in the
                 # same state as DISCARDED when no default option is used.
