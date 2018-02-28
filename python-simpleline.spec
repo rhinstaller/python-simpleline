@@ -3,7 +3,7 @@
 Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
-Version: 0.8
+Version: 1.0
 Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
@@ -60,6 +60,24 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Wed Feb 28 2018 Jiri Konecny <jkonecny@redhat.com> - 1.0-1
+- Fix docs based on the new PROCESSED feature (jkonecny)
+- Use new PROCESS_AND* in examples (jkonecny)
+- Add tests for PROCESSED_AND_{CLOSE|REDRAW} (jkonecny)
+- Use new PROCESSED_AND_{CLOSE|REDRAW} in advanced widgets (jkonecny)
+- Support PROCESSED_AND_CLOSE UserInputState (jkonecny)
+- Rename UserInputResult to UserInputAction (jkonecny)
+- Support PROCESSED_AND_REDRAW (jkonecny)
+- Fix link to the documentation in README (jkonecny)
+- Add link to the documentation (jkonecny)
+- Write documentation for Simpleline (jkonecny)
+- Disable pylint error for doc copyright variable (jkonecny)
+- Add new example used in the documentation (jkonecny)
+- Mock modules for readthedocs (jkonecny)
+- Do a small fixes to improve documentation (jkonecny)
+- Get version from the spec file (jkonecny)
+- Add documentation skeleton (jkonecny)
+
 * Thu Oct 19 2017 Jiri Konecny <jkonecny@redhat.com> - 0.8-1
 - Test clean-up (jkonecny)
 - Move and rename force_quit loop (jkonecny)
