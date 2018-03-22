@@ -28,7 +28,24 @@ from simpleline.render.widgets import TextWidget
 
 class InputHandler(object):
 
-    def __init__(self, pass_function=None, callback=None):
+    def __init__(self, pass_function=None, callback=None, width=80):
+        """Class to handle input from the terminal.
+
+        This class is designed to be instantiated on place where it should be used.
+        The main method is `get_input()` which is non-blocking asynchronous call. It can be used
+        as synchronous call be calling the `wait_on_input` method.
+
+        To get result from this class use the `value` property.
+
+        :param pass_function: Function which will be used to get hidden password input.
+        :type pass_function: Function without arguments to get hidden input.
+
+        :param callback: You can specify callback which will be called when user give input.
+        :type callback: Callback function with one argument which will be user input.
+
+        :param width: Width for user input.
+        :type width: int
+        """
         super().__init__()
         self._input_lock = threading.Lock()
 
@@ -37,7 +54,8 @@ class InputHandler(object):
         self._input_error_counter = 0
         self._input_thread = None
         self._input_received = False
-        self._width = App.get_scheduler().io_manager.width
+        self._width = width
+        self._skip_concurrency_check = False
 
         if pass_function:
             self._getpass_func = pass_function
@@ -52,7 +70,7 @@ class InputHandler(object):
             return
 
         self._input_received = True
-        self._user_input = signal.data
+        self._input = signal.data
         # wait for the input thread to finish
         self._input_thread.join()
 
@@ -61,7 +79,7 @@ class InputHandler(object):
             cb = self._input_callback
             self._input_callback = None
 
-            cb(self._user_input)
+            cb(self._input)
 
     @property
     def value(self):
@@ -70,6 +88,24 @@ class InputHandler(object):
         :returns: String or None if no is input received.
         """
         return self._input
+
+    @property
+    def skip_concurrency_check(self):
+        """Is this InputHandler skipping concurrency check?
+
+        :returns bool
+        """
+        return self._skip_concurrency_check
+
+    @skip_concurrency_check.setter
+    def skip_concurrency_check(self, value):
+        """Set if this InputHandler should skip concurrency check.
+
+        Note if you skip this check, you can have unexpected behavior. Use with caution.
+
+        :param value: True to skip the check, False if not.
+        """
+        self._skip_concurrency_check = value
 
     def set_pass_func(self, getpass_func):
         """Set a function for getting passwords."""
@@ -89,6 +125,18 @@ class InputHandler(object):
         :returns: True if yes, False otherwise.
         """
         return self._input_received
+
+    def wait_on_input(self):
+        """Blocks execution till the user input is received.
+
+        Events will works as expected during this blocking.
+        """
+        # we already received input from user
+        if self._input_received:
+            return
+
+        App.get_event_loop().process_signals(InputReadySignal)
+        return
 
     def get_input(self, prompt, hidden=False):
         """Use prompt to ask for user input and wait (non-blocking) on user input.
@@ -111,34 +159,24 @@ class InputHandler(object):
         self._check_input_thread_running()
         self._start_user_input_async(prompt, hidden)
 
-    def get_input_without_check(self, prompt, hidden=False):
-        """Reads user input without checking if someone is already waiting for input.
-
-        This works the same as `get_user_input` but ignore checks if there is somebody waiting on input.
-        When the user input is taken, all the waiting threads will get the same input.
-
-        WARNING:
-            This may be necessary in some situations, however, it can cause errors which are hard to find!
-
-
-        See `get_user_input()` method.
-        """
-        self._start_user_input_async(prompt, hidden)
-
-    def wait_on_input(self):
-        App.get_event_loop().process_signals(InputReadySignal)
-        return self._input  # return the user input
-
     def _check_input_thread_running(self):
+        if self._skip_concurrency_check:
+            return
+
         if self._input_thread is not None and self._input_thread.is_alive():
             raise KeyError("Can't run multiple input threads at the same time!")
 
     def _start_user_input_async(self, prompt, hidden):
-        self._input_received = False
+        self._clear_input()
+
         self._input_thread = threading.Thread(target=self._thread_input, name="InputThread",
                                               args=(prompt, hidden))
         self._input_thread.daemon = True
         self._input_thread.start()
+
+    def _clear_input(self):
+        self._input_received = False
+        self._input = None
 
     def _thread_input(self, prompt, hidden):
         """This method is responsible for interruptable user input.
