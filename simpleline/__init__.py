@@ -19,7 +19,9 @@
 # Red Hat, Inc.
 #
 
-__all__ = ["App"]
+__all__ = ["App", "DEFAULT_WIDTH"]
+
+DEFAULT_WIDTH = 80
 
 
 class App(object):

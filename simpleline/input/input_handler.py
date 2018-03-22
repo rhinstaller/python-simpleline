@@ -21,14 +21,14 @@ import threading
 import sys
 import getpass
 
-from simpleline import App
+from simpleline import App, DEFAULT_WIDTH
 from simpleline.event_loop.signals import InputReadySignal
 from simpleline.render.widgets import TextWidget
 
 
 class InputHandler(object):
 
-    def __init__(self, pass_function=None, callback=None, width=80):
+    def __init__(self, pass_function=None, callback=None, width=DEFAULT_WIDTH):
         """Class to handle input from the terminal.
 
         This class is designed to be instantiated on place where it should be used.
