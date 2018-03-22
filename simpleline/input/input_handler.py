@@ -28,7 +28,7 @@ from simpleline.render.widgets import TextWidget
 
 class InputHandler(object):
 
-    def __init__(self, pass_function=None, callback=None, width=DEFAULT_WIDTH):
+    def __init__(self, callback=None, width=DEFAULT_WIDTH):
         """Class to handle input from the terminal.
 
         This class is designed to be instantiated on place where it should be used.
@@ -36,9 +36,6 @@ class InputHandler(object):
         as synchronous call be calling the `wait_on_input` method.
 
         To get result from this class use the `value` property.
-
-        :param pass_function: Function which will be used to get hidden password input.
-        :type pass_function: Function without arguments to get hidden input.
 
         :param callback: You can specify callback which will be called when user give input.
         :type callback: Callback function with one argument which will be user input.
@@ -56,11 +53,6 @@ class InputHandler(object):
         self._input_received = False
         self._width = width
         self._skip_concurrency_check = False
-
-        if pass_function:
-            self._getpass_func = pass_function
-        else:
-            self._getpass_func = getpass.getpass
 
         App.get_event_loop().register_signal_handler(InputReadySignal,
                                                      self._input_received_handler)
@@ -107,10 +99,6 @@ class InputHandler(object):
         """
         self._skip_concurrency_check = value
 
-    def set_pass_func(self, getpass_func):
-        """Set a function for getting passwords."""
-        self._getpass_func = getpass_func
-
     def set_callback(self, callback):
         """Set a callback to get user input asynchronously.
 
@@ -138,7 +126,7 @@ class InputHandler(object):
         App.get_event_loop().process_signals(InputReadySignal)
         return
 
-    def get_input(self, prompt, hidden=False):
+    def get_input(self, prompt):
         """Use prompt to ask for user input and wait (non-blocking) on user input.
 
         This is an asynchronous call. If you want to wait for user input then use
@@ -150,14 +138,11 @@ class InputHandler(object):
         :param prompt: Ask user what you want to get.
         :type prompt: String or Prompt instance.
 
-        :param hidden: Hide echo of the keys from user.
-        :type hidden: bool
-
         :returns: User input.
         :rtype: str
         """
         self._check_input_thread_running()
-        self._start_user_input_async(prompt, hidden)
+        self._start_user_input_async(prompt)
 
     def _check_input_thread_running(self):
         if self._skip_concurrency_check:
@@ -166,11 +151,11 @@ class InputHandler(object):
         if self._input_thread is not None and self._input_thread.is_alive():
             raise KeyError("Can't run multiple input threads at the same time!")
 
-    def _start_user_input_async(self, prompt, hidden):
+    def _start_user_input_async(self, prompt):
         self._clear_input()
 
         self._input_thread = threading.Thread(target=self._thread_input, name="InputThread",
-                                              args=(prompt, hidden))
+                                              args=[prompt])
         self._input_thread.daemon = True
         self._input_thread.start()
 
@@ -178,7 +163,7 @@ class InputHandler(object):
         self._input_received = False
         self._input = None
 
-    def _thread_input(self, prompt, hidden):
+    def _thread_input(self, prompt):
         """This method is responsible for interruptable user input.
 
         It is expected to be used in a thread started on demand
@@ -186,26 +171,14 @@ class InputHandler(object):
 
         :param prompt: prompt to be displayed
         :type prompt: Prompt instance
-
-        :param hidden: whether typed characters should be echoed or not
-        :type hidden: bool
         """
-        text_prompt = self._prompt_to_text(prompt)
-
-        if not hidden:
-            sys.stdout.write(text_prompt)
-            sys.stdout.flush()
-
         if not self._input_lock.acquire(False):
             # raw_input is already running
             return
         else:
             # lock acquired, we can run input
             try:
-                if hidden:
-                    data = self._getpass_func(text_prompt)
-                else:
-                    data = self._get_input()
+                data = self._ask_input(prompt)
             except EOFError:
                 data = ""
             finally:
@@ -219,5 +192,42 @@ class InputHandler(object):
         lines = widget.get_lines()
         return "\n".join(lines) + " "
 
+    def _ask_input(self, prompt):
+        text_prompt = self._prompt_to_text(prompt)
+        sys.stdout.write(text_prompt)
+        sys.stdout.flush()
+
+        return self._get_input()
+
     def _get_input(self):
         return input()
+
+
+class PasswordInputHandler(InputHandler):
+
+    def __init__(self, callback=None, width=DEFAULT_WIDTH):
+        """Class to handle hidden password input from the terminal.
+
+        This class is designed to be instantiated on place where it should be used.
+        The main method is `get_input()` which is non-blocking asynchronous call. It can be used
+        as synchronous call be calling the `wait_on_input` method.
+
+        To get result from this class use the `value` property.
+
+        :param callback: You can specify callback which will be called when user give input.
+        :type callback: Callback function with one argument which will be user input.
+
+        :param width: Width for user input.
+        :type width: int
+        """
+        super().__init__(callback=callback, width=width)
+        self._getpass_func = getpass.getpass
+
+    def set_pass_func(self, getpass_func):
+        """Set a function for getting passwords."""
+        self._getpass_func = getpass_func
+
+    def _ask_input(self, prompt):
+        text_prompt = self._prompt_to_text(prompt)
+
+        return self._getpass_func(text_prompt)
