@@ -20,7 +20,7 @@
 import unittest
 from unittest import mock
 
-from simpleline import App
+from simpleline import App, DEFAULT_WIDTH
 from simpleline.render.screen_scheduler import ScreenScheduler
 from simpleline.event_loop.main_loop import MainLoop
 
@@ -62,6 +62,16 @@ class App_TestCase(unittest.TestCase):
         App.initialize("init")
         App.run()
         self.assertTrue(run_mock.called)
+
+    def test_app_width(self):
+        App.initialize()
+        self.assertEqual(App.get_width(), DEFAULT_WIDTH)
+
+        App.initialize(width=100)
+        self.assertEqual(App.get_width(), 100)
+
+        App.set_width(150)
+        self.assertEqual(App.get_width(), 150)
 
     def _check_app_settings(self, header, event_loop, scheduler):
         self.assertEqual(App.get_event_loop(), event_loop)

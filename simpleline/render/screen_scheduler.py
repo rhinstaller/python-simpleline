@@ -21,6 +21,7 @@
 
 import threading
 
+from simpleline import App
 from simpleline.event_loop import ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal, RenderScreenSignal, CloseScreenSignal
 from simpleline.render import RenderUnexpectedError
@@ -48,6 +49,7 @@ class ScreenScheduler(object):
         """
         self._quit_screen = None
         self._event_loop = event_loop
+
         self._io_manager = InOutManager(self._event_loop)
         if scheduler_stack:
             self._screen_stack = scheduler_stack
@@ -56,6 +58,9 @@ class ScreenScheduler(object):
         self._register_handlers()
 
         self._first_screen_scheduled = False
+
+    def _spacer(self):
+        return "\n".join(2 * [App.get_width() * "="])
 
     def _register_handlers(self):
         self._event_loop.register_signal_handler(RenderScreenSignal, self._process_screen_callback)
@@ -236,7 +241,7 @@ class ScreenScheduler(object):
                 return
 
             # draw screen to the console
-            self.io_manager.draw(top_screen)
+            self._draw_screen(top_screen)
 
             if top_screen.ui_screen.input_required:
                 log.debug("Input is required by %s screen", top_screen)
@@ -246,6 +251,25 @@ class ScreenScheduler(object):
         except Exception:    # pylint: disable=broad-except
             self._event_loop.enqueue_signal(ExceptionSignal(self))
             return False
+
+    def _draw_screen(self, active_screen):
+        """Draws the current `active_screen`.
+
+        :param active_screen: Screen which should be draw to the console.
+        :type active_screen: Classed based on `simpleline.render.screen.UIScreen`.
+        """
+        # get the widget tree from the screen and show it in the screen
+        try:
+            if not active_screen.ui_screen.no_separator:
+                # separate the content on the screen from the stuff we are about to display now
+                print(self._spacer())
+
+            # print UIScreen content
+            active_screen.ui_screen.show_all()
+        except ExitMainLoop:
+            raise
+        except Exception:    # pylint: disable=broad-except
+            self._event_loop.enqueue_signal(ExceptionSignal(self))
 
     def _get_last_screen(self):
         if self._screen_stack.empty():

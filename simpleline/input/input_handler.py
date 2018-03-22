@@ -28,7 +28,7 @@ from simpleline.render.widgets import TextWidget
 
 class InputHandler(object):
 
-    def __init__(self, callback=None, width=DEFAULT_WIDTH):
+    def __init__(self, callback=None):
         """Class to handle input from the terminal.
 
         This class is designed to be instantiated on place where it should be used.
@@ -39,9 +39,6 @@ class InputHandler(object):
 
         :param callback: You can specify callback which will be called when user give input.
         :type callback: Callback function with one argument which will be user input.
-
-        :param width: Width for user input.
-        :type width: int
         """
         super().__init__()
         self._input_lock = threading.Lock()
@@ -51,7 +48,7 @@ class InputHandler(object):
         self._input_error_counter = 0
         self._input_thread = None
         self._input_received = False
-        self._width = width
+        self._width = DEFAULT_WIDTH
         self._skip_concurrency_check = False
 
         App.get_event_loop().register_signal_handler(InputReadySignal,
@@ -157,6 +154,7 @@ class InputHandler(object):
         self._input_thread = threading.Thread(target=self._thread_input, name="InputThread",
                                               args=[prompt])
         self._input_thread.daemon = True
+        self._width = App.get_width()
         self._input_thread.start()
 
     def _clear_input(self):
@@ -205,7 +203,7 @@ class InputHandler(object):
 
 class PasswordInputHandler(InputHandler):
 
-    def __init__(self, callback=None, width=DEFAULT_WIDTH):
+    def __init__(self, callback=None):
         """Class to handle hidden password input from the terminal.
 
         This class is designed to be instantiated on place where it should be used.
@@ -216,11 +214,8 @@ class PasswordInputHandler(InputHandler):
 
         :param callback: You can specify callback which will be called when user give input.
         :type callback: Callback function with one argument which will be user input.
-
-        :param width: Width for user input.
-        :type width: int
         """
-        super().__init__(callback=callback, width=width)
+        super().__init__(callback=callback)
         self._getpass_func = getpass.getpass
 
     def set_pass_func(self, getpass_func):

@@ -35,6 +35,9 @@ def _fake_input(queue_instance, prompt, hidden):
 @mock.patch('sys.stdout', new_callable=StringIO)
 class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
 
+    def setUp(self):
+        App.initialize()
+
     def test_separator(self, stdout_mock):
         ui_screen = EmptyScreen()
 
@@ -46,7 +49,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
         ui_screen = EmptyScreen()
         width = 60
 
-        App.initialize()
+        App.set_width(width)
         App.get_scheduler().io_manager.width = width
         App.get_scheduler().schedule_screen(ui_screen)
         App.run()
@@ -57,7 +60,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
         ui_screen = EmptyScreen()
         width = 0
 
-        App.initialize()
+        App.set_width(width)
         App.get_scheduler().io_manager.width = width
         App.get_scheduler().schedule_screen(ui_screen)
         App.run()
