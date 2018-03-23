@@ -220,6 +220,9 @@ class PasswordInputHandler(InputHandler):
 
     def set_pass_func(self, getpass_func):
         """Set a function for getting passwords."""
+        if not getpass_func:
+            return
+
         self._getpass_func = getpass_func
 
     def _ask_input(self, prompt):

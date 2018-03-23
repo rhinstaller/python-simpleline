@@ -25,7 +25,7 @@ from simpleline import App
 from simpleline.render.containers import WindowContainer
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen.signal_handler import SignalHandler
-from simpleline.input.input_handler import InputHandler
+from simpleline.input.input_handler import InputHandler, PasswordInputHandler
 from simpleline.utils.i18n import _
 
 __all__ = ["UIScreen", "InputState"]
@@ -187,8 +187,16 @@ class UIScreen(SignalHandler):
         :param hidden: Do not echo user input (password typing).
         :type hidden: bool
         """
-        return App.get_scheduler().io_manager.get_input(message, pass_func=self._password_func,
-                                                        hidden=hidden)
+        if hidden:
+            handler = PasswordInputHandler()
+            if self.password_func:
+                handler.set_pass_func(self.password_func)
+        else:
+            handler = InputHandler()
+
+        handler.get_input(message)
+        handler.wait_on_input()
+        return handler.value
 
     def setup(self, args):
         """Do additional setup right before this screen is used.

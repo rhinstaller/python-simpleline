@@ -71,14 +71,6 @@ class ScreenScheduler(object):
         self._event_loop.register_signal_handler(CloseScreenSignal, self._close_screen_callback)
 
     @property
-    def io_manager(self):
-        return self._input_manager
-
-    @io_manager.setter
-    def io_manager(self, io_manager):
-        self._input_manager = io_manager
-
-    @property
     def quit_screen(self):
         """Return quit UIScreen."""
         return self._quit_screen
