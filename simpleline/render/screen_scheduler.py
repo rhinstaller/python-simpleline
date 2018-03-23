@@ -26,7 +26,7 @@ from simpleline import App
 from simpleline.event_loop import ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal, RenderScreenSignal, CloseScreenSignal
 from simpleline.render import RenderUnexpectedError
-from simpleline.render.io_manager import InputManager, UserInputAction
+from simpleline.render.input_manager import InputManager, UserInputAction
 from simpleline.render.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
 
 from simpleline.logging import get_simpleline_logger
