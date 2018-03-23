@@ -21,11 +21,12 @@
 
 import threading
 
+
 from simpleline import App
 from simpleline.event_loop import ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal, RenderScreenSignal, CloseScreenSignal
 from simpleline.render import RenderUnexpectedError
-from simpleline.render.io_manager import InOutManager, UserInputAction
+from simpleline.render.io_manager import InputManager, UserInputAction
 from simpleline.render.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
 
 from simpleline.logging import get_simpleline_logger
@@ -33,6 +34,9 @@ from simpleline.logging import get_simpleline_logger
 log = get_simpleline_logger()
 
 RAW_INPUT_LOCK = threading.Lock()
+
+
+__all__ = ["ScreenScheduler"]
 
 
 class ScreenScheduler(object):
@@ -50,7 +54,7 @@ class ScreenScheduler(object):
         self._quit_screen = None
         self._event_loop = event_loop
 
-        self._io_manager = InOutManager(self._event_loop)
+        self._input_manager = InputManager()
         if scheduler_stack:
             self._screen_stack = scheduler_stack
         else:
@@ -68,11 +72,11 @@ class ScreenScheduler(object):
 
     @property
     def io_manager(self):
-        return self._io_manager
+        return self._input_manager
 
     @io_manager.setter
     def io_manager(self, io_manager):
-        self._io_manager = io_manager
+        self._input_manager = io_manager
 
     @property
     def quit_screen(self):
@@ -135,7 +139,8 @@ class ScreenScheduler(object):
         try:
             execute_new_loop = self._screen_stack.pop().execute_new_loop
         except ScreenStackEmptyException:
-            raise ScreenStackEmptyException("Switch screen is not possible when there is no screen scheduled!")
+            raise ScreenStackEmptyException("Switch screen is not possible when there is no "
+                                            "screen scheduled!")
 
         # we have to keep the old_loop value so we stop
         # dialog's mainloop if it ever uses switch_screen
@@ -283,14 +288,15 @@ class ScreenScheduler(object):
         ui_screen = top_screen.ui_screen
         prompt = ui_screen.prompt(top_screen.args)
         hide_user_input = ui_screen.hide_user_input
+        pass_func = ui_screen.password_func
 
-        self._io_manager.get_user_input_async(prompt, self._process_input, hidden=hide_user_input)
+        self._input_manager.get_input(prompt, self._process_input, hide_user_input, pass_func)
 
     def _process_input(self, user_input):
         active_screen = self._get_last_screen()
 
         try:
-            input_result = self._io_manager.process_input(active_screen, user_input)
+            input_result = self._input_manager.process_input(active_screen, user_input)
         except ExitMainLoop:
             raise
         except Exception:    # pylint: disable=broad-except
@@ -298,7 +304,7 @@ class ScreenScheduler(object):
             return
 
         if not input_result.was_successful():
-            if self._io_manager.input_error_threshold_exceeded:
+            if self._input_manager.input_error_threshold_exceeded:
                 self.redraw()
             else:
                 log.debug("Input was not successful, ask for new input.")

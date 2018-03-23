@@ -254,7 +254,7 @@ class Containers_TestCase(BaseWidgets_TestCase):
             c.render(19)
 
 
-@patch('simpleline.render.io_manager.InOutManager._get_input')
+@patch('simpleline.input.input_handler.InputHandler._get_input')
 @patch('sys.stdout', new_callable=StringIO)
 class ContainerInput_TestCase(unittest.TestCase):
 

@@ -25,6 +25,7 @@ from simpleline import App
 from simpleline.render.containers import WindowContainer
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen.signal_handler import SignalHandler
+from simpleline.input.input_handler import InputHandler
 from simpleline.utils.i18n import _
 
 __all__ = ["UIScreen", "InputState"]
@@ -52,6 +53,7 @@ class UIScreen(SignalHandler):
 
         # ask for password
         self._hide_user_input = False
+        self._password_func = None
 
         # do not print separator for this screen
         self._no_separator = False
@@ -82,6 +84,23 @@ class UIScreen(SignalHandler):
         Set `None` to remove title.
         """
         self._title = title
+
+    @property
+    def password_func(self):
+        """Get password function.
+
+        This is function with one argument to get password from command line.
+        """
+        return self._password_func
+
+    @password_func.setter
+    def password_func(self, value):
+        """Set password function.
+
+        :param value: Function to get password from command line.
+        :type value: Function with one argument which is text representation of prompt.
+        """
+        self._password_func = value
 
     @property
     def screen_ready(self):
@@ -168,7 +187,8 @@ class UIScreen(SignalHandler):
         :param hidden: Do not echo user input (password typing).
         :type hidden: bool
         """
-        return App.get_scheduler().io_manager.get_user_input(message, hidden)
+        return App.get_scheduler().io_manager.get_input(message, pass_func=self._password_func,
+                                                        hidden=hidden)
 
     def setup(self, args):
         """Do additional setup right before this screen is used.
@@ -228,12 +248,18 @@ class UIScreen(SignalHandler):
                 for line in lines[pos:(pos + real_screen_height)]:
                     print(line)
                 custom_prompt = Prompt(_("\nPress %s to continue") % Prompt.ENTER)
-                App.get_scheduler().io_manager.get_user_input(custom_prompt)
+                self._ask_user_input_blocking(custom_prompt)
                 pos += real_screen_height
+
+    def _ask_user_input_blocking(self, prompt):
+        handler = InputHandler()
+        handler.get_input(prompt)
+        handler.wait_on_input()
+        return handler.value
 
     def show_all(self):
         """Print WindowContainer in `self.window` with all its content."""
-        self.window.render(App.get_scheduler().io_manager.width)
+        self.window.render(App.get_width())
         self._print_widget(self.window)
 
     def input(self, args, key):
