@@ -236,7 +236,7 @@ class Widgets_TestCase(BaseWidgets_TestCase):
         self.evaluate_result(w.get_lines(), expected_result=expected_result)
 
 
-@patch('simpleline.input.input_handler.InputHandler._get_input')
+@patch('simpleline.input.input_handler.InputHandlerRequest._get_input')
 @patch('sys.stdout', new_callable=StringIO)
 class WidgetProcessing_TestCase(unittest.TestCase):
 

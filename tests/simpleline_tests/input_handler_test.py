@@ -29,7 +29,7 @@ from simpleline.render.prompt import Prompt
 
 
 @mock.patch('sys.stdout', new_callable=StringIO)
-@mock.patch('simpleline.input.input_handler.InputHandler._get_input')
+@mock.patch('simpleline.input.input_handler.InputHandlerRequest._get_input')
 class InputHandler_TestCase(unittest.TestCase):
 
     def create_loop(self):

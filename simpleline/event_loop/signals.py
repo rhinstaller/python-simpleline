@@ -22,7 +22,8 @@
 from sys import exc_info
 from simpleline.event_loop import AbstractSignal
 
-__all__ = ["ExceptionSignal", "InputReadySignal", "RenderScreenSignal", "CloseScreenSignal"]
+__all__ = ["ExceptionSignal", "InputReadySignal", "RenderScreenSignal", "CloseScreenSignal",
+           "InputReceivedSignal"]
 
 
 class ExceptionSignal(AbstractSignal):
@@ -66,6 +67,17 @@ class InputReadySignal(AbstractSignal):
         :param priority: Priority of this event.
         :type priority: Int greater than 0.
         """
+        super().__init__(source, priority=priority)
+        self.data = data
+
+
+class InputReceivedSignal(AbstractSignal):
+    """Raw input received.
+
+    This signal will be further processed and InputReadySignal should be enqueued soon.
+    Most probably you are looking for InputReadySignal instead.
+    """
+    def __init__(self, source, data, priority=0):
         super().__init__(source, priority=priority)
         self.data = data
 

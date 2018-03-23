@@ -19,7 +19,6 @@
 
 import sys
 
-from simpleline import App
 from simpleline.render import widgets
 from simpleline.render.containers import WindowContainer
 from simpleline.render.prompt import Prompt

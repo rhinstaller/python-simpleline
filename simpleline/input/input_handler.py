@@ -17,13 +17,15 @@
 # Red Hat, Inc.
 #
 
-import threading
 import sys
 import getpass
 
-from simpleline import App, DEFAULT_WIDTH
+from simpleline import App
 from simpleline.event_loop.signals import InputReadySignal
 from simpleline.render.widgets import TextWidget
+from simpleline.input.input_threading import InputThreadManager, InputRequest
+
+__all__ = ["InputHandler", "PasswordInputHandler"]
 
 
 class InputHandler(object):
@@ -41,14 +43,9 @@ class InputHandler(object):
         :type callback: Callback function with one argument which will be user input.
         """
         super().__init__()
-        self._input_lock = threading.Lock()
-
         self._input = None
         self._input_callback = callback
-        self._input_error_counter = 0
-        self._input_thread = None
         self._input_received = False
-        self._width = DEFAULT_WIDTH
         self._skip_concurrency_check = False
 
         App.get_event_loop().register_signal_handler(InputReadySignal,
@@ -60,8 +57,6 @@ class InputHandler(object):
 
         self._input_received = True
         self._input = signal.data
-        # wait for the input thread to finish
-        self._input_thread.join()
 
         # call async callback
         if self._input_callback is not None:
@@ -120,8 +115,8 @@ class InputHandler(object):
         if self._input_received:
             return
 
-        App.get_event_loop().process_signals(InputReadySignal)
-        return
+        while not self._input_received:
+            App.get_event_loop().process_signals(InputReadySignal)
 
     def get_input(self, prompt):
         """Use prompt to ask for user input and wait (non-blocking) on user input.
@@ -138,60 +133,56 @@ class InputHandler(object):
         :returns: User input.
         :rtype: str
         """
-        self._check_input_thread_running()
-        self._start_user_input_async(prompt)
-
-    def _check_input_thread_running(self):
-        if self._skip_concurrency_check:
-            return
-
-        if self._input_thread is not None and self._input_thread.is_alive():
-            raise KeyError("Can't run multiple input threads at the same time!")
-
-    def _start_user_input_async(self, prompt):
         self._clear_input()
+        self._invoke_input_thread(prompt)
 
-        self._input_thread = threading.Thread(target=self._thread_input, name="InputThread",
-                                              args=[prompt])
-        self._input_thread.daemon = True
-        self._width = App.get_width()
-        self._input_thread.start()
+    def _invoke_input_thread(self, prompt):
+        thread_object = self.create_thread_object(prompt)
+        InputThreadManager.get_instance().start_input_thread(thread_object,
+                                                             not self._skip_concurrency_check)
+
+    def create_thread_object(self, prompt):
+        """Create thread object containing all the information how to get user input.
+
+        :returns: Instance of class inherited from `simpleline.input.InputThread`.
+        """
+        return InputHandlerRequest(App.get_width(), prompt, self)
 
     def _clear_input(self):
         self._input_received = False
         self._input = None
 
-    def _thread_input(self, prompt):
+
+class InputHandlerRequest(InputRequest):
+    """This is thread object to get input from user without blocking main thread."""
+
+    def __init__(self, width, prompt, source):
+        super().__init__(source)
+        self._width = width
+        self._prompt = prompt
+
+    def get_input(self):
         """This method is responsible for interruptable user input.
 
         It is expected to be used in a thread started on demand
         and returns the input via the communication Queue.
-
-        :param prompt: prompt to be displayed
-        :type prompt: Prompt instance
         """
-        if not self._input_lock.acquire(False):
-            # raw_input is already running
-            return
-        else:
-            # lock acquired, we can run input
-            try:
-                data = self._ask_input(prompt)
-            except EOFError:
-                data = ""
-            finally:
-                self._input_lock.release()
+        # lock acquired, we can run input
+        try:
+            data = self._ask_input()
+        except EOFError:
+            data = ""
 
-        App.get_event_loop().enqueue_signal(InputReadySignal(self, data))
+        return data
 
-    def _prompt_to_text(self, prompt):
-        widget = TextWidget(str(prompt))
+    def _prompt_to_text(self):
+        widget = TextWidget(str(self._prompt))
         widget.render(self._width)
         lines = widget.get_lines()
         return "\n".join(lines) + " "
 
-    def _ask_input(self, prompt):
-        text_prompt = self._prompt_to_text(prompt)
+    def _ask_input(self):
+        text_prompt = self._prompt_to_text()
         sys.stdout.write(text_prompt)
         sys.stdout.flush()
 
@@ -225,7 +216,19 @@ class PasswordInputHandler(InputHandler):
 
         self._getpass_func = getpass_func
 
-    def _ask_input(self, prompt):
-        text_prompt = self._prompt_to_text(prompt)
+    def create_thread_object(self, prompt):
+        """Return PasswordInputThread for getting user password."""
+        return PasswordInputHandlerRequest(App.get_width(), prompt, self, self._getpass_func)
+
+
+class PasswordInputHandlerRequest(InputHandlerRequest):
+    """Similar as InputHandlerRequest but don't echo user keys."""
+
+    def __init__(self, width, prompt, source, getpass_func):
+        super().__init__(width, prompt, source)
+        self._getpass_func = getpass_func
+
+    def _ask_input(self):
+        text_prompt = self._prompt_to_text()
 
         return self._getpass_func(text_prompt)

@@ -181,7 +181,7 @@ class ScreenException_TestCase(unittest.TestCase, UtilityMixin):
 
 
 @mock.patch('sys.stdout')
-@mock.patch('simpleline.input.input_handler.InputHandler._get_input')
+@mock.patch('simpleline.input.input_handler.InputHandlerRequest._get_input')
 class InputProcessing_TestCase(unittest.TestCase):
 
     def setUp(self):
@@ -380,8 +380,6 @@ class InputErrorDynamicPromptTestScreen(InputErrorTestScreen):
         if self.error_counter == self._not_return_prompt_on and not self.input_skipped:
             self.input_skipped = True
             self.redraw()
-            import sys
-            print("XXX", file=sys.stderr)
             return None
         else:
             return super().prompt(args)
