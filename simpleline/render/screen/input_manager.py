@@ -21,8 +21,9 @@
 
 from enum import Enum
 
-from simpleline.render.screen import InputState
+from simpleline import App
 from simpleline.event_loop import ExitMainLoop
+from simpleline.event_loop.signals import ExceptionSignal
 from simpleline.render.prompt import Prompt
 from simpleline.input.input_handler import InputHandler, PasswordInputHandler
 
@@ -33,14 +34,19 @@ log = get_simpleline_logger()
 
 class InputManager(object):
 
-    def __init__(self):
+    def __init__(self, ui_screen):
         """Processor for user input.
 
         This class is mainly helper class for ScreenScheduler.
+
+        :param ui_screen: Screen associated with this input manager.
+        :type ui_screen: The `simpleline.render.screen.UIScreen` based instance.
         """
         super().__init__()
+        self._ui_screen = ui_screen
         self._input_error_counter = 0
         self._input_error_threshold = 5
+        self._input_args = None
 
     @property
     def input_error_counter(self):
@@ -56,32 +62,26 @@ class InputManager(object):
         errors = self._input_error_counter % self._input_error_threshold
         return errors == 0
 
-    def get_input(self, prompt, callback, hidden, pass_func=None):
+    def get_input(self, args=None):
         """Get input from user.
 
-        :param prompt: Object to explain what is required from a user.
-        :type prompt: String or `simpleline.render.prompt.Prompt` instance.
-
-        :param callback: Callback which will be called when input received.
-        :type callback: Function with one parameter (user input).
-
-        :param hidden: Is user input a password?
-        :type hidden: bool
-
-        :param pass_func: Function to get password which takes one argument.
-        :type pass_func: Function with one argument which is text form of prompt.
+        :param args: Arguments passed in when UIScreen was scheduled.
+        :type args: Anything.
         """
+        prompt = self._ui_screen.prompt(args)
         if not self._is_input_expected(prompt):
             return
 
-        if not hidden:
+        self._input_args = args
+
+        if not self._ui_screen.hide_user_input:
             handler = InputHandler()
         else:
             handler = PasswordInputHandler()
-            if pass_func:
-                handler.set_pass_func(pass_func)
+            if self._ui_screen.password_func:
+                handler.set_pass_func(self._ui_screen.password_func)
 
-        handler.set_callback(callback)
+        handler.set_callback(self.process_input)
         handler.get_input(prompt)
 
     def _is_input_expected(self, prompt):
@@ -90,7 +90,8 @@ class InputManager(object):
         Do nothing if user did handled user input.
 
         :returns: True if prompt is set and we can use it to get user input.
-                  False if prompt is not available, which means that user handled input on their own.
+                  False if prompt is not available, which means that user handled input on their
+                  own.
         """
         # None means prompt handled the input by itself -> continue
         if prompt is None:
@@ -99,36 +100,33 @@ class InputManager(object):
         else:
             return True
 
-    def process_input(self, active_screen, user_input):
+    def process_input(self, user_input):
         """Process input from the screens.
-
-        Result of the processing is saved in the `processed_result` property.
-
-        :param active_screen: Screen demanding this input processing.
-        :type active_screen: Classed based on `simpleline.render.screen.UIScreen`.
 
         :param user_input: User input string.
         :type user_input: String.
 
         :raises: ExitMainLoop or any other kind of exception from screen processing.
-
-        :return: Return data object with result status and state.
-        :rtype: `simpleline.render.in_out_manager.UserInputResult` class.
         """
         # process the input, if it wasn't processed (valid)
         # increment the error counter
-        result = self._process_input(active_screen, user_input)
+        try:
+            result = self._process_input(user_input)
+        except ExitMainLoop:
+            raise
+        except Exception:    # pylint: disable=broad-except
+            App.get_event_loop().enqueue_signal(ExceptionSignal(self))
+            return
+
         if result.was_successful():
             self._input_error_counter = 0
         else:
             self._input_error_counter += 1
-        return result
 
-    def _process_input(self, active_screen, key):
+        App.get_scheduler().process_input_result(result, self.input_error_threshold_exceeded)
+
+    def _process_input(self, key):
         """Method called internally to process unhandled input key presses.
-
-        :param active_screen: Screen for input processing.
-        :type active_screen: Class based on `simpleline.render.screen_stack.screen_data`.
 
         :param key: The string entered by user.
         :type key: String.
@@ -138,9 +136,10 @@ class InputManager(object):
 
         :raises: Anything the Screen can raise in the input processing.
         """
+        from simpleline.render.screen import InputState
         # delegate the handling to active screen first
         try:
-            key = active_screen.ui_screen.input(active_screen.args, key)
+            key = self._ui_screen.input(self._input_args, key)
             if key == InputState.PROCESSED:
                 return UserInputAction.NOOP
             elif key == InputState.PROCESSED_AND_REDRAW:

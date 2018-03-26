@@ -25,6 +25,7 @@ from simpleline import App
 from simpleline.render.containers import WindowContainer
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen.signal_handler import SignalHandler
+from simpleline.render.screen.input_manager import InputManager
 from simpleline.input.input_handler import InputHandler, PasswordInputHandler
 from simpleline.utils.i18n import _
 
@@ -67,6 +68,8 @@ class UIScreen(SignalHandler):
         # index of the page (subset of screen) shown during show_all
         # indexing starts with 0
         self._page = 0
+
+        self._input_manager = InputManager(ui_screen=self)
 
     def __str__(self):
         """For easier logging."""
@@ -178,8 +181,8 @@ class UIScreen(SignalHandler):
     def get_user_input(self, message, hidden=False):
         """Get immediately input from user.
 
-        Use this with cautious. Never call this in middle of rendering or when other input is already waiting.
-        It is recommended to use `self.input_required` instead.
+        Use this with cautious. Never call this in middle of rendering or when other
+        input is already waiting. It is recommended to use `self.input_required` instead.
 
         :param message: Message for the user.
         :type message: str
@@ -278,11 +281,21 @@ class UIScreen(SignalHandler):
         :param args: optional argument passed from switch_screen calls
         :type args: anything
         :return: return `simpleline.render.InputState.PROCESSED` if key was handled,
-                 `simpleline.render.InputState.DISCARDED` if the screen should not process input on the scheduler and
-                 key if you want it to.
+                 `simpleline.render.InputState.DISCARDED` if the screen should not process input
+                 on the scheduler and key if you want it to.
         :rtype: `simpleline.render.InputState` enum | str
         """
         return key
+
+    def get_input_with_error_check(self, args):
+        """Get user input and redraw if user add too many invalid inputs.
+
+        This method should be used only by ScreenScheduler.
+
+        :param args: Arguments passed in when scheduling this screen.
+        :type args: Anything.
+        """
+        self._input_manager.get_input(args=args)
 
     def prompt(self, args=None):
         """Return the text to be shown as prompt or handle the prompt and return None.

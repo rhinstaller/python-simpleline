@@ -26,7 +26,7 @@ from simpleline import App
 from simpleline.event_loop import ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal, RenderScreenSignal, CloseScreenSignal
 from simpleline.render import RenderUnexpectedError
-from simpleline.render.input_manager import InputManager, UserInputAction
+from simpleline.render.screen.input_manager import UserInputAction
 from simpleline.render.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
 
 from simpleline.logging import get_simpleline_logger
@@ -54,7 +54,6 @@ class ScreenScheduler(object):
         self._quit_screen = None
         self._event_loop = event_loop
 
-        self._input_manager = InputManager()
         if scheduler_stack:
             self._screen_stack = scheduler_stack
         else:
@@ -189,7 +188,8 @@ class ScreenScheduler(object):
 
         if closed_from is not None and closed_from is not screen.ui_screen:
             raise RenderUnexpectedError("You are trying to close screen %s from screen %s! "
-                                        "This is most probably not intentional." % (closed_from, screen.ui_screen))
+                                        "This is most probably not intentional." %
+                                        (closed_from, screen.ui_screen))
 
         if screen.execute_new_loop:
             self._event_loop.close_loop()
@@ -242,7 +242,7 @@ class ScreenScheduler(object):
 
             if top_screen.ui_screen.input_required:
                 log.debug("Input is required by %s screen", top_screen)
-                self.input_required()
+                top_screen.ui_screen.get_input_with_error_check(top_screen.args)
         except ExitMainLoop:
             raise
         except Exception:    # pylint: disable=broad-except
@@ -274,33 +274,15 @@ class ScreenScheduler(object):
 
         return self._screen_stack.pop(False)
 
-    def input_required(self):
-        """Register user input to the event loop for processing."""
-        top_screen = self._get_last_screen()
-        ui_screen = top_screen.ui_screen
-        prompt = ui_screen.prompt(top_screen.args)
-        hide_user_input = ui_screen.hide_user_input
-        pass_func = ui_screen.password_func
-
-        self._input_manager.get_input(prompt, self._process_input, hide_user_input, pass_func)
-
-    def _process_input(self, user_input):
+    def process_input_result(self, input_result, should_redraw):
         active_screen = self._get_last_screen()
 
-        try:
-            input_result = self._input_manager.process_input(active_screen, user_input)
-        except ExitMainLoop:
-            raise
-        except Exception:    # pylint: disable=broad-except
-            self._event_loop.enqueue_signal(ExceptionSignal(self))
-            return
-
         if not input_result.was_successful():
-            if self._input_manager.input_error_threshold_exceeded:
+            if should_redraw:
                 self.redraw()
             else:
                 log.debug("Input was not successful, ask for new input.")
-                self.input_required()
+                active_screen.ui_screen.get_input_with_error_check(active_screen.args)
         else:
             if input_result == UserInputAction.NOOP:
                 return
