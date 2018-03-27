@@ -30,7 +30,7 @@ __all__ = ["InputHandler", "PasswordInputHandler"]
 
 class InputHandler(object):
 
-    def __init__(self, callback=None):
+    def __init__(self, callback=None, source=None):
         """Class to handle input from the terminal.
 
         This class is designed to be instantiated on place where it should be used.
@@ -41,18 +41,22 @@ class InputHandler(object):
 
         :param callback: You can specify callback which will be called when user give input.
         :type callback: Callback function with one argument which will be user input.
+
+        :param source: Source of this input. It will be helpful in case of debugging an issue.
+        :type source: Class which will process an input from this InputHandler.
         """
         super().__init__()
         self._input = None
         self._input_callback = callback
         self._input_received = False
         self._skip_concurrency_check = False
+        self._source = source
 
         App.get_event_loop().register_signal_handler(InputReadySignal,
                                                      self._input_received_handler)
 
     def _input_received_handler(self, signal, args):
-        if signal.source is not self:
+        if signal.input_handler_source != self:
             return
 
         self._input_received = True
@@ -72,6 +76,14 @@ class InputHandler(object):
         :returns: String or None if no is input received.
         """
         return self._input
+
+    @property
+    def source(self):
+        """Get source of this input.
+
+        :returns: Anything probably UIScreen.
+        """
+        return self._source
 
     @property
     def skip_concurrency_check(self):
@@ -156,8 +168,19 @@ class InputHandler(object):
 class InputHandlerRequest(InputRequest):
     """This is thread object to get input from user without blocking main thread."""
 
-    def __init__(self, width, prompt, source):
-        super().__init__(source)
+    def __init__(self, width, prompt, input_handler):
+        """Create request object to get input in InputThreadManager.
+
+        :param width: Width of the screen prompt.
+        :type width: int
+
+        :param prompt: Input prompt.
+        :type prompt: Instance of `simpleline.render.prompt.Prompt` class.
+
+        :param input_handler: InputHandler instance which created this object.
+        :type input_handler: InputHandler based instance.
+        """
+        super().__init__(input_handler, input_handler.source)
         self._width = width
         self._prompt = prompt
 
@@ -194,7 +217,7 @@ class InputHandlerRequest(InputRequest):
 
 class PasswordInputHandler(InputHandler):
 
-    def __init__(self, callback=None):
+    def __init__(self, callback=None, source=None):
         """Class to handle hidden password input from the terminal.
 
         This class is designed to be instantiated on place where it should be used.
@@ -205,8 +228,11 @@ class PasswordInputHandler(InputHandler):
 
         :param callback: You can specify callback which will be called when user give input.
         :type callback: Callback function with one argument which will be user input.
+
+        :param source: Source of this input. It will be helpful in case of debugging an issue.
+        :type source: Class which will process an input from this InputHandler.
         """
-        super().__init__(callback=callback)
+        super().__init__(callback=callback, source=source)
         self._getpass_func = getpass.getpass
 
     def set_pass_func(self, getpass_func):
@@ -224,8 +250,23 @@ class PasswordInputHandler(InputHandler):
 class PasswordInputHandlerRequest(InputHandlerRequest):
     """Similar as InputHandlerRequest but don't echo user keys."""
 
-    def __init__(self, width, prompt, source, getpass_func):
-        super().__init__(width, prompt, source)
+    def __init__(self, width, prompt, input_handler, getpass_func):
+        """Create request object to get password input in InputThreadManager.
+
+        :param width: Width of the screen prompt.
+        :type width: int
+
+        :param prompt: Input prompt.
+        :type prompt: Instance of `simpleline.render.prompt.Prompt` class.
+
+        :param input_handler: InputHandler instance which created this object.
+        :type input_handler: InputHandler based instance.
+
+        :param getpass_func: Function to get user password.
+        :type getpass_func: Function which gets prompt as only parameter and returns user input
+                            string.
+        """
+        super().__init__(width, prompt, input_handler)
         self._getpass_func = getpass_func
 
     def _ask_input(self):

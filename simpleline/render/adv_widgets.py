@@ -76,7 +76,7 @@ class PasswordDialog(UIScreen):
         self.window.add_with_separator(widgets.CenterWidget(text))
 
     def prompt(self, args=None):
-        handler = PasswordInputHandler()
+        handler = PasswordInputHandler(source=self)
         if self.password_func:
             handler.set_pass_func(self.password_func)
 

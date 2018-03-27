@@ -75,9 +75,9 @@ class InputManager(object):
         self._input_args = args
 
         if not self._ui_screen.hide_user_input:
-            handler = InputHandler()
+            handler = InputHandler(source=self._ui_screen)
         else:
-            handler = PasswordInputHandler()
+            handler = PasswordInputHandler(source=self._ui_screen)
             if self._ui_screen.password_func:
                 handler.set_pass_func(self._ui_screen.password_func)
 

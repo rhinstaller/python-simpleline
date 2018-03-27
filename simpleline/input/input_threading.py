@@ -22,10 +22,12 @@ import threading
 from abc import ABCMeta, abstractmethod
 
 from simpleline import App
-from simpleline.event_loop.signals import InputReadySignal, InputReceivedSignal
 from simpleline.logging import get_simpleline_logger
+from simpleline.event_loop.signals import InputReceivedSignal, InputReadySignal
 
 log = get_simpleline_logger()
+
+
 INPUT_THREAD_NAME = "SimplelineInputThread"
 
 
@@ -62,8 +64,12 @@ class InputThreadManager(object):
 
     def _input_received_handler(self, signal, args):
         thread_object = self._input_stack[-1]
-        new_source = thread_object.source
-        App.get_event_loop().enqueue_signal(InputReadySignal(new_source, signal.data))
+        handler_source = thread_object.source
+        signal_source = self._get_request_source(thread_object)
+        App.get_event_loop().enqueue_signal(InputReadySignal(source=signal_source,
+                                                             input_handler_source=handler_source,
+                                                             data=signal.data)
+                                            )
 
         # wait until used object ends
         for t in self._find_running_thread_objects():
@@ -74,6 +80,14 @@ class InputThreadManager(object):
 
         self._processing_input = False
         self._start_user_input_async()
+
+    def _get_request_source(self, thread_object):
+        """Get user input request source.
+
+        That means object who is using InputHandler.
+        If this object is not specified then return InputHandler as a source.
+        """
+        return thread_object.requester_source or thread_object.source
 
     def start_input_thread(self, input_thread_object, concurrent_check=True):
         """Start input thread to get user input.
@@ -93,8 +107,9 @@ class InputThreadManager(object):
             else:
                 msg = ""
                 for t in self._input_stack:
-                    thread_source = t.source
-                    msg += "Input handler: {}\n".format(thread_source)
+                    requester_source = t.requester_source or "Unknown"
+                    msg += "Input handler: {} Input requester: {}\n".format(t.source,
+                                                                            requester_source)
 
                 msg.rstrip()
 
@@ -134,10 +149,27 @@ class InputRequest(object, metaclass=ABCMeta):
         The `run_input` method will run in a separate thread!
     """
 
-    def __init__(self, source):
+    def __init__(self, source, requester_source=None):
         super().__init__()
-        self.source = source
+        self._source = source
+        self._requester_source = requester_source
         self.thread = None
+
+    @property
+    def source(self):
+        """Get direct source of this input request.
+
+        :returns: InputHandler instance.
+        """
+        return self._source
+
+    @property
+    def requester_source(self):
+        """Get requester -- source of this input.
+
+        :returns: Anything probably UIScreen based instance.
+        """
+        return self._requester_source
 
     def initialize_thread(self):
         """Initialize thread for this input request.

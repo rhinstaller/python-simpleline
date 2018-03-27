@@ -53,21 +53,34 @@ class ExceptionSignal(AbstractSignal):
 
 class InputReadySignal(AbstractSignal):
     """Input from user is ready for processing."""
-    def __init__(self, source, data, priority=0):
+    def __init__(self, source, input_handler_source, data, priority=0):
         """Store user input inside of this signal
 
         Read the data from user input in `data` attribute.
 
+        The only way how a user should ask for input is to use InputHandler and inherited classes.
+        The input_handler_source param must be set but this signal instance can be attached to
+        another source object which is registered to a specific event loop.
+
+        If no requester (object who uses InputHandler) is specified then source and
+        input_handler_source will both point to InputHandler instance.
+
         :param source: Source of this signal.
         :type source: Any object.
+
+        :param input_handler_source: InputHandler who is asking for input.
+        :type input_handler_source: The `simpleline.input.input_handler.InputHandler` based
+                                    instance.
 
         :param data: User input data.
         :type data: str
 
         :param priority: Priority of this event.
         :type priority: Int greater than 0.
+
         """
         super().__init__(source, priority=priority)
+        self.input_handler_source = input_handler_source
         self.data = data
 
 

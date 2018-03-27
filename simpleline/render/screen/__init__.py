@@ -191,11 +191,11 @@ class UIScreen(SignalHandler):
         :type hidden: bool
         """
         if hidden:
-            handler = PasswordInputHandler()
+            handler = PasswordInputHandler(source=self)
             if self.password_func:
                 handler.set_pass_func(self.password_func)
         else:
-            handler = InputHandler()
+            handler = InputHandler(source=self)
 
         handler.get_input(message)
         handler.wait_on_input()
@@ -263,7 +263,7 @@ class UIScreen(SignalHandler):
                 pos += real_screen_height
 
     def _ask_user_input_blocking(self, prompt):
-        handler = InputHandler()
+        handler = InputHandler(source=self)
         handler.get_input(prompt)
         handler.wait_on_input()
         return handler.value
