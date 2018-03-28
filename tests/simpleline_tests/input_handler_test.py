@@ -19,6 +19,9 @@
 
 
 import unittest
+from unittest.mock import Mock
+from threading import Barrier, current_thread, Event
+
 from unittest import mock
 from io import StringIO
 
@@ -42,6 +45,26 @@ class InputHandler_TestCase(unittest.TestCase):
 
         self._callback_called = False
         self._callback_input = ""
+
+        self._callback_called2 = False
+        self._callback_input2 = ""
+
+        self._thread_barrier = Barrier(2, timeout=3)
+        self._thread_event_wait_for_inner = Event()
+        self._thread_event_wait_for_outer = Event()
+        self._threads = []
+
+    def tearDown(self):
+        super().tearDown()
+        self._thread_event_wait_for_outer.set()
+
+        for t in self._threads:
+            t.join()
+
+        # process InputReceivedSignal
+        App.get_event_loop().process_signals()
+        # process InputReadySignal
+        App.get_event_loop().process_signals()
 
     def test_async_input(self, input_mock, output_mock):
         input_mock.return_value = 'a'
@@ -77,9 +100,96 @@ class InputHandler_TestCase(unittest.TestCase):
         self.assertEqual(self._callback_input, input_value)
         self.assertEqual(h.value, input_value)
 
+    def test_concurrent_input(self, input_mock, output_mock):
+        input_mock.side_effect = self._wait_for_concurrent_call
+
+        h = InputHandler()
+        h.set_callback(self._test_callback)
+        h2 = InputHandler()
+        h2.set_callback(self._test_callback2)
+
+        with self.assertRaisesRegex(KeyError, r'.*Input handler:.*InputHandler object'
+                                              r'.*Input requester: Unknown'
+                                              r'.*Input handler:.*InputHandler object'
+                                              r'.*Input requester: Unknown.*'):
+            h.get_input(Prompt(message="ABC"))
+            self._thread_event_wait_for_inner.wait()
+            h2.get_input(Prompt(message="ABC"))
+
+        self.assertFalse(self._callback_called)
+        self.assertEqual(self._callback_input, "")
+        self.assertEqual(h.value, None)
+
+        self.assertFalse(self._callback_called2)
+        self.assertEqual(self._callback_input2, "")
+        self.assertEqual(h2.value, None)
+
+    def test_concurrent_input_with_source(self, input_mock, output_mock):
+        input_mock.side_effect = self._wait_for_concurrent_call
+        source1 = Mock()
+        source2 = Mock()
+
+        h = InputHandler(source=source1)
+        h2 = InputHandler(source=source2)
+        h.set_callback(self._test_callback)
+        h2.set_callback(self._test_callback2)
+
+        with self.assertRaisesRegex(KeyError, r'.*Input handler:.*InputHandler object'
+                                              r'.*Input requester:.*Mock'
+                                              r'.*Input handler:.*InputHandler object'
+                                              r'.*Input requester:.*Mock.*'):
+            h.get_input(Prompt(message="ABC"))
+            self._thread_event_wait_for_inner.wait()
+            h2.get_input(Prompt(message="ABC"))
+
+        self.assertFalse(self._callback_called)
+        self.assertEqual(self._callback_input, "")
+        self.assertEqual(h.value, None)
+
+        self.assertFalse(self._callback_called2)
+        self.assertEqual(self._callback_input2, "")
+        self.assertEqual(h2.value, None)
+
+    def test_concurrent_input_without_check(self, input_mock, output_mock):
+        input_mock.side_effect = self._wait_for_concurrent_call
+
+        h = InputHandler()
+        h2 = InputHandler()
+        h.set_callback(self._test_callback)
+        h2.set_callback(self._test_callback2)
+        h2.skip_concurrency_check = True
+        h.skip_concurrency_check = True
+
+        h.get_input(Prompt(message="ABC"))
+        self._thread_event_wait_for_inner.wait()
+        h2.get_input(Prompt(message="ABC"))
+        self._thread_event_wait_for_outer.set()
+
+        h.wait_on_input()
+        h2.wait_on_input()
+
+        self.assertTrue(self._callback_called)
+        self.assertEqual(self._callback_input, "thread 1")
+        self.assertEqual(h.value, "thread 1")
+
+        self.assertTrue(self._callback_called2)
+        self.assertEqual(self._callback_input2, "thread 0")
+        self.assertEqual(h2.value, "thread 0")
+
+    def _wait_for_concurrent_call(self):
+        ret = "thread {}".format(len(self._threads))
+        self._threads.append(current_thread())
+        self._thread_event_wait_for_inner.set()
+        self._thread_event_wait_for_outer.wait()
+        return ret
+
     def _test_callback(self, user_input):
         self._callback_called = True
         self._callback_input = user_input
+
+    def _test_callback2(self, user_input):
+        self._callback_called2 = True
+        self._callback_input2 = user_input
 
 
 @mock.patch('sys.stdout', new_callable=StringIO)
