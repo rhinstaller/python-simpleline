@@ -53,7 +53,7 @@ class ExceptionSignal(AbstractSignal):
 
 class InputReadySignal(AbstractSignal):
     """Input from user is ready for processing."""
-    def __init__(self, source, input_handler_source, data, priority=0):
+    def __init__(self, source, input_handler_source, data, priority=0, success=True):
         """Store user input inside of this signal
 
         Read the data from user input in `data` attribute.
@@ -78,10 +78,13 @@ class InputReadySignal(AbstractSignal):
         :param priority: Priority of this event.
         :type priority: Int greater than 0.
 
+        :param success: Was the input successful? True on successful input False otherwise.
+        :type success: bool
         """
         super().__init__(source, priority=priority)
         self.input_handler_source = input_handler_source
         self.data = data
+        self.success = success
 
 
 class InputReceivedSignal(AbstractSignal):

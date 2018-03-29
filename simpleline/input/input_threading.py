@@ -63,23 +63,37 @@ class InputThreadManager(object):
         return cls.__instance
 
     def _input_received_handler(self, signal, args):
-        thread_object = self._input_stack[-1]
-        handler_source = thread_object.source
-        signal_source = self._get_request_source(thread_object)
-        App.get_event_loop().enqueue_signal(InputReadySignal(source=signal_source,
-                                                             input_handler_source=handler_source,
-                                                             data=signal.data)
-                                            )
+        thread_object = self._input_stack.pop()
+        self._send_input_ready_signal(signal, thread_object)
+
+        if thread_object.thread:
+            thread_object.thread.join()
 
         # wait until used object ends
-        for t in self._find_running_thread_objects():
-            t.thread.join()
+        for t in self._input_stack:
+            self._send_failed_input_ready_signal(t)
+            if t.thread:
+                t.thread.join()
 
-        # remove last item -- it was satisfied
-        self._input_stack.pop()
-
+        # remove all other items waiting for input
+        self._input_stack.clear()
         self._processing_input = False
-        self._start_user_input_async()
+
+    def _send_input_ready_signal(self, signal, thread_object):
+        handler_source = thread_object.source
+        signal_source = self._get_request_source(thread_object)
+
+        new_signal = InputReadySignal(source=signal_source, input_handler_source=handler_source,
+                                      data=signal.data, success=True)
+        App.get_event_loop().enqueue_signal(new_signal)
+
+    def _send_failed_input_ready_signal(self, thread_object):
+        handler_source = thread_object.source
+        signal_source = self._get_request_source(thread_object)
+
+        new_signal = InputReadySignal(source=signal_source, input_handler_source=handler_source,
+                                      data="", success=False)
+        App.get_event_loop().enqueue_signal(new_signal)
 
     def _get_request_source(self, thread_object):
         """Get user input request source.
@@ -102,8 +116,8 @@ class InputThreadManager(object):
     def _check_input_thread_running(self, raise_concurrent_check):
         if len(self._input_stack) != 1:
             if not raise_concurrent_check:
-                log.warning("Running concurrently multiple inputs. Last who asked wins! "
-                            "Others will get input after this one.")
+                log.warning("Asking for multiple inputs with concurrent check bypassed, "
+                            "last who asked wins! Others are dropped.")
             else:
                 msg = ""
                 for t in self._input_stack:
@@ -118,22 +132,21 @@ class InputThreadManager(object):
                                "{}".format(msg))
 
     def _start_user_input_async(self):
-        if not self._input_stack or self._processing_input:
-            return
-
         thread_object = self._input_stack[-1]
+
+        if self._processing_input:
+            self._print_new_prompt(thread_object)
+            return
 
         thread_object.initialize_thread()
         self._processing_input = True
         thread_object.start_thread()
 
-    def _find_running_thread_objects(self):
-        ret_list = []
-        for t in self._input_stack:
-            if t.thread and t.thread.is_alive():
-                ret_list.append(t)
+    def _print_new_prompt(self, thread_object):
+        prompt = thread_object.text_prompt()
 
-        return ret_list
+        # print new prompt
+        print(prompt, end="")
 
 
 class InputRequest(object, metaclass=ABCMeta):
@@ -144,6 +157,8 @@ class InputRequest(object, metaclass=ABCMeta):
 
     The `run_input` method is the entry point for this class. Output from this method must be
     a user input.
+    The `text_prompt` method is used to get textual representation of a prompt. This will be used
+    on concurrent input to replace existing prompt to get new input.
 
     WARNING:
         The `run_input` method will run in a separate thread!
@@ -194,6 +209,16 @@ class InputRequest(object, metaclass=ABCMeta):
         data = self.get_input()
 
         App.get_event_loop().enqueue_signal(InputReceivedSignal(self, data))
+
+    @abstractmethod
+    def text_prompt(self):
+        """Get text representation of the user prompt.
+
+        This will be used to get high priority input.
+
+        :returns: String representation of the prompt or None if no prompt is present.
+        """
+        return None
 
     @abstractmethod
     def get_input(self):

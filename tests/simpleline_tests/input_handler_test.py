@@ -168,11 +168,11 @@ class InputHandler_TestCase(unittest.TestCase):
         h.wait_on_input()
         h2.wait_on_input()
 
-        self.assertTrue(self._callback_called)
-        self.assertEqual(self._callback_input, "thread 1")
-        self.assertEqual(h.value, "thread 1")
+        self.assertFalse(self._callback_called)
+        self.assertFalse(h.input_successful())
 
         self.assertTrue(self._callback_called2)
+        self.assertTrue(h2.input_successful())
         self.assertEqual(self._callback_input2, "thread 0")
         self.assertEqual(h2.value, "thread 0")
 

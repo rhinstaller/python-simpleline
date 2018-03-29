@@ -49,6 +49,7 @@ class InputHandler(object):
         self._input = None
         self._input_callback = callback
         self._input_received = False
+        self._input_successful = False
         self._skip_concurrency_check = False
         self._source = source
 
@@ -60,6 +61,11 @@ class InputHandler(object):
             return
 
         self._input_received = True
+        self._input_successful = signal.success
+
+        if not self._input_successful:
+            return
+
         self._input = signal.data
 
         # call async callback
@@ -122,6 +128,8 @@ class InputHandler(object):
         """Blocks execution till the user input is received.
 
         Events will works as expected during this blocking.
+
+        Please check the `input_successful` method to test the input.
         """
         # we already received input from user
         if self._input_received:
@@ -129,6 +137,13 @@ class InputHandler(object):
 
         while not self._input_received:
             App.get_event_loop().process_signals(InputReadySignal)
+
+    def input_successful(self):
+        """Was input successful?
+
+        :returns: bool
+        """
+        return self._input_successful
 
     def get_input(self, prompt):
         """Use prompt to ask for user input and wait (non-blocking) on user input.
@@ -198,14 +213,14 @@ class InputHandlerRequest(InputRequest):
 
         return data
 
-    def _prompt_to_text(self):
+    def text_prompt(self):
         widget = TextWidget(str(self._prompt))
         widget.render(self._width)
         lines = widget.get_lines()
         return "\n".join(lines) + " "
 
     def _ask_input(self):
-        text_prompt = self._prompt_to_text()
+        text_prompt = self.text_prompt()
         sys.stdout.write(text_prompt)
         sys.stdout.flush()
 
@@ -270,6 +285,6 @@ class PasswordInputHandlerRequest(InputHandlerRequest):
         self._getpass_func = getpass_func
 
     def _ask_input(self):
-        text_prompt = self._prompt_to_text()
+        text_prompt = self.text_prompt()
 
         return self._getpass_func(text_prompt)

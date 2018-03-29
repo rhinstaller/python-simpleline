@@ -82,6 +82,10 @@ class PasswordDialog(UIScreen):
 
         handler.get_input(_("Passphrase: "))
         handler.wait_on_input()
+
+        if not handler.input_successful():
+            return None
+
         self._password = handler.value
         if not self._password:
             return None
