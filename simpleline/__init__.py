@@ -69,6 +69,15 @@ class App(object):
 
         cls.__app = cls.AppPimpl(scheduler, event_loop, width)
 
+        cls._post_init()
+
+    @classmethod
+    def _post_init(cls):
+        from simpleline.input.input_threading import InputThreadManager
+        # FIXME: This should be done by more general way not by calling exact class here.
+        # Create new instance of InputThreadManager because it needs new event loop
+        InputThreadManager.create_new_instance()
+
     @classmethod
     def is_initialized(cls):
         """Is the App already initialized?

@@ -40,12 +40,18 @@ class InputThreadManager(object):
     def __init__(self):
         super().__init__()
         self._input_stack = []
-        self._registered_loop = None
         self._processing_input = False
 
     @classmethod
     def create_new_instance(cls):
-        cls.__instance = InputThreadManager()
+        instance = InputThreadManager()
+        cls.__instance = instance
+
+        instance._post_init_configuration()
+
+    def _post_init_configuration(self):
+        App.get_event_loop().register_signal_handler(InputReceivedSignal,
+                                                     self.__instance._input_received_handler)
 
     @classmethod
     def get_instance(cls):
@@ -75,11 +81,6 @@ class InputThreadManager(object):
         :param input_thread_object: Input thread object based on InputThread class.
         :param concurrent_check: Should the concurrent thread check be fatal? (default True).
         """
-        if self._registered_loop is not App.get_event_loop():
-            App.get_event_loop().register_signal_handler(InputReceivedSignal,
-                                                         self._input_received_handler)
-            self._registered_loop = App.get_event_loop()
-
         self._input_stack.append(input_thread_object)
         self._check_input_thread_running(concurrent_check)
         self._start_user_input_async()
