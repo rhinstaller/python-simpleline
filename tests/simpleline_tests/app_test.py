@@ -21,6 +21,7 @@ import unittest
 from unittest import mock
 
 from simpleline import App, DEFAULT_WIDTH
+from simpleline.input.input_threading import InputThreadManager
 from simpleline.render.screen_scheduler import ScreenScheduler
 from simpleline.event_loop.main_loop import MainLoop
 
@@ -56,6 +57,19 @@ class App_TestCase(unittest.TestCase):
 
         App.initialize(event_loop=event_loop2, scheduler=scheduler2)
         self._check_app_settings("app_name_test2", event_loop2, scheduler2)
+
+        App.initialize()
+        self.assertNotEqual(App.get_event_loop(), event_loop2)
+        self.assertNotEqual(App.get_scheduler(), scheduler2)
+
+    def test_input_thread_manager_after_initialize(self):
+        App.initialize()
+
+        thread_mgr = InputThreadManager.get_instance()
+
+        App.initialize()
+
+        self.assertNotEqual(thread_mgr, InputThreadManager.get_instance())
 
     @mock.patch('simpleline.event_loop.main_loop.MainLoop.run')
     def test_run_shortcut(self, run_mock):
