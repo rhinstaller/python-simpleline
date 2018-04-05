@@ -64,44 +64,20 @@ class InputThreadManager(object):
 
     def _input_received_handler(self, signal, args):
         thread_object = self._input_stack.pop()
-        self._send_input_ready_signal(signal, thread_object)
+        thread_object.emit_input_ready_signal(signal.data)
 
         if thread_object.thread:
             thread_object.thread.join()
 
         # wait until used object ends
         for t in self._input_stack:
-            self._send_failed_input_ready_signal(t)
+            t.emit_failed_input_ready_signal()
             if t.thread:
                 t.thread.join()
 
         # remove all other items waiting for input
         self._input_stack.clear()
         self._processing_input = False
-
-    def _send_input_ready_signal(self, signal, thread_object):
-        handler_source = thread_object.source
-        signal_source = self._get_request_source(thread_object)
-
-        new_signal = InputReadySignal(source=signal_source, input_handler_source=handler_source,
-                                      data=signal.data, success=True)
-        App.get_event_loop().enqueue_signal(new_signal)
-
-    def _send_failed_input_ready_signal(self, thread_object):
-        handler_source = thread_object.source
-        signal_source = self._get_request_source(thread_object)
-
-        new_signal = InputReadySignal(source=signal_source, input_handler_source=handler_source,
-                                      data="", success=False)
-        App.get_event_loop().enqueue_signal(new_signal)
-
-    def _get_request_source(self, thread_object):
-        """Get user input request source.
-
-        That means object who is using InputHandler.
-        If this object is not specified then return InputHandler as a source.
-        """
-        return thread_object.requester_source or thread_object.source
 
     def start_input_thread(self, input_thread_object, concurrent_check=True):
         """Start input thread to get user input.
@@ -185,6 +161,36 @@ class InputRequest(object, metaclass=ABCMeta):
         :returns: Anything probably UIScreen based instance.
         """
         return self._requester_source
+
+    def emit_input_ready_signal(self, input_data):
+        """Emit the InputReadySignal signal with collected input data.
+
+        :param input_data: Input data received.
+        :type input_data: str
+        """
+        handler_source = self.source
+        signal_source = self._get_request_source()
+
+        new_signal = InputReadySignal(source=signal_source, input_handler_source=handler_source,
+                                      data=input_data, success=True)
+        App.get_event_loop().enqueue_signal(new_signal)
+
+    def emit_failed_input_ready_signal(self):
+        """Emit the InputReadySignal with failed state."""
+        handler_source = self.source
+        signal_source = self._get_request_source()
+
+        new_signal = InputReadySignal(source=signal_source, input_handler_source=handler_source,
+                                      data="", success=False)
+        App.get_event_loop().enqueue_signal(new_signal)
+
+    def _get_request_source(self):
+        """Get user input request source.
+
+        That means object who is using InputHandler.
+        If this object is not specified then return InputHandler as a source.
+        """
+        return self.requester_source or self.source
 
     def initialize_thread(self):
         """Initialize thread for this input request.
