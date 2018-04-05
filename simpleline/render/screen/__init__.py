@@ -26,7 +26,6 @@ from simpleline.render.containers import WindowContainer
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen.signal_handler import SignalHandler
 from simpleline.render.screen.input_manager import InputManager
-from simpleline.input.input_handler import InputHandler, PasswordInputHandler
 from simpleline.utils.i18n import _
 
 __all__ = ["UIScreen", "InputState"]
@@ -179,27 +178,18 @@ class UIScreen(SignalHandler):
         self._window = window
 
     def get_user_input(self, message, hidden=False):
-        """Get immediately input from user.
+        """Get immediately input from the user.
 
         Use this with cautious. Never call this in middle of rendering or when other
         input is already waiting. It is recommended to use `self.input_required` instead.
 
-        :param message: Message for the user.
+        :param message: Message prompt for the user.
         :type message: str
 
         :param hidden: Do not echo user input (password typing).
         :type hidden: bool
         """
-        if hidden:
-            handler = PasswordInputHandler(source=self)
-            if self.password_func:
-                handler.set_pass_func(self.password_func)
-        else:
-            handler = InputHandler(source=self)
-
-        handler.get_input(message)
-        handler.wait_on_input()
-        return handler.value
+        return self._input_manager.get_input_blocking(message, hidden)
 
     def setup(self, args):
         """Do additional setup right before this screen is used.
@@ -263,10 +253,7 @@ class UIScreen(SignalHandler):
                 pos += real_screen_height
 
     def _ask_user_input_blocking(self, prompt):
-        handler = InputHandler(source=self)
-        handler.get_input(prompt)
-        handler.wait_on_input()
-        return handler.value
+        return self._input_manager.get_input_blocking(prompt, False)
 
     def show_all(self):
         """Print WindowContainer in `self.window` with all its content."""

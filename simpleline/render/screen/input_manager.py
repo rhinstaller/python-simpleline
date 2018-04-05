@@ -25,7 +25,7 @@ from simpleline import App
 from simpleline.event_loop import ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal
 from simpleline.render.prompt import Prompt
-from simpleline.input.input_handler import InputHandler, PasswordInputHandler
+from simpleline.input import InputHandler, PasswordInputHandler
 
 from simpleline.logging import get_simpleline_logger
 
@@ -61,6 +61,26 @@ class InputManager(object):
         """
         errors = self._input_error_counter % self._input_error_threshold
         return errors == 0
+
+    def get_input_blocking(self, message, hidden):
+        """Get blocking input from the user.
+
+        :param message: Message prompt for the user.
+        :type message: str
+
+        :param hidden: Do not echo user input (password typing).
+        :type hidden: bool
+        """
+        if hidden:
+            handler = PasswordInputHandler(source=self)
+            if self._ui_screen.password_func:
+                handler.set_pass_func(self._ui_screen.password_func)
+        else:
+            handler = InputHandler(source=self)
+
+        handler.get_input(message)
+        handler.wait_on_input()
+        return handler.value
 
     def get_input(self, args=None):
         """Get input from user.
