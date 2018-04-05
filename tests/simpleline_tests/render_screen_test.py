@@ -180,7 +180,7 @@ class ScreenException_TestCase(unittest.TestCase, UtilityMixin):
         self.assertTrue(self._force_quit_called)
 
 
-@mock.patch('sys.stdout')
+@mock.patch('sys.stdout', new_callable=StringIO)
 @mock.patch('simpleline.input.input_handler.InputHandlerRequest._get_input')
 class InputProcessing_TestCase(unittest.TestCase):
 
@@ -296,6 +296,37 @@ class InputProcessing_TestCase(unittest.TestCase):
 
         self.assertTrue(screen.pass_called)
         self.assertEqual(screen.pass_prompt.rstrip(), str(prompt))
+
+    def test_blocking_input(self, mock_stdin, mock_stdout):
+        prompt_message = "test prompt"
+        ret = "blocking test"
+        mock_stdin.return_value = ret
+        screen = BlockingInputTestScreen(prompt_message, False)
+
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
+
+        self.assertEqual(screen.input_returned, ret)
+
+        out = mock_stdout.getvalue()
+        out = out.split("\n")[-1].strip()
+        self.assertEqual(out, prompt_message)
+
+    @mock.patch('getpass.getpass')
+    def test_blocking_password_input(self, mock_getpass, mock_stdin, mock_stdout):
+        prompt_message = "test prompt"
+        ret = "blocking test"
+        mock_getpass.return_value = ret
+        screen = BlockingInputTestScreen(prompt_message, True)
+
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
+
+        self.assertEqual(screen.input_returned, ret)
+
+        out = mock_stdout.getvalue()
+        # can't check for prompt because that is printed by getpass func which is mocked
+        self.assertGreater(len(out), 1)
 
 
 # HELPER CLASSES
@@ -508,6 +539,19 @@ class ExceptionTestScreen(UIScreen):
         super().show_all()
         if self._where == self.REDRAW:
             raise TestRedrawException("Redraw test exception happened!")
+
+
+class BlockingInputTestScreen(EmptyScreen):
+
+    def __init__(self, prompt_message, hidden):
+        super().__init__()
+        self._prompt_message = prompt_message
+        self._hidden = hidden
+        self.input_returned = None
+
+    def show_all(self):
+        self.input_returned = self.get_user_input(self._prompt_message, self._hidden)
+        super().show_all()
 
 
 class TestRefreshException(Exception):
