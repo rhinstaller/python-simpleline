@@ -19,7 +19,9 @@
 # Red Hat, Inc.
 #
 
-__all__ = ["App"]
+__all__ = ["App", "DEFAULT_WIDTH"]
+
+DEFAULT_WIDTH = 80
 
 
 class App(object):
@@ -38,12 +40,13 @@ class App(object):
 
     class AppPimpl(object):
 
-        def __init__(self, scheduler, event_loop):
+        def __init__(self, scheduler, event_loop, width):
             self.event_loop = event_loop
             self.scheduler = scheduler
+            self.width = width
 
     @classmethod
-    def initialize(cls, scheduler=None, event_loop=None):
+    def initialize(cls, scheduler=None, event_loop=None, width=DEFAULT_WIDTH):
         """Create app instance inside of this class.
 
         This method can be called multiple times to reset App settings.
@@ -64,7 +67,16 @@ class App(object):
         if scheduler is None:
             scheduler = ScreenScheduler(event_loop)
 
-        cls.__app = cls.AppPimpl(scheduler, event_loop)
+        cls.__app = cls.AppPimpl(scheduler, event_loop, width)
+
+        cls._post_init()
+
+    @classmethod
+    def _post_init(cls):
+        from simpleline.input.input_threading import InputThreadManager
+        # FIXME: This should be done by more general way not by calling exact class here.
+        # Create new instance of InputThreadManager because it needs new event loop
+        InputThreadManager.create_new_instance()
 
     @classmethod
     def is_initialized(cls):
@@ -86,6 +98,16 @@ class App(object):
     def get_event_loop(cls):
         """Get instance of class responsible for processing asynchronous events."""
         return cls.__app.event_loop
+
+    @classmethod
+    def set_width(cls, width):
+        """Set width of the application."""
+        cls.__app.width = width
+
+    @classmethod
+    def get_width(cls):
+        """Get width of the application."""
+        return cls.__app.width
 
     @classmethod
     def run(cls):

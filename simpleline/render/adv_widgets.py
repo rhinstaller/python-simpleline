@@ -19,11 +19,11 @@
 
 import sys
 
-from simpleline import App
 from simpleline.render import widgets
 from simpleline.render.containers import WindowContainer
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen import UIScreen, InputState
+from simpleline.input.input_handler import PasswordInputHandler
 from simpleline.utils.i18n import _, N_, C_
 
 __all__ = ["ErrorDialog", "GetInputScreen", "GetPasswordInputScreen", "HelpScreen", "PasswordDialog", "YesNoDialog"]
@@ -76,7 +76,17 @@ class PasswordDialog(UIScreen):
         self.window.add_with_separator(widgets.CenterWidget(text))
 
     def prompt(self, args=None):
-        self._password = App.get_scheduler().io_manager.get_user_input(_("Passphrase: "), hidden=True)
+        handler = PasswordInputHandler(source=self)
+        if self.password_func:
+            handler.set_pass_func(self.password_func)
+
+        handler.get_input(_("Passphrase: "))
+        handler.wait_on_input()
+
+        if not handler.input_successful():
+            return None
+
+        self._password = handler.value
         if not self._password:
             return None
         else:

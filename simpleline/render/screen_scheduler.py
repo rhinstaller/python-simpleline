@@ -21,10 +21,12 @@
 
 import threading
 
+
+from simpleline import App
 from simpleline.event_loop import ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal, RenderScreenSignal, CloseScreenSignal
 from simpleline.render import RenderUnexpectedError
-from simpleline.render.io_manager import InOutManager, UserInputAction
+from simpleline.render.screen.input_manager import UserInputAction
 from simpleline.render.screen_stack import ScreenStack, ScreenData, ScreenStackEmptyException
 
 from simpleline.logging import get_simpleline_logger
@@ -32,6 +34,9 @@ from simpleline.logging import get_simpleline_logger
 log = get_simpleline_logger()
 
 RAW_INPUT_LOCK = threading.Lock()
+
+
+__all__ = ["ScreenScheduler"]
 
 
 class ScreenScheduler(object):
@@ -48,7 +53,7 @@ class ScreenScheduler(object):
         """
         self._quit_screen = None
         self._event_loop = event_loop
-        self._io_manager = InOutManager(self._event_loop)
+
         if scheduler_stack:
             self._screen_stack = scheduler_stack
         else:
@@ -57,17 +62,12 @@ class ScreenScheduler(object):
 
         self._first_screen_scheduled = False
 
+    def _spacer(self):
+        return "\n".join(2 * [App.get_width() * "="])
+
     def _register_handlers(self):
         self._event_loop.register_signal_handler(RenderScreenSignal, self._process_screen_callback)
         self._event_loop.register_signal_handler(CloseScreenSignal, self._close_screen_callback)
-
-    @property
-    def io_manager(self):
-        return self._io_manager
-
-    @io_manager.setter
-    def io_manager(self, io_manager):
-        self._io_manager = io_manager
 
     @property
     def quit_screen(self):
@@ -130,7 +130,8 @@ class ScreenScheduler(object):
         try:
             execute_new_loop = self._screen_stack.pop().execute_new_loop
         except ScreenStackEmptyException:
-            raise ScreenStackEmptyException("Switch screen is not possible when there is no screen scheduled!")
+            raise ScreenStackEmptyException("Switch screen is not possible when there is no "
+                                            "screen scheduled!")
 
         # we have to keep the old_loop value so we stop
         # dialog's mainloop if it ever uses switch_screen
@@ -187,7 +188,8 @@ class ScreenScheduler(object):
 
         if closed_from is not None and closed_from is not screen.ui_screen:
             raise RenderUnexpectedError("You are trying to close screen %s from screen %s! "
-                                        "This is most probably not intentional." % (closed_from, screen.ui_screen))
+                                        "This is most probably not intentional." %
+                                        (closed_from, screen.ui_screen))
 
         if screen.execute_new_loop:
             self._event_loop.close_loop()
@@ -236,16 +238,35 @@ class ScreenScheduler(object):
                 return
 
             # draw screen to the console
-            self.io_manager.draw(top_screen)
+            self._draw_screen(top_screen)
 
             if top_screen.ui_screen.input_required:
                 log.debug("Input is required by %s screen", top_screen)
-                self.input_required()
+                top_screen.ui_screen.get_input_with_error_check(top_screen.args)
         except ExitMainLoop:
             raise
         except Exception:    # pylint: disable=broad-except
             self._event_loop.enqueue_signal(ExceptionSignal(self))
             return False
+
+    def _draw_screen(self, active_screen):
+        """Draws the current `active_screen`.
+
+        :param active_screen: Screen which should be draw to the console.
+        :type active_screen: Classed based on `simpleline.render.screen.UIScreen`.
+        """
+        # get the widget tree from the screen and show it in the screen
+        try:
+            if not active_screen.ui_screen.no_separator:
+                # separate the content on the screen from the stuff we are about to display now
+                print(self._spacer())
+
+            # print UIScreen content
+            active_screen.ui_screen.show_all()
+        except ExitMainLoop:
+            raise
+        except Exception:    # pylint: disable=broad-except
+            self._event_loop.enqueue_signal(ExceptionSignal(self))
 
     def _get_last_screen(self):
         if self._screen_stack.empty():
@@ -253,32 +274,15 @@ class ScreenScheduler(object):
 
         return self._screen_stack.pop(False)
 
-    def input_required(self):
-        """Register user input to the event loop for processing."""
-        top_screen = self._get_last_screen()
-        ui_screen = top_screen.ui_screen
-        prompt = ui_screen.prompt(top_screen.args)
-        hide_user_input = ui_screen.hide_user_input
-
-        self._io_manager.get_user_input_async(prompt, self._process_input, hidden=hide_user_input)
-
-    def _process_input(self, user_input):
+    def process_input_result(self, input_result, should_redraw):
         active_screen = self._get_last_screen()
 
-        try:
-            input_result = self._io_manager.process_input(active_screen, user_input)
-        except ExitMainLoop:
-            raise
-        except Exception:    # pylint: disable=broad-except
-            self._event_loop.enqueue_signal(ExceptionSignal(self))
-            return
-
         if not input_result.was_successful():
-            if self._io_manager.input_error_threshold_exceeded:
+            if should_redraw:
                 self.redraw()
             else:
                 log.debug("Input was not successful, ask for new input.")
-                self.input_required()
+                active_screen.ui_screen.get_input_with_error_check(active_screen.args)
         else:
             if input_result == UserInputAction.NOOP:
                 return

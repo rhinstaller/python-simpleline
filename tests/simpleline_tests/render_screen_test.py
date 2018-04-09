@@ -28,12 +28,15 @@ from simpleline.render.screen import UIScreen, InputState
 from tests.simpleline_tests import UtilityMixin
 
 
-def _fake_input(queue_instance, prompt, hidden):
+def _fake_input(queue_instance, prompt):
     queue_instance.put("a")
 
 
 @mock.patch('sys.stdout', new_callable=StringIO)
 class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
+
+    def setUp(self):
+        App.initialize()
 
     def test_separator(self, stdout_mock):
         ui_screen = EmptyScreen()
@@ -46,8 +49,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
         ui_screen = EmptyScreen()
         width = 60
 
-        App.initialize()
-        App.get_scheduler().io_manager.width = width
+        App.set_width(width)
         App.get_scheduler().schedule_screen(ui_screen)
         App.run()
 
@@ -57,8 +59,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
         ui_screen = EmptyScreen()
         width = 0
 
-        App.initialize()
-        App.get_scheduler().io_manager.width = width
+        App.set_width(width)
         App.get_scheduler().schedule_screen(ui_screen)
         App.run()
 
@@ -179,19 +180,11 @@ class ScreenException_TestCase(unittest.TestCase, UtilityMixin):
         self.assertTrue(self._force_quit_called)
 
 
-@mock.patch('sys.stdout')
-@mock.patch('simpleline.render.io_manager.InOutManager._get_input')
+@mock.patch('sys.stdout', new_callable=StringIO)
+@mock.patch('simpleline.input.input_handler.InputHandlerRequest._get_input')
 class InputProcessing_TestCase(unittest.TestCase):
 
-    def _test_getpass(self, prompt):
-        self.pass_prompt = prompt
-        self.pass_called = True
-        return "test"
-
     def setUp(self):
-        self.pass_called = False
-        self.pass_prompt = None
-
         App.initialize()
 
     def test_basic_input(self, input_mock, mock_stdout):
@@ -271,6 +264,19 @@ class InputProcessing_TestCase(unittest.TestCase):
         self.assertEqual(screen.render_counter, 3)
         self.assertEqual(screen.error_counter, threshold)
 
+    def test_no_refresh_when_prompt_is_none(self, mock_stdin, mock_stdout):
+        mock_stdin.return_value = "q"
+        threshold = 5
+        screen = InputErrorDynamicPromptTestScreen(threshold, not_return_prompt_on=3)
+
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
+
+        # first draw and manual redraw when prompt is None
+        self.assertEqual(screen.render_counter, 2)
+        self.assertTrue(screen.input_skipped)
+        self.assertEqual(screen.error_counter, threshold)
+
     def test_input_no_prompt(self, mock_stdin, mock_stdout):
         screen = InputWithNoPrompt()
 
@@ -282,12 +288,45 @@ class InputProcessing_TestCase(unittest.TestCase):
     @mock.patch('simpleline.event_loop.main_loop.MainLoop.process_signals')
     def test_custom_getpass(self, mock_stdin, mock_stdout, process_signals):
         prompt = mock.MagicMock()
+        ret = "test"
+        screen = TestScreenWithPassFunc(prompt, ret)
 
-        App.get_scheduler().io_manager.set_pass_func(self._test_getpass)
-        App.get_scheduler().io_manager.get_user_input(prompt=prompt, hidden=True)
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
 
-        self.assertTrue(self.pass_called)
-        self.assertEqual(self.pass_prompt.rstrip(), str(prompt))
+        self.assertTrue(screen.pass_called)
+        self.assertEqual(screen.pass_prompt.rstrip(), str(prompt))
+
+    def test_blocking_input(self, mock_stdin, mock_stdout):
+        prompt_message = "test prompt"
+        ret = "blocking test"
+        mock_stdin.return_value = ret
+        screen = BlockingInputTestScreen(prompt_message, False)
+
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
+
+        self.assertEqual(screen.input_returned, ret)
+
+        out = mock_stdout.getvalue()
+        out = out.split("\n")[-1].strip()
+        self.assertEqual(out, prompt_message)
+
+    @mock.patch('getpass.getpass')
+    def test_blocking_password_input(self, mock_getpass, mock_stdin, mock_stdout):
+        prompt_message = "test prompt"
+        ret = "blocking test"
+        mock_getpass.return_value = ret
+        screen = BlockingInputTestScreen(prompt_message, True)
+
+        App.get_scheduler().schedule_screen(screen)
+        App.run()
+
+        self.assertEqual(screen.input_returned, ret)
+
+        out = mock_stdout.getvalue()
+        # can't check for prompt because that is printed by getpass func which is mocked
+        self.assertGreater(len(out), 1)
 
 
 # HELPER CLASSES
@@ -318,6 +357,29 @@ class TestScreenSetupFail(UIScreen):
         return False
 
 
+class TestScreenWithPassFunc(UIScreen):
+
+    def __init__(self, prompt, return_value):
+        super().__init__()
+        self.pass_prompt = ""
+        self.pass_called = False
+        self.password_func = self._test_getpass
+        self.hide_user_input = True
+        self._prompt = prompt
+        self._return_value = return_value
+
+    def prompt(self, args=None):
+        return self._prompt
+
+    def _test_getpass(self, prompt):
+        self.pass_prompt = prompt
+        self.pass_called = True
+        return self._return_value
+
+    def input(self, args, key):
+        return InputState.PROCESSED_AND_CLOSE
+
+
 class InputErrorTestScreen(UIScreen):
 
     def __init__(self, error_threshold=5):
@@ -336,6 +398,22 @@ class InputErrorTestScreen(UIScreen):
 
     def show_all(self):
         self.render_counter += 1
+
+
+class InputErrorDynamicPromptTestScreen(InputErrorTestScreen):
+
+    def __init__(self, error_threshold=5, not_return_prompt_on=2):
+        super().__init__(error_threshold=error_threshold)
+        self._not_return_prompt_on = not_return_prompt_on
+        self.input_skipped = False
+
+    def prompt(self, args=None):
+        if self.error_counter == self._not_return_prompt_on and not self.input_skipped:
+            self.input_skipped = True
+            self.redraw()
+            return None
+        else:
+            return super().prompt(args)
 
 
 class InputWithNoPrompt(UIScreen):
@@ -461,6 +539,19 @@ class ExceptionTestScreen(UIScreen):
         super().show_all()
         if self._where == self.REDRAW:
             raise TestRedrawException("Redraw test exception happened!")
+
+
+class BlockingInputTestScreen(EmptyScreen):
+
+    def __init__(self, prompt_message, hidden):
+        super().__init__()
+        self._prompt_message = prompt_message
+        self._hidden = hidden
+        self.input_returned = None
+
+    def show_all(self):
+        self.input_returned = self.get_user_input(self._prompt_message, self._hidden)
+        super().show_all()
 
 
 class TestRefreshException(Exception):

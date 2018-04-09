@@ -25,6 +25,7 @@ from simpleline import App
 from simpleline.render.containers import WindowContainer
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen.signal_handler import SignalHandler
+from simpleline.render.screen.input_manager import InputManager
 from simpleline.utils.i18n import _
 
 __all__ = ["UIScreen", "InputState"]
@@ -52,6 +53,7 @@ class UIScreen(SignalHandler):
 
         # ask for password
         self._hide_user_input = False
+        self._password_func = None
 
         # do not print separator for this screen
         self._no_separator = False
@@ -65,6 +67,8 @@ class UIScreen(SignalHandler):
         # index of the page (subset of screen) shown during show_all
         # indexing starts with 0
         self._page = 0
+
+        self._input_manager = InputManager(ui_screen=self)
 
     def __str__(self):
         """For easier logging."""
@@ -82,6 +86,23 @@ class UIScreen(SignalHandler):
         Set `None` to remove title.
         """
         self._title = title
+
+    @property
+    def password_func(self):
+        """Get password function.
+
+        This is function with one argument to get password from command line.
+        """
+        return self._password_func
+
+    @password_func.setter
+    def password_func(self, value):
+        """Set password function.
+
+        :param value: Function to get password from command line.
+        :type value: Function with one argument which is text representation of prompt.
+        """
+        self._password_func = value
 
     @property
     def screen_ready(self):
@@ -157,18 +178,18 @@ class UIScreen(SignalHandler):
         self._window = window
 
     def get_user_input(self, message, hidden=False):
-        """Get immediately input from user.
+        """Get immediately input from the user.
 
-        Use this with cautious. Never call this in middle of rendering or when other input is already waiting.
-        It is recommended to use `self.input_required` instead.
+        Use this with cautious. Never call this in middle of rendering or when other
+        input is already waiting. It is recommended to use `self.input_required` instead.
 
-        :param message: Message for the user.
+        :param message: Message prompt for the user.
         :type message: str
 
         :param hidden: Do not echo user input (password typing).
         :type hidden: bool
         """
-        return App.get_scheduler().io_manager.get_user_input(message, hidden)
+        return self._input_manager.get_input_blocking(message, hidden)
 
     def setup(self, args):
         """Do additional setup right before this screen is used.
@@ -228,12 +249,15 @@ class UIScreen(SignalHandler):
                 for line in lines[pos:(pos + real_screen_height)]:
                     print(line)
                 custom_prompt = Prompt(_("\nPress %s to continue") % Prompt.ENTER)
-                App.get_scheduler().io_manager.get_user_input(custom_prompt)
+                self._ask_user_input_blocking(custom_prompt)
                 pos += real_screen_height
+
+    def _ask_user_input_blocking(self, prompt):
+        return self._input_manager.get_input_blocking(prompt, False)
 
     def show_all(self):
         """Print WindowContainer in `self.window` with all its content."""
-        self.window.render(App.get_scheduler().io_manager.width)
+        self.window.render(App.get_width())
         self._print_widget(self.window)
 
     def input(self, args, key):
@@ -244,11 +268,21 @@ class UIScreen(SignalHandler):
         :param args: optional argument passed from switch_screen calls
         :type args: anything
         :return: return `simpleline.render.InputState.PROCESSED` if key was handled,
-                 `simpleline.render.InputState.DISCARDED` if the screen should not process input on the scheduler and
-                 key if you want it to.
+                 `simpleline.render.InputState.DISCARDED` if the screen should not process input
+                 on the scheduler and key if you want it to.
         :rtype: `simpleline.render.InputState` enum | str
         """
         return key
+
+    def get_input_with_error_check(self, args):
+        """Get user input and redraw if user add too many invalid inputs.
+
+        This method should be used only by ScreenScheduler.
+
+        :param args: Arguments passed in when scheduling this screen.
+        :type args: Anything.
+        """
+        self._input_manager.get_input(args=args)
 
     def prompt(self, args=None):
         """Return the text to be shown as prompt or handle the prompt and return None.

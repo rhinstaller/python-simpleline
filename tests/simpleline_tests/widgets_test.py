@@ -236,7 +236,7 @@ class Widgets_TestCase(BaseWidgets_TestCase):
         self.evaluate_result(w.get_lines(), expected_result=expected_result)
 
 
-@patch('simpleline.render.io_manager.InOutManager._get_input')
+@patch('simpleline.input.input_handler.InputHandlerRequest._get_input')
 @patch('sys.stdout', new_callable=StringIO)
 class WidgetProcessing_TestCase(unittest.TestCase):
 
@@ -284,6 +284,7 @@ class WidgetProcessing_TestCase(unittest.TestCase):
     def test_widget_too_high(self, out_mock, in_mock):
         in_mock.return_value = "\n"
         in_mock.side_effect = lambda: print('\n')
+
         widget_text = ("Line\n"
                        "Line2\n"
                        "Line3\n"

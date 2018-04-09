@@ -27,7 +27,7 @@ from tests.simpleline_tests import UtilityMixin
 from simpleline.render.adv_widgets import GetInputScreen, GetPasswordInputScreen
 
 
-@patch('simpleline.render.io_manager.InOutManager._get_input')
+@patch('simpleline.input.input_handler.InputHandlerRequest._get_input')
 @patch('sys.stdout', new_callable=StringIO)
 class AdvWidgets_TestCase(unittest.TestCase, UtilityMixin):
     def setUp(self):
