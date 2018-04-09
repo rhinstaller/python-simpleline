@@ -99,7 +99,7 @@ class UIScreen(SignalHandler):
     def password_func(self, value):
         """Set password function.
 
-        :param value: Function to get password from command line.
+        :param value: Function to get password from a command line.
         :type value: Function with one argument which is text representation of prompt.
         """
         self._password_func = value
