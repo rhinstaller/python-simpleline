@@ -173,7 +173,7 @@ class InputHandler(object):
 
         :returns: Instance of class inherited from `simpleline.input.InputThread`.
         """
-        return InputHandlerRequest(App.get_width(), prompt, self)
+        return InputHandlerRequest(App.get_configuration().width, prompt, self)
 
     def _clear_input(self):
         self._input_received = False
@@ -259,7 +259,8 @@ class PasswordInputHandler(InputHandler):
 
     def create_thread_object(self, prompt):
         """Return PasswordInputThread for getting user password."""
-        return PasswordInputHandlerRequest(App.get_width(), prompt, self, self._getpass_func)
+        return PasswordInputHandlerRequest(App.get_configuration().width, prompt, self,
+                                           self._getpass_func)
 
 
 class PasswordInputHandlerRequest(InputHandlerRequest):

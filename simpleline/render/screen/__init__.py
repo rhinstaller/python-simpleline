@@ -257,7 +257,7 @@ class UIScreen(SignalHandler):
 
     def show_all(self):
         """Print WindowContainer in `self.window` with all its content."""
-        self.window.render(App.get_width())
+        self.window.render(App.get_configuration().width)
         self._print_widget(self.window)
 
     def input(self, args, key):

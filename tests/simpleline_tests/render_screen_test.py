@@ -49,7 +49,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
         ui_screen = EmptyScreen()
         width = 60
 
-        App.set_width(width)
+        App.get_configuration().width = width
         App.get_scheduler().schedule_screen(ui_screen)
         App.run()
 
@@ -59,7 +59,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
         ui_screen = EmptyScreen()
         width = 0
 
-        App.set_width(width)
+        App.get_configuration().width = width
         App.get_scheduler().schedule_screen(ui_screen)
         App.run()
 
