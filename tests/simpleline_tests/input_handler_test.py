@@ -193,7 +193,7 @@ class InputHandler_TestCase(unittest.TestCase):
 
 
 @mock.patch('sys.stdout', new_callable=StringIO)
-@mock.patch('getpass.getpass')
+@mock.patch('simpleline.global_configuration.GlobalConfiguration.password_function')
 class PasswordInputHandler_TestCase(unittest.TestCase):
 
     def create_loop(self):

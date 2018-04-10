@@ -79,7 +79,7 @@ class AdvWidgets_TestCase(unittest.TestCase, UtilityMixin):
         self.assertEqual(expected_output, stdout_mock.getvalue())
         self.assertTrue(self.args_used)
 
-    @patch("getpass.getpass")
+    @patch("simpleline.global_configuration.GlobalConfiguration.password_function")
     def test_getpass(self, hiden_stdin_mock, stdout_mock, stdin_mock):
         prompt = "Type input"
         input_text = "user input"
@@ -90,7 +90,7 @@ class AdvWidgets_TestCase(unittest.TestCase, UtilityMixin):
 
         self.assertEqual(screen.value, input_text)
 
-    @patch("getpass.getpass")
+    @patch("simpleline.global_configuration.GlobalConfiguration.password_function")
     def test_getpass_with_condition(self, hiden_stdin_mock, stdout_mock, stdin_mock):
         prompt = "Type input"
         wrong_input = "wrong"

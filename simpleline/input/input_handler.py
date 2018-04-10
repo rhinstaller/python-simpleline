@@ -18,7 +18,6 @@
 #
 
 import sys
-import getpass
 
 from simpleline import App
 from simpleline.event_loop.signals import InputReadySignal
@@ -173,7 +172,7 @@ class InputHandler(object):
 
         :returns: Instance of class inherited from `simpleline.input.InputThread`.
         """
-        return InputHandlerRequest(App.get_width(), prompt, self)
+        return InputHandlerRequest(App.get_configuration().width, prompt, self)
 
     def _clear_input(self):
         self._input_received = False
@@ -248,7 +247,7 @@ class PasswordInputHandler(InputHandler):
         :type source: Class which will process an input from this InputHandler.
         """
         super().__init__(callback=callback, source=source)
-        self._getpass_func = getpass.getpass
+        self._getpass_func = App.get_configuration().password_function
 
     def set_pass_func(self, getpass_func):
         """Set a function for getting passwords."""
@@ -259,7 +258,8 @@ class PasswordInputHandler(InputHandler):
 
     def create_thread_object(self, prompt):
         """Return PasswordInputThread for getting user password."""
-        return PasswordInputHandlerRequest(App.get_width(), prompt, self, self._getpass_func)
+        return PasswordInputHandlerRequest(App.get_configuration().width, prompt, self,
+                                           self._getpass_func)
 
 
 class PasswordInputHandlerRequest(InputHandlerRequest):

@@ -63,7 +63,7 @@ class ScreenScheduler(object):
         self._first_screen_scheduled = False
 
     def _spacer(self):
-        return "\n".join(2 * [App.get_width() * "="])
+        return "\n".join(2 * [App.get_configuration().width * "="])
 
     def _register_handlers(self):
         self._event_loop.register_signal_handler(RenderScreenSignal, self._process_screen_callback)

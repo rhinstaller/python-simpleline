@@ -49,7 +49,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
         ui_screen = EmptyScreen()
         width = 60
 
-        App.set_width(width)
+        App.get_configuration().width = width
         App.get_scheduler().schedule_screen(ui_screen)
         App.run()
 
@@ -59,7 +59,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
         ui_screen = EmptyScreen()
         width = 0
 
-        App.set_width(width)
+        App.get_configuration().width = width
         App.get_scheduler().schedule_screen(ui_screen)
         App.run()
 
@@ -312,7 +312,7 @@ class InputProcessing_TestCase(unittest.TestCase):
         out = out.split("\n")[-1].strip()
         self.assertEqual(out, prompt_message)
 
-    @mock.patch('getpass.getpass')
+    @mock.patch('simpleline.global_configuration.GlobalConfiguration.password_function')
     def test_blocking_password_input(self, mock_getpass, mock_stdin, mock_stdout):
         prompt_message = "test prompt"
         ret = "blocking test"

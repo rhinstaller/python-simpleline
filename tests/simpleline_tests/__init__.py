@@ -18,11 +18,12 @@
 #
 
 from simpleline import App
+from simpleline.global_configuration import DEFAULT_WIDTH
 
 
 class UtilityMixin(object):
 
-    def calculate_separator(self, width=80):
+    def calculate_separator(self, width=DEFAULT_WIDTH):
         separator = "\n".join(2 * [width * "="])
         separator += "\n"  # print adds another newline
         return separator
