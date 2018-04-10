@@ -21,6 +21,7 @@ import unittest
 from unittest import mock
 
 from simpleline import App
+from simpleline.global_configuration import GlobalConfiguration
 from simpleline.input.input_threading import InputThreadManager
 from simpleline.render.screen_scheduler import ScreenScheduler
 from simpleline.event_loop.main_loop import MainLoop
@@ -32,6 +33,7 @@ class App_TestCase(unittest.TestCase):
         App.initialize()
         self.assertTrue(isinstance(App.get_scheduler(), ScreenScheduler))
         self.assertTrue(isinstance(App.get_event_loop(), MainLoop))
+        self.assertTrue(isinstance(App.get_configuration(), GlobalConfiguration))
 
     def test_create_instance_with_custom_scheduler(self):
         App.initialize(scheduler=CustomScreenScheduler(CustomEventLoop()))
@@ -41,26 +43,40 @@ class App_TestCase(unittest.TestCase):
         App.initialize(event_loop=CustomEventLoop())
         self.assertTrue(isinstance(App.get_event_loop(), CustomEventLoop))
 
-    def test_create_instance_with_scheduler_and_event_loop(self):
+    def test_create_instance_with_configuration(self):
+        App.initialize(global_configuration=CustomGlobalConfiguration())
+        self.assertTrue(isinstance(App.get_configuration(), CustomGlobalConfiguration))
+
+    def test_create_instance_with_custom_everything(self):
         event_loop = CustomEventLoop()
-        App.initialize(event_loop=event_loop, scheduler=CustomScreenScheduler(event_loop))
+        App.initialize(event_loop=event_loop,
+                       scheduler=CustomScreenScheduler(event_loop),
+                       global_configuration=CustomGlobalConfiguration())
+
         self.assertTrue(isinstance(App.get_event_loop(), CustomEventLoop))
         self.assertTrue(isinstance(App.get_scheduler(), CustomScreenScheduler))
+        self.assertTrue(isinstance(App.get_configuration(), CustomGlobalConfiguration))
 
     def test_reinitialize(self):
         event_loop1 = CustomEventLoop()
         event_loop2 = CustomEventLoop()
         scheduler1 = CustomScreenScheduler(event_loop1)
         scheduler2 = CustomScreenScheduler(event_loop2)
-        App.initialize(event_loop=event_loop1, scheduler=scheduler1)
-        self._check_app_settings("app_name_test1", event_loop1, scheduler1)
+        configuration1 = CustomGlobalConfiguration()
+        configuration2 = CustomGlobalConfiguration()
 
-        App.initialize(event_loop=event_loop2, scheduler=scheduler2)
-        self._check_app_settings("app_name_test2", event_loop2, scheduler2)
+        App.initialize(event_loop=event_loop1, scheduler=scheduler1,
+                       global_configuration=configuration1)
+        self._check_app_settings(event_loop1, scheduler1, configuration1)
+
+        App.initialize(event_loop=event_loop2, scheduler=scheduler2,
+                       global_configuration=configuration2)
+        self._check_app_settings(event_loop2, scheduler2, configuration2)
 
         App.initialize()
         self.assertNotEqual(App.get_event_loop(), event_loop2)
         self.assertNotEqual(App.get_scheduler(), scheduler2)
+        self.assertNotEqual(App.get_configuration(), configuration2)
 
     def test_input_thread_manager_after_initialize(self):
         App.initialize()
@@ -77,9 +93,10 @@ class App_TestCase(unittest.TestCase):
         App.run()
         self.assertTrue(run_mock.called)
 
-    def _check_app_settings(self, header, event_loop, scheduler):
+    def _check_app_settings(self, event_loop, scheduler, configuration):
         self.assertEqual(App.get_event_loop(), event_loop)
         self.assertEqual(App.get_scheduler(), scheduler)
+        self.assertEqual(App.get_configuration(), configuration)
 
 
 class CustomScreenScheduler(ScreenScheduler):
@@ -87,4 +104,8 @@ class CustomScreenScheduler(ScreenScheduler):
 
 
 class CustomEventLoop(MainLoop):
+    pass
+
+
+class CustomGlobalConfiguration(GlobalConfiguration):
     pass
