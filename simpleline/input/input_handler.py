@@ -18,7 +18,6 @@
 #
 
 import sys
-import getpass
 
 from simpleline import App
 from simpleline.event_loop.signals import InputReadySignal
@@ -248,7 +247,7 @@ class PasswordInputHandler(InputHandler):
         :type source: Class which will process an input from this InputHandler.
         """
         super().__init__(callback=callback, source=source)
-        self._getpass_func = getpass.getpass
+        self._getpass_func = App.get_configuration().password_function
 
     def set_pass_func(self, getpass_func):
         """Set a function for getting passwords."""
