@@ -3,7 +3,7 @@
 Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
-Version: 1.0
+Version: 1.1
 Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
@@ -60,6 +60,33 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Tue Apr 10 2018 Jiri Konecny <jkonecny@redhat.com> - 1.1-1
+- Add global configuration initialize test (jkonecny)
+- Use default password function from GlobalConfiguration (jkonecny)
+- Add tests for GlobalConfiguration class (jkonecny)
+- Move default width to GlobalConfiguration class (jkonecny)
+- Add GlobalConfiguration object (jkonecny)
+- Fix a missing article in docs. (jkonecny)
+- Add tests for UIScreen get_user_input method (jkonecny)
+- Only InputManager is used to get input in UIScreen (jkonecny)
+- Move emit of InputReadySignal to InputRequest (jkonecny)
+- Get only last input on concurrent input (jkonecny)
+- Add concurrency tests for InputHandler (jkonecny)
+- Add requester source to the InputHandler (#1557472) (jkonecny)
+- Use InputManager as screen helper not in ScreenScheduler (#1557472) (jkonecny)
+- Add test to check InputThreadManager after initialization (jkonecny)
+- Reinitialize InputThreadManager when app is initialized (jkonecny)
+- Input requests are now handled by InputThreadManager (jkonecny)
+- Remove io_manager property from ScreenScheduler (jkonecny)
+- Rename io_manager to input_manager (jkonecny)
+- Change IOManager to InputManager (jkonecny)
+- Move draw from IOManager to ScreenScheduler (jkonecny)
+- Separate password input to PasswordInputHandler (jkonecny)
+- Add DEFAULT_WIDTH constant (jkonecny)
+- Add tests for InputHandler (jkonecny)
+- Replace get_input_without_check by new property (jkonecny)
+- Separate input to a new module (jkonecny)
+
 * Wed Feb 28 2018 Jiri Konecny <jkonecny@redhat.com> - 1.0-1
 - Fix docs based on the new PROCESSED feature (jkonecny)
 - Use new PROCESS_AND* in examples (jkonecny)

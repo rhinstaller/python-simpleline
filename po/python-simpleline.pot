@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-28 10:03+0100\n"
+"POT-Creation-Date: 2018-04-10 15:14+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,28 +34,28 @@ msgstr ""
 msgid "Enter your passphrase"
 msgstr ""
 
-#: ../simpleline/render/adv_widgets.py:79
+#: ../simpleline/render/adv_widgets.py:83
 msgid "Passphrase: "
 msgstr ""
 
-#: ../simpleline/render/adv_widgets.py:111
+#: ../simpleline/render/adv_widgets.py:121
 msgid "Question"
 msgstr ""
 
-#: ../simpleline/render/adv_widgets.py:121
+#: ../simpleline/render/adv_widgets.py:131
 #, python-format
 msgid "Please respond '%(yes)s' or '%(no)s'"
 msgstr ""
 
-#: ../simpleline/render/adv_widgets.py:157
+#: ../simpleline/render/adv_widgets.py:167
 msgid "Help"
 msgstr ""
 
-#: ../simpleline/render/adv_widgets.py:163
+#: ../simpleline/render/adv_widgets.py:173
 msgid "The help is not available."
 msgstr ""
 
-#: ../simpleline/render/adv_widgets.py:176
+#: ../simpleline/render/adv_widgets.py:186
 #, python-format
 msgid "Press %s to return"
 msgstr ""
