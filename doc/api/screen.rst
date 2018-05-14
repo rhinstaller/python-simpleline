@@ -1,3 +1,5 @@
+.. _uiscreen_label:
+
 UIScreen
 ========
 
