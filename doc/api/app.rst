@@ -22,5 +22,27 @@ This can be done by::
 **Do not instantiate the** :class:`App` **class!** It is designed to be used in a purely static way.
 
 
+Application configuration
+-------------------------
+
+Configuration of the application is saved in the
+:class:`GlobalConfiguration <global_configuration.GlobalConfiguration>` class. This class can be
+created before :meth:`App.initialize` is called and passed in as a
+parameter. This way the same configuration can be used between re-initialization of the
+application. The configuration can easily be changed, even while an application is running,
+by setting desired properties.
+
+Look at the :class:`GlobalConfiguration <global_configuration.GlobalConfiguration>` to find out
+all the configuration possibilities.
+
+App class
+---------
+
 .. autoclass:: App
+    :members:
+
+GlobalConfiguration class
+-------------------------
+
+.. autoclass:: simpleline.global_configuration.GlobalConfiguration
     :members:
