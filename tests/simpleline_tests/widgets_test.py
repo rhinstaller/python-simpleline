@@ -117,7 +117,9 @@ class Widgets_TestCase(BaseWidgets_TestCase):
             "You can choose to mount your file systems read-only instead of read-write by",
             "choosing '2'.",
             "If for some reason this process does not work choose '3' to skip directly to a",
-            "shell."]
+            "shell.",
+            "",
+            ""]
         res_lines = self.w6.get_lines()
         self.evaluate_result(res_lines, expected_result)
 

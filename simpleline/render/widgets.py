@@ -190,6 +190,7 @@ class Widget(object):
 
         # emulate typing machine
         for character in text:
+            # FIXME: Remove the code duplication below and optimize it
             # process newline
             if character == "\n":
                 x += 1
@@ -197,6 +198,8 @@ class Widget(object):
                     y = col
                 else:
                     y = 0
+
+                self._increase_x_buffer_size(x)
                 continue
 
             self._increase_x_buffer_size(x)
