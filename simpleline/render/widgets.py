@@ -190,6 +190,7 @@ class Widget(object):
 
         # emulate typing machine
         for character in text:
+            # FIXME: Remove the code duplication below and optimize it
             # process newline
             if character == "\n":
                 x += 1
@@ -197,19 +198,14 @@ class Widget(object):
                     y = col
                 else:
                     y = 0
+
+                self._increase_x_buffer_size(x)
                 continue
 
-            # if the line is not in buffer, create it
-            if x >= len(self._buffer):
-                for _i in range(x - len(self._buffer) + 1):
-                    self._buffer.append(list())
+            self._increase_x_buffer_size(x)
+            self._increase_y_buffer_size(x, y)
 
-            # if the line's length is not enough, fill it with spaces
-            if y >= len(self._buffer[x]):
-                self._buffer[x] += ((y - len(self._buffer[x]) + 1) * list(u" "))
-
-            # "type" character
-            self._buffer[x][y] = character
+            self._save_character_to_buffer(x, y, character)
 
             # shift to the next char
             y += 1
@@ -221,6 +217,18 @@ class Widget(object):
                     y = 0
 
         self._cursor = (x, y)
+
+    def _increase_x_buffer_size(self, x):
+        if x >= len(self._buffer):
+            for _i in range(x - len(self._buffer) + 1):
+                self._buffer.append(list())
+
+    def _increase_y_buffer_size(self, x, y):
+        if y >= len(self._buffer[x]):
+            self._buffer[x] += ((y - len(self._buffer[x]) + 1) * list(u" "))
+
+    def _save_character_to_buffer(self, x, y, character):
+        self._buffer[x][y] = character
 
     def _wrap_words(self, text, width):
         lines = []
