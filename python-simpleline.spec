@@ -3,7 +3,7 @@
 Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
-Version: 1.1
+Version: 1.2
 Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
@@ -60,6 +60,14 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Tue May 29 2018 Jiri Konecny <jkonecny@redhat.com> - 1.2-1
+- Document GlobalConfiguration class (jkonecny)
+- Add advanced input processing section to docs (jkonecny)
+- Make makefile zanata check more robust (jkonecny)
+- Add missing newline characters at the end (jkonecny)
+- Abstract widget buffer extensions (jkonecny)
+- Use python 3 sphinx module (jkonecny)
+
 * Tue Apr 10 2018 Jiri Konecny <jkonecny@redhat.com> - 1.1-1
 - Add global configuration initialize test (jkonecny)
 - Use default password function from GlobalConfiguration (jkonecny)
