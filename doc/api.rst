@@ -19,3 +19,4 @@ API listed here is the public API. Developers shouldn't use anything which is no
     Event loops <api/event_loops>
     Signals <api/signals>
     Errors <api/errors>
+    Advanced Input <api/advanced_input>
