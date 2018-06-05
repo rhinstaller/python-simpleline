@@ -236,7 +236,7 @@ class MainLoop(AbstractEventLoop):
             for handler_data in self._handlers[type(signal)]:
                 try:
                     handler_data.callback(signal, handler_data.data)
-                except ExitMainLoop:
+                except ExitMainLoop:  # pylint: disable=try-except-raise
                     raise
                 except Exception:  # pylint: disable=broad-except
                     self.enqueue_signal(ExceptionSignal(self))

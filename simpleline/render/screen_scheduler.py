@@ -129,7 +129,7 @@ class ScreenScheduler(object):
         log.debug("Replacing screen %s", ui_screen)
         try:
             execute_new_loop = self._screen_stack.pop().execute_new_loop
-        except ScreenStackEmptyException:
+        except ScreenStackEmptyException:  # pylint: disable=try-except-raise
             raise ScreenStackEmptyException("Switch screen is not possible when there is no "
                                             "screen scheduled!")
 
@@ -243,7 +243,7 @@ class ScreenScheduler(object):
             if top_screen.ui_screen.input_required:
                 log.debug("Input is required by %s screen", top_screen)
                 top_screen.ui_screen.get_input_with_error_check(top_screen.args)
-        except ExitMainLoop:
+        except ExitMainLoop:  # pylint: disable=try-except-raise
             raise
         except Exception:    # pylint: disable=broad-except
             self._event_loop.enqueue_signal(ExceptionSignal(self))
@@ -263,7 +263,7 @@ class ScreenScheduler(object):
 
             # print UIScreen content
             active_screen.ui_screen.show_all()
-        except ExitMainLoop:
+        except ExitMainLoop:  # pylint: disable=try-except-raise
             raise
         except Exception:    # pylint: disable=broad-except
             self._event_loop.enqueue_signal(ExceptionSignal(self))
