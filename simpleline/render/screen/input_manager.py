@@ -132,7 +132,7 @@ class InputManager(object):
         # increment the error counter
         try:
             result = self._process_input(user_input)
-        except ExitMainLoop:
+        except ExitMainLoop:  # pylint: disable=try-except-raise
             raise
         except Exception:    # pylint: disable=broad-except
             App.get_event_loop().enqueue_signal(ExceptionSignal(self))
@@ -158,18 +158,15 @@ class InputManager(object):
         """
         from simpleline.render.screen import InputState
         # delegate the handling to active screen first
-        try:
-            key = self._ui_screen.input(self._input_args, key)
-            if key == InputState.PROCESSED:
-                return UserInputAction.NOOP
-            elif key == InputState.PROCESSED_AND_REDRAW:
-                return UserInputAction.REDRAW
-            elif key == InputState.PROCESSED_AND_CLOSE:
-                return UserInputAction.CLOSE
-            elif key == InputState.DISCARDED:
-                return UserInputAction.INPUT_ERROR
-        except ExitMainLoop:
-            raise
+        key = self._ui_screen.input(self._input_args, key)
+        if key == InputState.PROCESSED:
+            return UserInputAction.NOOP
+        elif key == InputState.PROCESSED_AND_REDRAW:
+            return UserInputAction.REDRAW
+        elif key == InputState.PROCESSED_AND_CLOSE:
+            return UserInputAction.CLOSE
+        elif key == InputState.DISCARDED:
+            return UserInputAction.INPUT_ERROR
 
         # global refresh command
         if key == Prompt.REFRESH:
