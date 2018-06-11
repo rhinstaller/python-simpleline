@@ -22,6 +22,11 @@
 __all__ = ["App"]
 
 
+from simpleline.logging import setup_logging
+
+setup_logging()
+
+
 class App(object):
     """This is the main class for Simpleline library.
 

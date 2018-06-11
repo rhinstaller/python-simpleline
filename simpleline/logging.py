@@ -26,6 +26,13 @@ import logging
 SIMPLELINE_LOGGER = "simpleline"
 
 
+def setup_logging():
+    """Set proper logging for a library"""
+    log = get_simpleline_logger()
+    null_hd = logging.NullHandler()
+    log.addHandler(null_hd)
+
+
 def get_simpleline_logger():
     """Return logging instance that can be used in the application."""
     return logging.getLogger(SIMPLELINE_LOGGER)
