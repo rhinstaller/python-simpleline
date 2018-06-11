@@ -3,7 +3,7 @@
 Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
-Version: 1.2
+Version: 1.3
 Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
@@ -60,6 +60,10 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Mon Jun 11 2018 Jiri Konecny <jkonecny@redhat.com> - 1.3-1
+- Fix pylint errors raised by new pylint version (jkonecny)
+- Setup logging handler properly for a library (jkonecny)
+
 * Tue May 29 2018 Jiri Konecny <jkonecny@redhat.com> - 1.2-1
 - Document GlobalConfiguration class (jkonecny)
 - Add advanced input processing section to docs (jkonecny)
