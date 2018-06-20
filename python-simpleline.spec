@@ -60,6 +60,9 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Mon Jun 18 2018 Miro Hrončok <mhroncok@redhat.com> - 1.3-2
+- Rebuilt for Python 3.7
+
 * Mon Jun 11 2018 Jiri Konecny <jkonecny@redhat.com> - 1.3-1
 - Fix pylint errors raised by new pylint version (jkonecny)
 - Setup logging handler properly for a library (jkonecny)
