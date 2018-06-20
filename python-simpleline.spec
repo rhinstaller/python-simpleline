@@ -16,7 +16,6 @@ BuildRequires: python3-devel
 BuildRequires: gettext
 BuildRequires: python3-setuptools
 BuildRequires: intltool
-BuildRequires: python3-pocketlint
 BuildRequires: python3-gobject-base
 
 %description
@@ -60,6 +59,9 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Wed Jun 20 2018 Jiri Konecny <jkonecny@redhat.com> - 1.3-3
+- Drop python-pocketlint dependency
+
 * Mon Jun 18 2018 Miro Hrončok <mhroncok@redhat.com> - 1.3-2
 - Rebuilt for Python 3.7
 
