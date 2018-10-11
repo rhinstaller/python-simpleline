@@ -83,7 +83,7 @@ po-push: potfile
 bumpver: po-push
 	@NEWSUBVER=$$((`echo $(VERSION) |cut -d . -f 2` + 1)) ; \
 	NEWVERSION=`echo $(VERSION).$$NEWSUBVER |cut -d . -f 1,3` ; \
-	DATELINE="* `LANG=c date "+%a %b %d %Y"` `git config user.name` <`git config user.email`> - $$NEWVERSION-1"  ; \
+	DATELINE="* `LC_ALL=C.UTF-8 date "+%a %b %d %Y"` `git config user.name` <`git config user.email`> - $$NEWVERSION-1"  ; \
 	cl=`grep -n %changelog $(SPECNAME).spec |cut -d : -f 1` ; \
 	tail --lines=+$$(($$cl + 1)) $(SPECNAME).spec > speclog ; \
 	(head -n $$cl $(SPECNAME).spec ; echo "$$DATELINE" ; make --quiet rpmlog 2>/dev/null ; echo ""; cat speclog) > $(SPECNAME).spec.new ; \
