@@ -3,7 +3,7 @@
 Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
-Version: 1.3
+Version: 1.4
 Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
@@ -59,6 +59,14 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Mon Nov 19 2018 Jiri Konecny <jkonecny@redhat.com> - 1.4-1
+- Fix and add tests for the new changes (#1646568) (jkonecny)
+- Add should_run_with_empty_stack configuration (#1646568) (jkonecny)
+- Remove wrong line in password_function conf (jkonecny)
+- Tweak date lang settings in make bumpver command (jkonecny)
+- Drop python-pocketlint build dependency (jkonecny)
+- Update spec file from Fedora (jkonecny)
+
 * Wed Jun 20 2018 Jiri Konecny <jkonecny@redhat.com> - 1.3-3
 - Drop python-pocketlint dependency
 
