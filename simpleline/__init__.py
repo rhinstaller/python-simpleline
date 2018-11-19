@@ -23,6 +23,7 @@ __all__ = ["App"]
 
 
 from simpleline.logging import setup_logging
+from simpleline.errors import NothingScheduledError
 
 setup_logging()
 
@@ -119,6 +120,16 @@ class App(object):
     def run(cls):
         """Run event loop.
 
+        Raise an exception if no screen is scheduled. This behavior can be changed by
+        `should_run_with_empty_stack` global configuration option.
+
         This is shortcut to `App.event_loop().run()`.
+        :raises NothingScheduledError: when there is no screen scheduled
         """
+        if not cls.__app.configuration.should_run_with_empty_stack:
+            # Check if the screen stack is not empty
+            if cls.__app.scheduler.nothing_to_render:
+                raise NothingScheduledError("Can't run application with the empty screen stack! "
+                                            "To avoid this please see should_run_with_empty_stack "
+                                            "global configuration option.")
         App.get_event_loop().run()

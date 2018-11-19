@@ -26,3 +26,8 @@
 class SimplelineError(Exception):
     """Base exception for all other exceptions."""
     pass
+
+
+class NothingScheduledError(SimplelineError):
+    """Exception when running the loop with no screens scheduled."""
+    pass
