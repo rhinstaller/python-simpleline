@@ -34,6 +34,7 @@ class GlobalConfiguration(object):
     def __init__(self):
         self._width = DEFAULT_WIDTH
         self._getpass = DEFAULT_PASSWORD_FUNC
+        self._run_with_empty_stack = False
 
     @property
     def width(self):
@@ -82,3 +83,29 @@ class GlobalConfiguration(object):
         Default: getpass.getpass function
         """
         self._getpass = getpass
+
+    @property
+    def should_run_with_empty_stack(self):
+        """Should test on empty screen stack when starting event loop.
+
+        :returns: If False the App.run() call will end with an exception (default), True otherwise.
+        """
+        return self._run_with_empty_stack
+
+    @should_run_with_empty_stack.setter
+    def should_run_with_empty_stack(self, value):
+        """Set if the App.run() call should end with an exception when screen stack is empty.
+
+        This can be valuable when you want to schedule a screen later by an other thread.
+
+        :param value: If False the App.run() call will end with an exception, if True it will
+                        run with nothing displayed.
+        """
+        self._run_with_empty_stack = value
+
+    def clear_should_run_with_empty_stack(self):
+        """Clear user defined test to run with an empty screen stack.
+
+        Default: False
+        """
+        self._run_with_empty_stack = False
