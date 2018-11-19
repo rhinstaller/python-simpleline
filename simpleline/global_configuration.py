@@ -63,8 +63,6 @@ class GlobalConfiguration(object):
     def password_function(self):
         """Get function to get user passwords from a console.
 
-        This function takes one parameter which is text representation of a prompt.
-
         :returns: Function with one argument which is text representation of prompt.
         """
         return self._getpass
