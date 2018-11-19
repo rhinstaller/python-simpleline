@@ -25,6 +25,7 @@ from simpleline.global_configuration import GlobalConfiguration
 from simpleline.input.input_threading import InputThreadManager
 from simpleline.render.screen_scheduler import ScreenScheduler
 from simpleline.event_loop.main_loop import MainLoop
+from simpleline.errors import NothingScheduledError
 
 
 class App_TestCase(unittest.TestCase):
@@ -89,9 +90,15 @@ class App_TestCase(unittest.TestCase):
 
     @mock.patch('simpleline.event_loop.main_loop.MainLoop.run')
     def test_run_shortcut(self, run_mock):
-        App.initialize("init")
+        App.initialize()
+        App.get_configuration().should_run_with_empty_stack = True
         App.run()
         self.assertTrue(run_mock.called)
+
+    def test_run_with_empty_screen_stack(self):
+        App.initialize()
+        with self.assertRaises(NothingScheduledError):
+            App.run()
 
     def _check_app_settings(self, event_loop, scheduler, configuration):
         self.assertEqual(App.get_event_loop(), event_loop)
