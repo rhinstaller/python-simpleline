@@ -3,8 +3,8 @@
 Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
-Version: 1.4
-Release: 2%{?dist}
+Version: 1.5
+Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
 #   cd python-simpleline && make archive
@@ -59,6 +59,10 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Mon May 13 2019 Jiri Konecny <jkonecny@redhat.com> - 1.5-1
+- Update spec file from the downstream (jkonecny)
+- Fix translation issue for lt language (jkonecny)
+
 * Sat Feb 02 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.4-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
