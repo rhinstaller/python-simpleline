@@ -33,7 +33,6 @@ class EventQueueError(SimplelineError):
 
     Inherits from `simpleline.SimplelineError`.
     """
-    pass
 
 
 class EventQueue(object):
