@@ -87,14 +87,13 @@ class PasswordDialog(UIScreen):
             return None
 
         self._password = handler.value
-        if not self._password:
-            return None
-        else:
-            # this may seem innocuous, but it's really a giant hack; we should
-            # not be calling close() from prompt(), but the input handling code
-            # in the TUI is such that without this very simple workaround, we
-            # would be forever pelting users with a prompt to enter their pw
-            self.close()
+
+        # this may seem innocuous, but it's really a giant hack; we should
+        # not be calling close() from prompt(), but the input handling code
+        # in the TUI is such that without this very simple workaround, we
+        # would be forever pelting users with a prompt to enter their pw
+        self.close()
+        return None
 
     @property
     def answer(self):
