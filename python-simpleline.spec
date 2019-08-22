@@ -3,7 +3,7 @@
 Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
-Version: 1.5
+Version: 1.6
 Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
@@ -59,6 +59,10 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Thu Aug 22 2019 Jiri Konecny <jkonecny@redhat.com> - 1.6-1
+- Always close the password dialog (vponcova)
+- Remove unnecessary pass statements (jkonecny)
+
 * Mon May 13 2019 Jiri Konecny <jkonecny@redhat.com> - 1.5-1
 - Update spec file from the downstream (jkonecny)
 - Fix translation issue for lt language (jkonecny)
