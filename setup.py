@@ -18,11 +18,26 @@
 # along with Simpleline.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from distutils.core import setup
+from setuptools import setup, find_packages
 
-setup(name='simpleline', version='1.6',
+with open("README.md", "r") as f:
+    long_description = f.read()
+
+setup(name='simpleline',
+      version='1.6',
+      author='Jiri Konecny',
+      author_mail='jkonecny@redhat.com',
       description='Python text UI framework',
-      author='Jiri Konecny', author_email='jkonecny@redhat.com',
+      long_description=long_description,
+      long_description_content_type="text/markdown",
+      keywords='ui text library glib',
       url='http://git.fedoraproject.org/git/?p=python-simpleline.git',
-      packages=['simpleline', 'simpleline.render', 'simpleline.render.screen',
-                'simpleline.event_loop', 'simpleline.utils', 'simpleline.input'])
+      packages=find_packages(include=['simpleline', 'simpleline.*']),
+      classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: GNU Lesser General"
+        "Public License v3 or later (LGPLv3+)",
+        "Programming Language :: Python :: 3",
+      ],
+      python_requires='>=3.4')
