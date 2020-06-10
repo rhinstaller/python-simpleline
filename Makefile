@@ -59,29 +59,9 @@ tag:
 
 release: tag archive
 
-archive: po-pull
-	@rm -f ChangeLog
-	@make ChangeLog
-	git archive --format=tar --prefix=$(PKGNAME)-$(VERSION)/ $(TAG) > $(PKGNAME)-$(VERSION).tar
-	mkdir $(PKGNAME)-$(VERSION)
-	cp -r po $(PKGNAME)-$(VERSION)
-	cp ChangeLog $(PKGNAME)-$(VERSION)/
-	tar -rf $(PKGNAME)-$(VERSION).tar $(PKGNAME)-$(VERSION)
-	gzip -9 $(PKGNAME)-$(VERSION).tar
-	rm -rf $(PKGNAME)-$(VERSION)
-	git checkout -- po/python-$(PKGNAME).pot
-	@echo "The archive name is $(PKGNAME)-$(VERSION).tar.gz"
-
-local: po-pull
-	@rm -f ChangeLog
-	@make ChangeLog
-	rm -rf $(PKGNAME)-$(VERSION).tar.gz
-	rm -rf /tmp/$(PKGNAME)-$(VERSION) /tmp/$(PKGNAME)
-	dir=$$PWD; cp -a $$dir /tmp/$(PKGNAME)-$(VERSION)
-	cd /tmp/$(PKGNAME)-$(VERSION) ; $(PYTHON) setup.py -q sdist
-	cp /tmp/$(PKGNAME)-$(VERSION)/dist/$(PKGNAME)-$(VERSION).tar.gz .
-	rm -rf /tmp/$(PKGNAME)-$(VERSION)
-	@echo "The archive name is $(PKGNAME)-$(VERSION).tar.gz"
+archive: po-pull ChangeLog
+	$(PYTHON) setup.py sdist bdist_wheel
+	@echo "The archive is in dist/$(PKGNAME)-$(VERSION).tar.gz"
 
 rpmlog:
 	@git log --no-merges --pretty="format:- %s (%ae)" $(TAG).. |sed -e 's/@.*)/)/'
