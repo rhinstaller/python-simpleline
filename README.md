@@ -1,3 +1,5 @@
+[![Copr build status](https://copr.fedorainfracloud.org/coprs/g/rhinstaller/Anaconda/package/python-simpleline/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/g/rhinstaller/Anaconda/package/python-simpleline/)
+
 Python Simpleline
 =================
 
