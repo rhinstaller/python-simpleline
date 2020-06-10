@@ -30,73 +30,67 @@ ZANATA_PUSH_ARGS = --srcdir po/ --push-type source --force
 
 default: all
 
+.PHONY: all
 all:
 	$(MAKE) -C po
 
+.PHONY: clean
 clean:
-	-rm *.tar.gz simpleline/*.pyc tests/*.pyc ChangeLog
+	-rm -rf *.tar.gz simpleline/*.pyc tests/*.pyc ChangeLog dist build simpleline.egg-info
 	$(MAKE) -C po clean
 	$(PYTHON) setup.py -q clean --all
 
+.PHONY: test
 test:
 	@echo "*** Running unittests ***"
 	PYTHONPATH=. $(PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 
+.PHONY: check
 check:
 	@echo "*** Running pocketlint ***"
 	PYTHONPATH=. tests/pylint/runpylint.py
 
+.PHONY: install
 install:
 	$(PYTHON) setup.py install --root=$(DESTDIR)
 	$(MAKE) -C po install
 
+.PHONY: ChangeLog
 ChangeLog:
 	(GIT_DIR=.git git log > .changelog.tmp && mv .changelog.tmp ChangeLog; rm -f .changelog.tmp) || (touch ChangeLog; echo 'git directory not found: installing possibly empty changelog.' >&2)
 
+.PHONY: tag
 tag:
 	git tag -a -m "Tag as $(TAG)" -f $(TAG)
 	@echo "Tagged as $(TAG)"
 
+.PHONY: release
 release: tag archive
 
-archive: po-pull
-	@rm -f ChangeLog
-	@make ChangeLog
-	git archive --format=tar --prefix=$(PKGNAME)-$(VERSION)/ $(TAG) > $(PKGNAME)-$(VERSION).tar
-	mkdir $(PKGNAME)-$(VERSION)
-	cp -r po $(PKGNAME)-$(VERSION)
-	cp ChangeLog $(PKGNAME)-$(VERSION)/
-	tar -rf $(PKGNAME)-$(VERSION).tar $(PKGNAME)-$(VERSION)
-	gzip -9 $(PKGNAME)-$(VERSION).tar
-	rm -rf $(PKGNAME)-$(VERSION)
-	git checkout -- po/python-$(PKGNAME).pot
-	@echo "The archive name is $(PKGNAME)-$(VERSION).tar.gz"
+.PHONY: archive
+archive: po-pull ChangeLog
+	$(PYTHON) setup.py sdist bdist_wheel
+	@echo "The archive is in dist/$(PKGNAME)-$(VERSION).tar.gz"
 
-local: po-pull
-	@rm -f ChangeLog
-	@make ChangeLog
-	rm -rf $(PKGNAME)-$(VERSION).tar.gz
-	rm -rf /tmp/$(PKGNAME)-$(VERSION) /tmp/$(PKGNAME)
-	dir=$$PWD; cp -a $$dir /tmp/$(PKGNAME)-$(VERSION)
-	cd /tmp/$(PKGNAME)-$(VERSION) ; $(PYTHON) setup.py -q sdist
-	cp /tmp/$(PKGNAME)-$(VERSION)/dist/$(PKGNAME)-$(VERSION).tar.gz .
-	rm -rf /tmp/$(PKGNAME)-$(VERSION)
-	@echo "The archive name is $(PKGNAME)-$(VERSION).tar.gz"
-
+.PHONY: rpmlog
 rpmlog:
 	@git log --no-merges --pretty="format:- %s (%ae)" $(TAG).. |sed -e 's/@.*)/)/'
 	@echo
 
+.PHONY: potfile
 potfile:
 	$(MAKE) -C po potfile
 
+.PHONY: po-pull
 po-pull:
 	which zanata &>/dev/null || ( echo "need to install zanata python client"; exit 1 )
 	zanata pull $(ZANATA_PULL_ARGS)
 
+.PHONY: po-push
 po-push: potfile
 	zanata push $(ZANATA_PUSH_ARGS) || ( echo "zanata push failed"; exit 1 )
 
+.PHONY: bumpver
 bumpver: po-push
 	@NEWSUBVER=$$((`echo $(VERSION) |cut -d . -f 2` + 1)) ; \
 	NEWVERSION=`echo $(VERSION).$$NEWSUBVER |cut -d . -f 1,3` ; \
@@ -108,6 +102,5 @@ bumpver: po-push
 	sed -i "s/Version: $(VERSION)/Version: $$NEWVERSION/" $(SPECNAME).spec ; \
 	sed -i "s/version='$(VERSION)'/version='$$NEWVERSION'/" setup.py
 
+.PHONY: ci
 ci: check test
-
-.PHONY: clean install tag archive local

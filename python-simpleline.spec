@@ -54,7 +54,7 @@ make test
 
 
 %files -n python3-%{srcname} -f python-%{srcname}.lang
-%license COPYING
+%license LICENSE.md
 %doc ChangeLog README.md
 %{python3_sitelib}/*
 

@@ -1,8 +1,6 @@
 *.pyc
 .*.swp
 
-python-simpleline*.tar.gz
-
 ChangeLog
 
 po/*.gmo
@@ -13,6 +11,8 @@ tests/pylint/.pylint.d/
 pylint-log
 
 build/
+dist/
+simpleline.egg-info/
 
 .directory
 
