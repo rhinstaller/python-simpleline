@@ -36,7 +36,7 @@ all:
 
 .PHONY: clean
 clean:
-	-rm *.tar.gz simpleline/*.pyc tests/*.pyc ChangeLog
+	-rm -rf *.tar.gz simpleline/*.pyc tests/*.pyc ChangeLog dist build simpleline.egg-info
 	$(MAKE) -C po clean
 	$(PYTHON) setup.py -q clean --all
 
