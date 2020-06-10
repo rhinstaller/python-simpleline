@@ -10,7 +10,7 @@ Release: 1%{?dist}
 #   cd python-simpleline && make archive
 Source0: https://github.com/rhinstaller/python-%{srcname}/archive/%{srcname}-%{version}.tar.gz
 
-License: GPLv2+
+License: LGPLv3+
 BuildArch: noarch
 BuildRequires: python3-devel
 BuildRequires: gettext
