@@ -27,6 +27,7 @@ PYTHON=python3
 
 # LOCALIZATION SETTINGS
 L10N_REPOSITORY ?= https://github.com/rhinstaller/python-simpleline-l10n.git
+L10N_REPOSITORY_RW ?= git@github.com:rhinstaller/python-simpleline-l10n.git
 
 # Branch used in localization repository. This should be master all the time.
 GIT_L10N_BRANCH ?= master
@@ -98,7 +99,33 @@ po-pull:
 
 .PHONY: po-push
 po-push: potfile
-	zanata push $(ZANATA_PUSH_ARGS) || ( echo "zanata push failed"; exit 1 )
+# This algorithm will make these steps:
+# - clone localization repository
+# - copy pot file to this repository
+# - check if pot file is changed (ignore the POT-Creation-Date otherwise it's always changed)
+# - if not changed:
+#   - remove cloned repository
+# - if changed:
+#   - add pot file
+#   - commit pot file
+#   - tell user to verify this file and push to the remote from the temp dir
+	TEMP_DIR=$$(mktemp --tmpdir -d $(SPECNAME)-localization-XXXXXXXXXX) || exit 1 ; \
+	git clone --depth 1 -b $(GIT_L10N_BRANCH) -- $(L10N_REPOSITORY_RW) $$TEMP_DIR || exit 2 ; \
+	cp ./po/$(SPECNAME).pot $$TEMP_DIR/$(L10N_DIR)/ || exit 3 ; \
+	pushd $$TEMP_DIR/$(L10N_DIR) ; \
+	git difftool --trust-exit-code -y -x "diff -u -I '^\"POT-Creation-Date: .*$$'" HEAD ./$(SPECNAME).pot &>/dev/null ; \
+	if [ $$? -eq 0  ] ; then \
+		popd ; \
+		echo "Pot file is up to date" ; \
+		rm -rf $$TEMP_DIR ; \
+	else \
+		git add ./$(SPECNAME).pot && \
+		git commit -m "Update $(SPECNAME).pot" && \
+		popd && \
+		echo "Pot file updated for the localization repository $(L10N_REPOSITORY)" && \
+		echo "Please confirm changes and push:" && \
+		echo "$$TEMP_DIR" ; \
+	fi ;
 
 .PHONY: bumpver
 bumpver: po-push
