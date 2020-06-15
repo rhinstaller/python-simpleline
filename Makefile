@@ -34,9 +34,6 @@ GIT_L10N_BRANCH ?= master
 # Directory in localization repository specific for this branch.
 L10N_DIR ?= master
 
-ZANATA_PULL_ARGS = --transdir po/
-ZANATA_PUSH_ARGS = --srcdir po/ --push-type source --force
-
 default: all
 
 .PHONY: all
