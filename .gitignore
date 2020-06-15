@@ -5,6 +5,7 @@ ChangeLog
 
 po/*.gmo
 po/*.po
+po/python-simpleline.pot
 po/POTFILES
 
 tests/pylint/.pylint.d/
