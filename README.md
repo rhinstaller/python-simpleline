@@ -1,4 +1,5 @@
 [![Copr build status](https://copr.fedorainfracloud.org/coprs/g/rhinstaller/Anaconda/package/python-simpleline/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/g/rhinstaller/Anaconda/package/python-simpleline/)
+[![Translation status](https://translate.fedoraproject.org/widgets/python-simpleline/-/master/svg-badge.svg)](https://translate.fedoraproject.org/engage/python-simpleline/?utm_source=widget)
 
 Python Simpleline
 =================
