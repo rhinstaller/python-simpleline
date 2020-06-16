@@ -1,5 +1,9 @@
 specfile_path: python-simpleline.spec
 upstream_package_name: python-simpleline
+actions:
+  create-archive:
+    - "make archive"
+    - 'bash -c "ls dist/*.tar.gz"'
 jobs:
   - job: copr_build
     trigger: pull_request
