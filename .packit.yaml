@@ -4,7 +4,7 @@ actions:
   get-current-version:
     - "python3 ./setup.py --version"
   create-archive:
-    - "make archive"
+    - "make BUILD_ARGS=sdist archive"
     - 'bash -c "ls dist/*.tar.gz"'
 jobs:
   - job: copr_build
