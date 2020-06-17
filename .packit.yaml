@@ -1,5 +1,5 @@
 specfile_path: python-simpleline.spec
-upstream_package_name: python-simpleline
+upstream_package_name: simpleline
 actions:
   get-current-version:
     - "python3 ./setup.py --version"
