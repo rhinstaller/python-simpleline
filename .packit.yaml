@@ -5,7 +5,8 @@ actions:
     - "python3 ./setup.py --version"
   create-archive:
     - "make BUILD_ARGS=sdist archive"
-    - 'bash -c "ls dist/*.tar.gz"'
+    - 'bash -c "cp dist/*.tar.gz ."'
+    - 'bash -c "ls *.tar.gz"'
 jobs:
   - job: copr_build
     trigger: pull_request
