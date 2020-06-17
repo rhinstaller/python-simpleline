@@ -26,7 +26,7 @@ with open("README.md", "r") as f:
 setup(name='simpleline',
       version='1.6',
       author='Jiri Konecny',
-      author_mail='jkonecny@redhat.com',
+      author_email='jkonecny@redhat.com',
       description='Python text UI framework',
       long_description=long_description,
       long_description_content_type="text/markdown",
