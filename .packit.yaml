@@ -1,0 +1,20 @@
+specfile_path: python-simpleline.spec
+upstream_package_name: simpleline
+actions:
+  get-current-version:
+    - "python3 ./setup.py --version"
+  create-archive:
+    - "make BUILD_ARGS=sdist archive"
+    - 'bash -c "cp dist/*.tar.gz ."'
+    - 'bash -c "ls *.tar.gz"'
+jobs:
+  - job: copr_build
+    trigger: pull_request
+    metadata:
+      targets:
+        - fedora-all
+
+  - job: propose_downstream
+    trigger: release
+    metadata:
+      dist-git-branch: fedora-all
