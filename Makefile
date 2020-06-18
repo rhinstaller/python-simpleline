@@ -23,6 +23,9 @@ TAG=$(PKGNAME)-$(VERSION)
 
 PYTHON=python3
 
+# Arguments used for setup.py call for creating archive
+BUILD_ARGS ?= sdist bdist_wheel
+
 # LOCALIZATION SETTINGS
 L10N_REPOSITORY ?= https://github.com/rhinstaller/python-simpleline-l10n.git
 L10N_REPOSITORY_RW ?= git@github.com:rhinstaller/python-simpleline-l10n.git
@@ -73,7 +76,7 @@ release: tag archive
 
 .PHONY: archive
 archive: po-pull ChangeLog
-	$(PYTHON) setup.py sdist bdist_wheel
+	$(PYTHON) setup.py $(BUILD_ARGS)
 	@echo "The archive is in dist/$(PKGNAME)-$(VERSION).tar.gz"
 
 .PHONY: rpmlog
