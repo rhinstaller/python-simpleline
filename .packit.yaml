@@ -8,13 +8,13 @@ actions:
     - 'bash -c "cp dist/*.tar.gz ."'
     - 'bash -c "ls *.tar.gz"'
 jobs:
-  - job: copr_build
-    trigger: pull_request
-    metadata:
-      targets:
-        - fedora-all
-
   - job: propose_downstream
     trigger: release
     metadata:
       dist-git-branch: fedora-all
+
+  - job: tests
+    trigger: pull_request
+    metadata:
+      targets:
+        - fedora-all
