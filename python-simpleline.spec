@@ -3,7 +3,7 @@
 Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
-Version: 1.6
+Version: 1.7
 Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
@@ -59,6 +59,35 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Thu Jun 25 2020 Jiri Konecny <jkonecny@redhat.com> - 1.7-1
+- Testing farm seems like a better option (jkonecny)
+- Fix upstream package name (jkonecny)
+- Copy archive to the project root for packit (jkonecny)
+- Use BUILD_ARGS for packit to remove wheel dependency (jkonecny)
+- Correct how packit sniffing package version (jkonecny)
+- Add packit action to create archive correctly (jkonecny)
+- Simplify Packit configuration file (jkonecny)
+- Enable copr builds and add packit config (dhodovsk)
+- Add possibility to change setup.py arguments (jkonecny)
+- Fix typo in setup.py (jkonecny)
+- Add translation badge from Weblate (jkonecny)
+- Add potfile to the .gitignore (jkonecny)
+- Pause releasing when calling bumpver (jkonecny)
+- Remove unused PREFIX from the Makefile (jkonecny)
+- Remove Zanata from the Simpleline (jkonecny)
+- Switch po-push from Zanata to Weblate (jkonecny)
+- Download translations from Weblate (jkonecny)
+- Remove pot file from this repository (jkonecny)
+- Add new directories to .gitignore and make clean (jkonecny)
+- Add Makefile PHONY targets (jkonecny)
+- Simplify archive creation (jkonecny)
+- Reflect rename of COPYING to LICENSE.md (jkonecny)
+- Change license in spec file to LGPLv3+ (jkonecny)
+- Add COPR badge for daily builds (jkonecny)
+- Improve setup.py (jkonecny)
+- Change license to LGPLv3 for all the files (jkonecny)
+- Change License from GPLv2+ to LGPLv3+ (jkonecny)
+
 * Thu Aug 22 2019 Jiri Konecny <jkonecny@redhat.com> - 1.6-1
 - Always close the password dialog (vponcova)
 - Remove unnecessary pass statements (jkonecny)
