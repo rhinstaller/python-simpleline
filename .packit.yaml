@@ -5,8 +5,10 @@ actions:
     - "python3 ./setup.py --version"
   create-archive:
     - "make BUILD_ARGS=sdist archive"
-    - 'bash -c "cp dist/*.tar.gz ."'
-    - 'bash -c "ls *.tar.gz"'
+    - 'cp dist/*.tar.gz .'
+    - 'ls *.tar.gz'
+  fix-spec-file:
+    - 'make bumpver'
 jobs:
   - job: propose_downstream
     trigger: release

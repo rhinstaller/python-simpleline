@@ -126,9 +126,7 @@ po-push: potfile
 	fi ;
 
 .PHONY: bumpver
-bumpver: po-push
-	read -p "Please see the above message. Verify and push localization commit. Press anything to continue." -n 1 -r
-
+bumpver:
 	@NEWSUBVER=$$((`echo $(VERSION) |cut -d . -f 2` + 1)) ; \
 	NEWVERSION=`echo $(VERSION).$$NEWSUBVER |cut -d . -f 1,3` ; \
 	DATELINE="* `LC_ALL=C.UTF-8 date "+%a %b %d %Y"` `git config user.name` <`git config user.email`> - $$NEWVERSION-1"  ; \
