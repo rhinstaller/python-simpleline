@@ -31,7 +31,7 @@ setup(name='simpleline',
       long_description=long_description,
       long_description_content_type="text/markdown",
       keywords='ui text library glib',
-      url='http://git.fedoraproject.org/git/?p=python-simpleline.git',
+      url='https://github.com/rhinstaller/python-simpleline',
       packages=find_packages(include=['simpleline', 'simpleline.*']),
       classifiers=[
         "Development Status :: 5 - Production/Stable",
