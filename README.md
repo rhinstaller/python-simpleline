@@ -16,7 +16,8 @@ How to
 
 [Link](https://python-simpleline.readthedocs.io) to the documentation.
 
-Another way to learn how to use this library is to view the examples directory.
+Another way to learn how to use this library is to view the
+[examples directory](https://github.com/rhinstaller/python-simpleline/tree/master/examples).
 Examples can be run without installing Simpleline to the system. You can test
 them by running the script `run_example.sh`.
 
