@@ -139,5 +139,9 @@ bumpver: po-push
 	sed -i "s/Version: $(VERSION)/Version: $$NEWVERSION/" $(SPECNAME).spec ; \
 	sed -i "s/version='$(VERSION)'/version='$$NEWVERSION'/" setup.py
 
+.PHONY: pypi-upload
+pypi-upload:
+	$(PYTHON) -m twine upload dist/*
+
 .PHONY: ci
 ci: check test

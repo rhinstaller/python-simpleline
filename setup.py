@@ -34,10 +34,10 @@ setup(name='simpleline',
       url='https://github.com/rhinstaller/python-simpleline',
       packages=find_packages(include=['simpleline', 'simpleline.*']),
       classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: GNU Lesser General"
-        "Public License v3 or later (LGPLv3+)",
-        "Programming Language :: Python :: 3",
+          "Development Status :: 5 - Production/Stable",
+          "Intended Audience :: Developers",
+          "Topic :: Software Development :: User Interfaces",
+          "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
+          "Programming Language :: Python :: 3",
       ],
       python_requires='>=3.4')
