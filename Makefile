@@ -21,7 +21,8 @@ VERSION=$(shell awk '/Version:/ { print $$2 }' $(SPECNAME).spec)
 RELEASE=$(shell awk '/Release:/ { print $$2 }' $(SPECNAME).spec | sed -e 's|%.*$$||g')
 TAG=$(PKGNAME)-$(VERSION)
 
-PYTHON=python3
+PYTHON?=python3
+COVERAGE?=coverage3
 
 # Arguments used for setup.py call for creating archive
 BUILD_ARGS ?= sdist bdist_wheel
@@ -51,6 +52,12 @@ clean:
 test:
 	@echo "*** Running unittests ***"
 	PYTHONPATH=. $(PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
+
+.PHONY: coverage
+coverage:
+	@echo "*** Running unittests with coverage ***"
+	PYTHONPATH=. $(COVERAGE) run --branch -m unittest discover -v -s tests/ -p '*_test.py'
+	$(COVERAGE) report -m --include="simpleline/*" | tee tests/coverage-report.log
 
 .PHONY: check
 check:
