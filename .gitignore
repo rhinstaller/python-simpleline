@@ -1,6 +1,9 @@
 *.pyc
 .*.swp
 
+.coverage
+tests/coverage-report.log
+
 ChangeLog
 
 po/*.gmo
