@@ -15,7 +15,7 @@ L10N_REPOSITORY_RW ?= git@github.com:rhinstaller/python-simpleline-l10n.git
 # Branch used in localization repository. This should be master all the time.
 GIT_L10N_BRANCH ?= master
 # Directory in localization repository specific for this branch.
-L10N_DIR ?= master
+L10N_DIR ?= rhel-8
 
 default: all
 
