@@ -28,7 +28,7 @@ __all__ = ["Widget", "TextWidget", "SeparatorWidget", "EntryWidget", "ColumnWidg
            "CheckboxWidget", "CenterWidget"]
 
 
-class Widget(object):
+class Widget():
 
     def __init__(self, max_width=None, default=None):
         """Initializes base Widgets buffer.
@@ -43,7 +43,7 @@ class Widget(object):
         """
         self._buffer = []
         if default:
-            self._buffer = [[c for c in l] for l in default.split("\n")]
+            self._buffer = [[c for c in l] for l in default.split("\n")] # pylint: disable=unnecessary-comprehension
         self._max_width = max_width
         self._cursor = (0, 0)  # row, col
 
@@ -229,7 +229,8 @@ class Widget(object):
     def _save_character_to_buffer(self, x, y, character):
         self._buffer[x][y] = character
 
-    def _wrap_words(self, text, width):
+    @staticmethod
+    def _wrap_words(text, width):
         lines = []
         # Wrap each line separately
         for line in text.split('\n'):
@@ -303,7 +304,8 @@ class EntryWidget(TextWidget):
         text = self._create_text(title=title, value=value)
         super().__init__(text)
 
-    def _create_text(self, title, value):
+    @staticmethod
+    def _create_text(title, value):
         msg = title
 
         if value:

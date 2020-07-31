@@ -35,10 +35,12 @@ class Container(Widget):
     def __init__(self, items=None, numbering=True):
         """Construct Container.
 
-        :param items: List of items for positioning in this Container. Callback can't be specified this way.
+        :param items: List of items for positioning in this Container. Callback
+                      can't be specified this way.
         :type items: List of items for rendering.
 
-        :param numbering: Enable/disable automatic numbering (labels) for items. Enabled by default (True).
+        :param numbering: Enable/disable automatic numbering (labels) for items.
+                          Enabled by default (True).
         :type numbering: bool
         """
         super().__init__()
@@ -81,7 +83,8 @@ class Container(Widget):
         :type item: Could be item (based on `simpleline.render.widgets.Widget`)
                     or other container (based on `simpleline.render.containers.Container`).
 
-        :param callback: Add callback for this item. This callback will be called when user activate this `item`.
+        :param callback: Add callback for this item. This callback will be called when user
+                         activate this `item`.
         :type callback: function ``func(data)``.
 
         :param data: Data which will be passed to the callback.
@@ -96,14 +99,18 @@ class Container(Widget):
     def process_user_input(self, key):
         """Process input from the user if any of the items in the list was called.
 
-        This method must be called in `UIScreen.input()` method if list widget should call the callbacks.
+        This method must be called in `UIScreen.input()` method if list widget should call
+        the callbacks.
 
         :param key: Key pressed from user.
         :type key: str
 
         :returns: True if key was processed. False otherwise.
         """
-        if not self._key_pattern or type(key) != str:
+        if not self._key_pattern:
+            return False
+
+        if not isinstance(key, str):
             return False
 
         res = self._key_pattern.translate_input_to_widget_id(key)
@@ -140,8 +147,8 @@ class WindowContainer(Container):
     def __init__(self, title=None):
         """Construct base container for screens.
 
-        This container doesn't have numbering support. Input other containers in it to allow numbering
-        and input processing.
+        This container doesn't have numbering support. Input other containers in it to
+        allow numbering and input processing.
 
         :param title: Title line with separator after this title.
         :type title: str
@@ -160,7 +167,8 @@ class WindowContainer(Container):
         :type item: Could be item (based on `simpleline.render.widgets.Widget`)
                     or other container (based on `simpleline.render.containers.Container`).
 
-        :param callback: Add callback for this item. This callback will be called when user activate this `item`.
+        :param callback: Add callback for this item. This callback will be called when user
+                         activate this `item`.
         :type callback: function ``func(data)``.
 
         :param data: Data which will be passed to the callback.
@@ -227,8 +235,8 @@ class ListRowContainer(Container):
 
     Compared to the ColumnWidget this is able to handle word wrapping correctly.
 
-    There is numbering N) automatically for all items. To disable this feature call `self.key_pattern = None`.
-    If you want other numbering then look on `KeyPattern` class.
+    There is numbering N) automatically for all items. To disable this feature call
+    `self.key_pattern = None`. If you want other numbering then look on `KeyPattern` class.
 
     Widgets will be placed based on the number of columns in the following way:
 
@@ -243,17 +251,19 @@ class ListRowContainer(Container):
         :param columns: How many columns we want.
         :type columns: int, bigger than 0
 
-        :param items: List of items for positioning in this Container. Callback can't be specified this way.
+        :param items: List of items for positioning in this Container. Callback can't be
+                      specified this way.
         :type items: List of items for rendering.
 
-        :param columns_width: Width of every column. If nothing specified the maximum width will be distributed
-                              to columns.
+        :param columns_width: Width of every column. If nothing specified the maximum width
+                              will be distributed to columns.
         :type columns_width: int or None
 
         :param spacing: Set the spacing between columns.
         :type spacing: int
 
-        :param numbering: Enable/disable automatic numbering (labels) for items. Enabled by default (True).
+        :param numbering: Enable/disable automatic numbering (labels) for items.
+                          Enabled by default (True).
         :type numbering: bool
         """
         super().__init__(items, numbering)
@@ -311,7 +321,8 @@ class ListRowContainer(Container):
         # call `self._render_and_calculate_lines_per_rows()` method instead
         lines_per_row = []
 
-        # go through all items and find how many lines we need for each row printed (because of wrapping)
+        # go through all items and find how many lines we need for each row
+        # printed (because of wrapping)
         for column_items in items:
             for row_id, item_id in enumerate(column_items):
                 item = self._items[item_id]
@@ -347,7 +358,8 @@ class ListRowContainer(Container):
     def _get_ordered_map(self):
         """Return list of identifiers (index) to the original item list.
 
-        .. NOTE: Use of ``self._prepare_list()` is encouraged to create output list and just fill up this list.
+        .. NOTE: Use of ``self._prepare_list()` is encouraged to create output list and
+                 just fill up this list.
         """
         # create list of columns (lists)
         ordering_map = self._prepare_list()
@@ -370,8 +382,8 @@ class ListColumnContainer(ListRowContainer):
 
     Compared to the ColumnWidget this is able to handle word wrapping correctly.
 
-    There is numbering N) automatically for all items. To disable this feature call `self.key_pattern = None`.
-    If you want other numbering then look on `KeyPattern` class.
+    There is numbering N) automatically for all items. To disable this feature call
+    `self.key_pattern = None`. If you want other numbering then look on `KeyPattern` class.
 
     Widgets will be placed based on the number of columns in the following way:
 
@@ -391,19 +403,21 @@ class ListColumnContainer(ListRowContainer):
         return ordering_map
 
 
-class KeyPattern(object):
+class KeyPattern():
     """Pattern for automatic key printing before items."""
 
     def __init__(self, pattern="{:d}) ", offset=1):
         """Create the pattern class.
 
-        For enabling greater functionality than python 3 format is able to do, feel free to override this class and
-        use your subclass instead.
+        For enabling greater functionality than python 3 format is able to do, feel free to
+        override this class and use your subclass instead.
 
         :param pattern: Set pattern which will be called for every item.
-        :type pattern: Strings format method. See https://docs.python.org/3.3/library/string.html#format-string-syntax.
+        :type pattern: Strings format method.
+                       See https://docs.python.org/3.3/library/string.html#format-string-syntax.
 
-        :param offset: Set the offset for numbering items. Default is 1 to start indexing naturally for user.
+        :param offset: Set the offset for numbering items. Default is 1 to start indexing
+                       naturally for user.
         :type offset: int
         """
         self._pattern = pattern
@@ -437,7 +451,7 @@ class KeyPattern(object):
             return None
 
 
-class ContainerItem(object):
+class ContainerItem():
     """Item used inside of containers to store widgets callbacks and data.
 
     Internal representation for Containers. Do not use this class directly.

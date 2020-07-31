@@ -23,7 +23,8 @@ from io import StringIO
 from unittest.mock import patch
 
 from simpleline import App
-from simpleline.render.containers import WindowContainer, ListRowContainer, ListColumnContainer, KeyPattern
+from simpleline.render.containers import WindowContainer, ListRowContainer, ListColumnContainer, \
+    KeyPattern
 from simpleline.render.screen import UIScreen, InputState
 from simpleline.render.widgets import TextWidget
 from tests.simpleline_tests.widgets_test import BaseWidgets_TestCase
@@ -35,7 +36,11 @@ class Containers_TestCase(BaseWidgets_TestCase):
         pass
 
     def test_listrow_container(self):
-        c = ListRowContainer(columns=2, items=[self.w2, self.w3, self.w5], columns_width=10, spacing=2, numbering=False)
+        c = ListRowContainer(columns=2,
+                             items=[self.w2, self.w3, self.w5],
+                             columns_width=10,
+                             spacing=2,
+                             numbering=False)
         c.render(25)
 
         expected_result = [u"Test        Test 2",
@@ -63,7 +68,10 @@ class Containers_TestCase(BaseWidgets_TestCase):
 
     def test_listrow_wrapping(self):
         # spacing is 3 by default
-        c = ListRowContainer(2, [self.w1, self.w2, self.w3, self.w4], columns_width=15, numbering=False)
+        c = ListRowContainer(2,
+                             [self.w1, self.w2, self.w3, self.w4],
+                             columns_width=15,
+                             numbering=False)
         c.render(25)
 
         expected_result = [u"Můj krásný        Test",
@@ -88,7 +96,10 @@ class Containers_TestCase(BaseWidgets_TestCase):
         self.evaluate_result(res_lines, expected_result)
 
     def test_listcolumn_container(self):
-        c = ListColumnContainer(columns=2, items=[self.w2, self.w3, self.w5], columns_width=10, spacing=2,
+        c = ListColumnContainer(columns=2,
+                                items=[self.w2, self.w3, self.w5],
+                                columns_width=10,
+                                spacing=2,
                                 numbering=False)
         c.render(25)
 
@@ -99,7 +110,10 @@ class Containers_TestCase(BaseWidgets_TestCase):
 
     def test_listcolumn_wrapping(self):
         # spacing is 3 by default
-        c = ListColumnContainer(2, [self.w1, self.w2, self.w3, self.w4], columns_width=15, numbering=False)
+        c = ListColumnContainer(2,
+                                [self.w1, self.w2, self.w3, self.w4],
+                                columns_width=15,
+                                numbering=False)
         c.render(25)
 
         expected_result = [u"Můj krásný        Test 2",
@@ -110,7 +124,11 @@ class Containers_TestCase(BaseWidgets_TestCase):
         self.evaluate_result(res_lines, expected_result)
 
     def test_add_new_container(self):
-        c = ListRowContainer(columns=2, items=[TextWidget("Ahoj")], columns_width=15, spacing=0, numbering=False)
+        c = ListRowContainer(columns=2,
+                             items=[TextWidget("Ahoj")],
+                             columns_width=15,
+                             spacing=0,
+                             numbering=False)
 
         expected_result = [u"Ahoj"]
 
@@ -243,7 +261,9 @@ class Containers_TestCase(BaseWidgets_TestCase):
             c.render(10)
 
     def test_list_container_too_small_turn_off_numbering(self):
-        # to be able to render this container we need 11 width + three times numbers (3 characters) = 20
+        # to be able to render this container we need
+        # 11 width + three times numbers (3 characters) = 20
+        #
         # 8 will take only spacing and then 1 for every column
         c = ListRowContainer(3, spacing=4, numbering=True)
 

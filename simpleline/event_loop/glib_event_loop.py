@@ -21,17 +21,17 @@
 #
 # Author(s): Jiri Konecny <jkonecny@redhat.com>
 #
-
 from collections import namedtuple
+
+import gi
 
 from simpleline.event_loop import AbstractEventLoop, ExitMainLoop
 from simpleline.event_loop.signals import ExceptionSignal
+from simpleline.logging import get_simpleline_logger
 
-import gi
 gi.require_version("GLib", "2.0")
 
-from gi.repository import GLib
-from simpleline.logging import get_simpleline_logger
+from gi.repository import GLib # pylint: disable=wrong-import-order, wrong-import-position
 
 log = get_simpleline_logger()
 
@@ -92,9 +92,9 @@ class GLibEventLoop(AbstractEventLoop):
         context = event_loop.get_context()
         handlers = []
 
-        if type(signal) in self._handlers:
+        if type(signal) in self._handlers: # pylint: disable=unidiomatic-typecheck
             handlers = self._handlers[type(signal)]
-        elif type(signal) is ExceptionSignal:
+        elif isinstance(signal, ExceptionSignal):
             handler_data = self._create_event_handler(self.kill_app_with_traceback, None)
             handlers = [handler_data]
 
@@ -188,14 +188,14 @@ class GLibEventLoop(AbstractEventLoop):
     def process_signals(self, return_after=None):
         """This method processes incoming async messages.
 
-        Process signals enqueued by the `self.enqueue_signal()` method. Call handlers registered to the signals by
-        the `self.register_signal_handler()` method.
+        Process signals en-queued by the `self.enqueue_signal()` method. Call handlers registered
+                        to the signals by the `self.register_signal_handler()` method.
 
         When `return_after` is specified then wait to the point when this signal is processed.
         NO warranty that this method will return immediately after the signal was processed!
 
-        Without `return_after` parameter this method will return after all queued signals with the highest priority
-        will be processed.
+        Without `return_after` parameter this method will return after all queued signals with
+        the highest priority will be processed.
 
         The method is NOT thread safe!
 
@@ -208,22 +208,23 @@ class GLibEventLoop(AbstractEventLoop):
         if return_after is not None:
             ticket_id = self._register_wait_on_signal(return_after)
 
-            while not self._check_if_signal_processed(return_after, ticket_id) and not self._force_quit:
+            while not self._check_if_signal_processed(return_after, ticket_id) and \
+                  not self._force_quit:
                 self._iterate_event_loop(loop_data.loop)
         else:
             self._iterate_event_loop(loop_data.loop)
 
-    def _iterate_event_loop(self, event_loop):
+    @staticmethod
+    def _iterate_event_loop(event_loop):
         context = event_loop.get_context()
         # This is useful for tests
         wait_on_timeout = False
         context.iteration(wait_on_timeout)
 
 
-class EventLoopData(object):
+class EventLoopData():
 
     def __init__(self, loop):
         super().__init__()
         self.loop = loop
         self.sources = set()
-

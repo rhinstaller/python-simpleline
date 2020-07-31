@@ -26,8 +26,8 @@ from unittest.mock import patch
 from simpleline import App
 from simpleline.render.prompt import Prompt
 from simpleline.render.screen import UIScreen
-from simpleline.render.widgets import TextWidget, SeparatorWidget, CheckboxWidget, CenterWidget, ColumnWidget, \
-                                      EntryWidget
+from simpleline.render.widgets import TextWidget, SeparatorWidget, CheckboxWidget, CenterWidget, \
+    ColumnWidget, EntryWidget
 
 
 class BaseWidgets_TestCase(unittest.TestCase):
@@ -53,7 +53,7 @@ class BaseWidgets_TestCase(unittest.TestCase):
 
     def evaluate_result(self, test_result, expected_result):
         self.assertEqual(len(test_result), len(expected_result))
-        for i in range(0, len(test_result)):
+        for i in range(0, len(test_result)): # pylint: disable=consider-using-enumerate
             self.assertEqual(test_result[i], expected_result[i])
 
 
@@ -111,7 +111,7 @@ class Widgets_TestCase(BaseWidgets_TestCase):
 
     def test_multiline_text(self):
         self.w6.render(80)
-        expected_result =[
+        expected_result = [
             "The rescue environment will now attempt to find your Linux installation and",
             "mount it under the directory : bla.  You can then make any changes required to",
             "your system.  Choose '1' to proceed with this step.",
@@ -133,10 +133,11 @@ class Widgets_TestCase(BaseWidgets_TestCase):
         res_lines = self.w7.get_lines()
 
         self.assertEqual(len(res_lines), len(expected_result))
-        for i in range(0, len(res_lines)):
+        for i in range(0, len(res_lines)): # pylint: disable=consider-using-enumerate
             self.assertEqual(res_lines[i], expected_result[i])
 
         self.w8.render(80)
+        # pylint: disable=line-too-long
         expected_result = ["Text that would be wrapped exactly at the screen width should have special test.",
                            "This one."]
         res_lines = self.w8.get_lines()
@@ -243,7 +244,8 @@ class Widgets_TestCase(BaseWidgets_TestCase):
 @patch('sys.stdout', new_callable=StringIO)
 class WidgetProcessing_TestCase(unittest.TestCase):
 
-    def _calculate_spacer(self):
+    @staticmethod
+    def _calculate_spacer():
         # this calculation is taken from scheduler for default width '80'
         return '\n'.join(2 * [80 * '='])
 

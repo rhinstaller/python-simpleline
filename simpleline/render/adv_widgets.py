@@ -27,7 +27,8 @@ from simpleline.render.screen import UIScreen, InputState
 from simpleline.input.input_handler import PasswordInputHandler
 from simpleline.utils.i18n import _, N_, C_
 
-__all__ = ["ErrorDialog", "GetInputScreen", "GetPasswordInputScreen", "HelpScreen", "PasswordDialog", "YesNoDialog"]
+__all__ = ["ErrorDialog", "GetInputScreen", "GetPasswordInputScreen", "HelpScreen",
+           "PasswordDialog", "YesNoDialog"]
 
 
 class ErrorDialog(UIScreen):
@@ -105,8 +106,8 @@ class PasswordDialog(UIScreen):
         if key:
             self._password = key
             return InputState.PROCESSED_AND_CLOSE
-        else:
-            return InputState.DISCARDED
+
+        return InputState.DISCARDED
 
 
 class YesNoDialog(UIScreen):
@@ -142,12 +143,11 @@ class YesNoDialog(UIScreen):
             return InputState.PROCESSED_AND_CLOSE
 
         # TRANSLATORS: 'no' as negative reply
-        elif key == C_('TUI|Spoke Navigation', 'no'):
+        if key == C_('TUI|Spoke Navigation', 'no'):
             self._response = False
             return InputState.PROCESSED_AND_CLOSE
 
-        else:
-            return InputState.DISCARDED
+        return InputState.DISCARDED
 
     @property
     def answer(self):
@@ -209,8 +209,9 @@ class GetInputScreen(UIScreen):
 
         :param acceptance_function: Functions that accepts or rejects a user input.
         :type acceptance_function: `function(input, args) -> bool`  - function which takes
-                                   user input (string) and arguments (`args`) and return True when input is accepted or
-                                   False if rejected so we will ask for a new input.
+                                   user input (string) and arguments (`args`) and return True when
+                                   input is accepted or False if rejected so we will ask for
+                                   a new input.
 
         :param args: Second argument for `acceptance_function` the first one will be user input.
         :type args: Anything.

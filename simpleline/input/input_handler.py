@@ -28,7 +28,7 @@ from simpleline.input.input_threading import InputThreadManager, InputRequest
 __all__ = ["InputHandler", "PasswordInputHandler"]
 
 
-class InputHandler(object):
+class InputHandler():
 
     def __init__(self, callback=None, source=None):
         """Class to handle input from the terminal.
@@ -226,7 +226,8 @@ class InputHandlerRequest(InputRequest):
 
         return self._get_input()
 
-    def _get_input(self):
+    @staticmethod
+    def _get_input():
         return input()
 
 

@@ -20,10 +20,10 @@
 
 
 import unittest
-from unittest.mock import Mock
+
+from unittest.mock import Mock, patch
 from threading import Barrier, current_thread, Event
 
-from unittest import mock
 from io import StringIO
 
 from simpleline import App
@@ -32,8 +32,8 @@ from simpleline.input.input_handler import InputHandler, PasswordInputHandler
 from simpleline.render.prompt import Prompt
 
 
-@mock.patch('sys.stdout', new_callable=StringIO)
-@mock.patch('simpleline.input.input_handler.InputHandlerRequest._get_input')
+@patch('sys.stdout', new_callable=StringIO)
+@patch('simpleline.input.input_handler.InputHandlerRequest._get_input')
 class InputHandler_TestCase(unittest.TestCase):
 
     def create_loop(self):
@@ -193,8 +193,8 @@ class InputHandler_TestCase(unittest.TestCase):
         self._callback_input2 = user_input
 
 
-@mock.patch('sys.stdout', new_callable=StringIO)
-@mock.patch('simpleline.global_configuration.GlobalConfiguration.password_function')
+@patch('sys.stdout', new_callable=StringIO)
+@patch('simpleline.global_configuration.GlobalConfiguration.password_function')
 class PasswordInputHandler_TestCase(unittest.TestCase):
 
     def create_loop(self):

@@ -40,7 +40,7 @@ RAW_INPUT_LOCK = threading.Lock()
 __all__ = ["ScreenScheduler"]
 
 
-class ScreenScheduler(object):
+class ScreenScheduler():
 
     def __init__(self, event_loop, scheduler_stack=None):
         """Constructor where you can pass your own scheduler stack.
@@ -63,7 +63,8 @@ class ScreenScheduler(object):
 
         self._first_screen_scheduled = False
 
-    def _spacer(self):
+    @staticmethod
+    def _spacer():
         return "\n".join(2 * [App.get_configuration().width * "="])
 
     def _register_handlers(self):
@@ -287,7 +288,8 @@ class ScreenScheduler(object):
         else:
             if input_result == UserInputAction.NOOP:
                 return
-            elif input_result == UserInputAction.REDRAW:
+
+            if input_result == UserInputAction.REDRAW:
                 self.redraw()
             elif input_result == UserInputAction.CLOSE:
                 self.close_screen()
@@ -297,8 +299,8 @@ class ScreenScheduler(object):
                     try:
                         if self.quit_screen.answer is True:
                             raise ExitMainLoop()
-                        else:
-                            self.redraw()
+
+                        self.redraw()
                     except AttributeError:
                         raise ExitMainLoop()
                 else:

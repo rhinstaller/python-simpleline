@@ -17,17 +17,17 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Simpleline.  If not, see <https://www.gnu.org/licenses/>.
 #
+import gi
 
 from simpleline import App
 from simpleline.event_loop.glib_event_loop import GLibEventLoop
 
-import gi
 gi.require_version("GLib", "2.0")
 
-from gi.repository import GLib
+from gi.repository import GLib # pylint: disable=wrong-import-position, wrong-import-order
 
 
-class GLibUtilityMixin(object):
+class GLibUtilityMixin():
 
     def __init__(self):
         self.loop = None

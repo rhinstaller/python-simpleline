@@ -80,10 +80,10 @@ class DividerScreen(UIScreen):
             # This will call refresh so our new result will be processed inside of the refresh()
             # method.
             return InputState.PROCESSED_AND_REDRAW
-        else:
-            # Not input for our screen, try other default inputs. This will result in the
-            # same state as DISCARDED when no default option is used.
-            return key
+
+        # Not input for our screen, try other default inputs. This will result in the
+        # same state as DISCARDED when no default option is used.
+        return key
 
 
 if __name__ == "__main__":
@@ -100,4 +100,3 @@ if __name__ == "__main__":
     # Run the application. You must have some screen scheduled
     # otherwise it will end in an infinite loop.
     App.run()
-

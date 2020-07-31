@@ -30,9 +30,11 @@ __all__ = ["ExceptionSignal", "InputReadySignal", "RenderScreenSignal", "CloseSc
 class ExceptionSignal(AbstractSignal):
     """Emit this signal when exception is raised.
 
-    This class must be created inside of exception handler or `exception_info` must be specified in creation process.
+    This class must be created inside of exception handler or `exception_info` must be specified
+    in creation process.
 
-    If you register handler for this exception then the Simpleline's exception handling is disabled!
+    If you register handler for this exception then the Simpleline's exception handling
+    is disabled!
     """
 
     def __init__(self, source, exception_info=None):
@@ -42,7 +44,8 @@ class ExceptionSignal(AbstractSignal):
         :type source: class which emits this signal
 
         :param exception_info: if specified raise your exception, otherwise create exception here;
-                               to create exception here it needs to be created inside of exception handler
+                               to create exception here it needs to be created inside of exception
+                               handler
         :type exception_info: output of `sys.exc_info()` method
         """
         super().__init__(source, priority=-20)

@@ -69,7 +69,8 @@ class ScreenScheduler_TestCase(unittest.TestCase, UtilityMixin):
     def test_switch_screen_modal_refresh_and_render(self, _):
         modal_refresh = ModalTestScreen()
         modal_render = ModalTestScreen()
-        screen = ModalTestScreen(modal_screen_refresh=modal_refresh, modal_screen_render=modal_render)
+        screen = ModalTestScreen(modal_screen_refresh=modal_refresh,
+                                 modal_screen_render=modal_render)
 
         self.schedule_screen_and_run(screen)
 
@@ -86,8 +87,10 @@ class ScreenScheduler_TestCase(unittest.TestCase, UtilityMixin):
 
         self.assertEqual(screen.copied_modal_counter, ModalTestScreen.AFTER_MODAL_RENDER)
         # outer modal screen has AFTER_MODAL_RENDER because it was set before by inner loop
-        self.assertEqual(modal_render_outer.copied_modal_counter, ModalTestScreen.AFTER_MODAL_RENDER)
-        self.assertEqual(modal_render_inner.copied_modal_counter, ModalTestScreen.BEFORE_MODAL_RENDER)
+        self.assertEqual(modal_render_outer.copied_modal_counter,
+                         ModalTestScreen.AFTER_MODAL_RENDER)
+        self.assertEqual(modal_render_inner.copied_modal_counter,
+                         ModalTestScreen.BEFORE_MODAL_RENDER)
 
     @mock.patch('simpleline.input.input_handler.InputHandlerRequest._get_input')
     def test_switch_screen_modal_input_order(self, mock_input, mock_stdout):
@@ -127,12 +130,13 @@ class ShowedCounterScreen(UIScreen):
 
 
 class ModalTestScreen(UIScreen):
-    """Test if the modal screen is really modal and stops the execution in a place where we start the modal screen.
+    """Test if the modal screen is really modal and stops the execution in a place where
+    we start the modal screen.
 
-    This class have checkpoints which increment class variable counter. This counter is copied in the modal instance
-    to the local variable self.copied_modal_counter.
-    In the end we should check if the instance modal counter have the correct value, which is before the
-    modal screen was started (1).
+    This class have checkpoints which increment class variable counter. This counter is
+    copied in the modal instance to the local variable self.copied_modal_counter.
+    In the end we should check if the instance modal counter have the correct value, which is
+    before the modal screen was started (1).
     """
 
     INIT = 0

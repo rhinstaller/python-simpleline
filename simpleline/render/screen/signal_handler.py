@@ -24,7 +24,7 @@ from simpleline import App
 from simpleline.event_loop.signals import RenderScreenSignal, CloseScreenSignal
 
 
-class SignalHandler(object):
+class SignalHandler():
     """Provides methods for handling signals anc callbacks.
 
     Provides main methods:
@@ -53,8 +53,8 @@ class SignalHandler(object):
         :param signal_class: signal you want to use
         :type signal_class: class based on `simpleline.event_loop.AbstractSignal`
 
-        :param priority: priority of the signal; please look on the `simpleline.event_loop.AbstractSignal.priority` for
-                         further info
+        :param priority: priority of the signal; please look on the
+                         `simpleline.event_loop.AbstractSignal.priority` for further info
         :type priority: int
         """
         return signal_class(self, priority)

@@ -30,7 +30,7 @@ log = get_simpleline_logger()
 INPUT_THREAD_NAME = "SimplelineInputThread"
 
 
-class InputThreadManager(object):
+class InputThreadManager():
     """Manager object for input threads.
 
     This manager helps with concurrent user input (still you really shouldn't do that).
@@ -48,9 +48,10 @@ class InputThreadManager(object):
         instance = InputThreadManager()
         cls.__instance = instance
 
-        instance._post_init_configuration()
+        instance._post_init_configuration() # pylint: disable=protected-access
 
     def _post_init_configuration(self):
+        # pylint: disable=protected-access
         App.get_event_loop().register_signal_handler(InputReceivedSignal,
                                                      self.__instance._input_received_handler)
 
@@ -117,14 +118,15 @@ class InputThreadManager(object):
         self._processing_input = True
         thread_object.start_thread()
 
-    def _print_new_prompt(self, thread_object):
+    @staticmethod
+    def _print_new_prompt(thread_object):
         prompt = thread_object.text_prompt()
 
         # print new prompt
         print(prompt, end="")
 
 
-class InputRequest(object, metaclass=ABCMeta):
+class InputRequest(metaclass=ABCMeta):
     """Base input request class.
 
     This should be overloaded for every InputHandler class. Purpose of this class is to print

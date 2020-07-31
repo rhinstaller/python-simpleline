@@ -393,9 +393,9 @@ class InputErrorTestScreen(UIScreen):
         if self.error_counter == self._error_threshold:
             # let "q" propagate to quit
             return key
-        else:
-            self.error_counter += 1
-            return InputState.DISCARDED
+
+        self.error_counter += 1
+        return InputState.DISCARDED
 
     def show_all(self):
         self.render_counter += 1
@@ -413,8 +413,8 @@ class InputErrorDynamicPromptTestScreen(InputErrorTestScreen):
             self.input_skipped = True
             self.redraw()
             return None
-        else:
-            return super().prompt(args)
+
+        return super().prompt(args)
 
 
 class InputWithNoPrompt(UIScreen):
@@ -515,9 +515,9 @@ class InputStateRedrawScreen(UIScreen):
         if not self._refreshing:
             self._refreshing = True
             return InputState.PROCESSED_AND_REDRAW
-        else:
-            self.refreshed = True
-            return InputState.PROCESSED_AND_CLOSE
+
+        self.refreshed = True
+        return InputState.PROCESSED_AND_CLOSE
 
 
 class ExceptionTestScreen(UIScreen):

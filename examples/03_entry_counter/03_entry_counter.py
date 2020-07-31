@@ -43,11 +43,11 @@ class Hub(UIScreen):
             ScreenHandler.push_screen(self._counter_spoke)
             # this input was processed
             return InputState.PROCESSED
-        else:
-            # return for outer processing
-            # the basic processing is 'c' for continue, 'r' for refresh, 'q' to quit
-            # otherwise the input is discarded and waiting for a new input
-            return key
+
+        # return for outer processing
+        # the basic processing is 'c' for continue, 'r' for refresh, 'q' to quit
+        # otherwise the input is discarded and waiting for a new input
+        return key
 
     def prompt(self, args=None):
         """Add our information to the prompt."""

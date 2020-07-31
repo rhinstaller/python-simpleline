@@ -35,7 +35,8 @@ __all__ = ["MainLoop"]
 class MainLoop(AbstractEventLoop):
     """Default main event loop for the Simpleline.
 
-    This event loop can be replaced by your event loop by implementing `simpleline.event_loop.AbstractEventLoop` class.
+    This event loop can be replaced by your event loop by implementing
+    `simpleline.event_loop.AbstractEventLoop` class.
     """
 
     def __init__(self):
@@ -130,7 +131,8 @@ class MainLoop(AbstractEventLoop):
     def enqueue_signal(self, signal):
         """Enqueue new event for processing.
 
-        Enqueue signal to the most inner queue (nearest to the active queue) where the `signal.source` belongs.
+        Enqueue signal to the most inner queue (nearest to the active queue) where
+        the `signal.source` belongs.
         If it belongs nowhere enqueue it to the active one.
 
         This method is thread safe.
@@ -165,14 +167,14 @@ class MainLoop(AbstractEventLoop):
     def process_signals(self, return_after=None):
         """This method processes incoming async messages.
 
-        Process signals enqueued by the `self.enqueue_signal()` method. Call handlers registered to the signals by
-        the `self.register_signal_handler()` method.
+        Process signals en-queued by the `self.enqueue_signal()` method. Call handlers
+        registered to the signals by the `self.register_signal_handler()` method.
 
         When `return_after` is specified then wait to the point when this signal is processed.
         NO warranty that this method will return immediately after the signal was processed!
 
-        Without `return_after` parameter this method will return after all queued signals with the highest priority
-        will be processed.
+        Without `return_after` parameter this method will return after all queued signals
+        with the highest priority will be processed.
 
         The method is NOT thread safe!
 
@@ -233,7 +235,7 @@ class MainLoop(AbstractEventLoop):
 
         self._mark_signal_processed(signal)
 
-        if type(signal) in self._handlers:
+        if type(signal) in self._handlers: # pylint: disable=unidiomatic-typecheck
             for handler_data in self._handlers[type(signal)]:
                 try:
                     handler_data.callback(signal, handler_data.data)
@@ -241,5 +243,5 @@ class MainLoop(AbstractEventLoop):
                     raise
                 except Exception:  # pylint: disable=broad-except
                     self.enqueue_signal(ExceptionSignal(self))
-        elif type(signal) is ExceptionSignal:
+        elif isinstance(signal, ExceptionSignal):
             self.kill_app_with_traceback(signal)

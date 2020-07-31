@@ -39,8 +39,8 @@ def C_(msgctxt, msgid):
     # If there is no translation for msgctxt<EOT>msgid, return only msgid
     if translation == ctxid:
         return msgid
-    else:
-        return translation
+
+    return translation
 
 # Mark as translatable with context
 CN_ = lambda c, x: x
@@ -57,5 +57,5 @@ def CP_(msgctxt, msgid, msgid_plural, n):
     # return value is correct.
     if translation == ctxid:
         return msgid
-    else:
-        return translation
+
+    return translation

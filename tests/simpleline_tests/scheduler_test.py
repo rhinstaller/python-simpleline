@@ -44,7 +44,7 @@ class Scheduler_TestCase(unittest.TestCase):
 
     def test_create_scheduler(self):
         scheduler = ScreenScheduler(MainLoop())
-        self.assertTrue(type(scheduler._screen_stack) is ScreenStack)
+        self.assertTrue(isinstance(scheduler._screen_stack, ScreenStack)) # pylint: disable=protected-access
 
     def test_scheduler_quit_screen(self):
         def test_callback():
