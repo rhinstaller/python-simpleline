@@ -100,7 +100,6 @@ class InputReceivedSignal(AbstractSignal):
 
 class RenderScreenSignal(AbstractSignal):
     """Render UIScreen to terminal."""
-    pass
 
 
 class CloseScreenSignal(AbstractSignal):

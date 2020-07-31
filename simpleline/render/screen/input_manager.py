@@ -168,7 +168,7 @@ class InputManager(object):
                 return UserInputAction.CLOSE
             elif key == InputState.DISCARDED:
                 return UserInputAction.INPUT_ERROR
-        except ExitMainLoop:
+        except ExitMainLoop: # pylint: disable=try-except-raise
             raise
 
         # global refresh command
