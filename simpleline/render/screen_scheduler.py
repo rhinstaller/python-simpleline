@@ -213,9 +213,13 @@ class ScreenScheduler():
         self._process_screen()
 
     def _process_screen(self):
-        """Draws the current screen and returns True if user input is requested.
+        """Process the current screen.
 
-        If modal screen is requested, starts a new loop and initiates redraw after it ends.
+        1) It will call setup if the screen is not already set.
+        2a) If setup was success then draw the screen.
+        2b) If setup wasn't successful then pop the screen and try to process next in the stack.
+            Continue by (1).
+        3)Ask for user input if requested.
         """
         top_screen = self._get_last_screen()
 
@@ -249,7 +253,7 @@ class ScreenScheduler():
             raise
         except Exception:    # pylint: disable=broad-except
             self._event_loop.enqueue_signal(ExceptionSignal(self))
-            return False
+            return
 
     def _draw_screen(self, active_screen):
         """Draws the current `active_screen`.
