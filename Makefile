@@ -62,7 +62,7 @@ coverage:
 .PHONY: check
 check:
 	@echo "*** Running pylint ***"
-	$(PYTHON) -m pylint simpleline/ examples/*/*.py tests/
+	$(PYTHON) -m pylint simpleline/ examples/*/*.py tests/units/
 
 .PHONY: install
 install:
