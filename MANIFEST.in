@@ -1,4 +1,4 @@
 include LICENSE.md Makefile ChangeLog README.md
 recursive-include simpleline *.py
 recursive-include po *.po *.pot Makefile
-recursive-include tests *.py
+recursive-include tests *.py *.sh
