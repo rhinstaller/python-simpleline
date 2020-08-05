@@ -19,6 +19,7 @@
 #
 
 import unittest
+
 from unittest import mock
 
 from simpleline import App
