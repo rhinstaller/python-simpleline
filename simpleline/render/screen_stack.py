@@ -25,12 +25,10 @@ from simpleline.errors import SimplelineError
 
 class ScreenStackException(SimplelineError):
     """General screen stack exception."""
-    pass
 
 
 class ScreenStackEmptyException(ScreenStackException):
     """Screen stack exception when stack is empty."""
-    pass
 
 
 class ScreenStack(object):

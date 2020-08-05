@@ -39,7 +39,6 @@ QuitCallback = namedtuple("QuitCallback", ["callback", "args"])
 
 class ExitMainLoop(SimplelineError):
     """This exception ends the whole event loop."""
-    pass
 
 
 class AbstractEventLoop(metaclass=ABCMeta):
@@ -83,7 +82,6 @@ class AbstractEventLoop(metaclass=ABCMeta):
         :param signal_source: Source for future signals.
         :type signal_source: `simpleline.render.ui_screen.UIScreen`
         """
-        pass
 
     @abstractmethod
     def enqueue_signal(self, signal):
@@ -146,7 +144,6 @@ class AbstractEventLoop(metaclass=ABCMeta):
         :param return_after: Wait on this signal to be processed.
         :type return_after: Class of the signal.
         """
-        pass
 
     def set_quit_callback(self, callback, args=None):
         """Call this callback when event loop quits.

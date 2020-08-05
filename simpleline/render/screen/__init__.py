@@ -301,7 +301,6 @@ class UIScreen(SignalHandler):
 
     def closed(self):
         """Callback when this screen is closed."""
-        pass
 
 
 class InputState(Enum):
