@@ -40,7 +40,7 @@ RAW_INPUT_LOCK = threading.Lock()
 __all__ = ["ScreenScheduler"]
 
 
-class ScreenScheduler(object):
+class ScreenScheduler():
 
     def __init__(self, event_loop, scheduler_stack=None):
         """Constructor where you can pass your own scheduler stack.
@@ -63,7 +63,8 @@ class ScreenScheduler(object):
 
         self._first_screen_scheduled = False
 
-    def _spacer(self):
+    @staticmethod
+    def _spacer():
         return "\n".join(2 * [App.get_configuration().width * "="])
 
     def _register_handlers(self):
@@ -212,9 +213,13 @@ class ScreenScheduler(object):
         self._process_screen()
 
     def _process_screen(self):
-        """Draws the current screen and returns True if user input is requested.
+        """Process the current screen.
 
-        If modal screen is requested, starts a new loop and initiates redraw after it ends.
+        1) It will call setup if the screen is not already set.
+        2a) If setup was success then draw the screen.
+        2b) If setup wasn't successful then pop the screen and try to process next in the stack.
+            Continue by (1).
+        3)Ask for user input if requested.
         """
         top_screen = self._get_last_screen()
 
@@ -248,7 +253,7 @@ class ScreenScheduler(object):
             raise
         except Exception:    # pylint: disable=broad-except
             self._event_loop.enqueue_signal(ExceptionSignal(self))
-            return False
+            return
 
     def _draw_screen(self, active_screen):
         """Draws the current `active_screen`.
@@ -287,7 +292,8 @@ class ScreenScheduler(object):
         else:
             if input_result == UserInputAction.NOOP:
                 return
-            elif input_result == UserInputAction.REDRAW:
+
+            if input_result == UserInputAction.REDRAW:
                 self.redraw()
             elif input_result == UserInputAction.CLOSE:
                 self.close_screen()
@@ -297,8 +303,8 @@ class ScreenScheduler(object):
                     try:
                         if self.quit_screen.answer is True:
                             raise ExitMainLoop()
-                        else:
-                            self.redraw()
+
+                        self.redraw()
                     except AttributeError:
                         raise ExitMainLoop()
                 else:

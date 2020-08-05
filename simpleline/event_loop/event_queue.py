@@ -36,7 +36,7 @@ class EventQueueError(SimplelineError):
     """
 
 
-class EventQueue(object):
+class EventQueue():
     """Class for managing signal queue.
 
     Responsibilities of this class are:
@@ -68,7 +68,8 @@ class EventQueue(object):
     def enqueue_if_source_belongs(self, signal, source):
         """Enqueue signal to this queue if the signal source belongs to this queue.
 
-        Enqueue the `signal` only if the `source` belongs to this queue. See the `add_source()` method.
+        Enqueue the `signal` only if the `source` belongs to this queue.
+        See the `add_source()` method.
 
         :param signal: Signal which should be enqueued to this queue.
         :type signal: Signal class based on `simpleline.event_loop.signals.AbstractSignal`.
@@ -80,8 +81,8 @@ class EventQueue(object):
         if self.contains_source(source):
             self._queue.put(signal)
             return True
-        else:
-            return False
+
+        return False
 
     def get(self):
         """Return enqueued signal with the highest priority.
@@ -106,9 +107,9 @@ class EventQueue(object):
         event = self._queue.get()
         if event.priority == priority:
             return event
-        else:
-            self._queue.put(event)
-            return None
+
+        self._queue.put(event)
+        return None
 
     def add_source(self, signal_source):
         """Add new source of signals to this queue.

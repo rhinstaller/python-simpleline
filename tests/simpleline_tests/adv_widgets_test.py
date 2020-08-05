@@ -59,7 +59,8 @@ class AdvWidgets_TestCase(unittest.TestCase, UtilityMixin):
 
         self.schedule_screen_and_run(screen)
 
-        expected_output = self.create_output_with_separators(["%s: %s: " % (prompt, prompt)]).rstrip("\n")
+        temp_prompt = ["%s: %s: " % (prompt, prompt)]
+        expected_output = self.create_output_with_separators(temp_prompt).rstrip("\n")
 
         self.assertEqual(expected_output, stdout_mock.getvalue())
         self.assertTrue(self.correct_input)

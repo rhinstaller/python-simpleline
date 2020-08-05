@@ -100,8 +100,11 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.signal_counter = 0
 
         loop = self.loop
-        loop.register_signal_handler(TestSignal, self._handler_signal_counter)
-        loop.register_signal_handler(TestSignal2, self._handler_process_events_then_register_testsignal, loop)
+        loop.register_signal_handler(TestSignal,
+                                     self._handler_signal_counter)
+        loop.register_signal_handler(TestSignal2,
+                                     self._handler_process_events_then_register_testsignal,
+                                     loop)
         loop.enqueue_signal(TestSignal())
         loop.enqueue_signal(TestSignal2())
         loop.process_signals(return_after=TestSignal2)
@@ -114,9 +117,12 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.signal_counter = 0
 
         loop = self.loop
-        loop.register_signal_handler(TestSignal, self._handler_signal_counter)
+        loop.register_signal_handler(TestSignal,
+                                     self._handler_signal_counter)
         # run process signals recursively in this handler which will skip processing
-        loop.register_signal_handler(TestSignal2, self._handler_process_events_then_register_testsignal, loop)
+        loop.register_signal_handler(TestSignal2,
+                                     self._handler_process_events_then_register_testsignal,
+                                     loop)
         loop.enqueue_signal(TestSignal2())
         loop.enqueue_signal(TestSignal())
         # new signal will be registered in handler method but that shouldn't be processed
@@ -147,7 +153,8 @@ class ProcessEvents_TestCase(unittest.TestCase):
         loop.register_signal_handler(TestPrioritySignal, self._handler_signal_counter)
         loop.enqueue_signal(TestSignal())
         loop.enqueue_signal(TestSignal())
-        loop.enqueue_signal(TestPrioritySignal())  # should be processed as first signal because of priority
+        # should be processed as first signal because of priority
+        loop.enqueue_signal(TestPrioritySignal())
         loop.enqueue_signal(TestSignal())
         loop.process_signals()
         self.assertEqual(self.signal_counter, 1)
@@ -204,9 +211,13 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.callback_called = False
 
         loop = self.loop
-        loop.register_signal_handler(TestSignal, self._handler_start_inner_loop_and_enqueue_event, TestSignal3())
-        loop.register_signal_handler(TestSignal2, self._handler_callback)
-        loop.register_signal_handler(TestSignal3, self._handler_force_quit_exception)
+        loop.register_signal_handler(TestSignal,
+                                     self._handler_start_inner_loop_and_enqueue_event,
+                                     TestSignal3())
+        loop.register_signal_handler(TestSignal2,
+                                     self._handler_callback)
+        loop.register_signal_handler(TestSignal3,
+                                     self._handler_force_quit_exception)
         loop.enqueue_signal(TestSignal())
         loop.enqueue_signal(TestSignal2())
         loop.run()
@@ -245,7 +256,8 @@ class ProcessEvents_TestCase(unittest.TestCase):
     def _handler_signal_copy_counter(self, signal, data):
         self.signal_counter_copied = self.signal_counter
 
-    def _handler_process_events_then_register_testsignal(self, signal, data):
+    @staticmethod
+    def _handler_process_events_then_register_testsignal(signal, data):
         event_loop = data
         event_loop.process_signals()
         # This shouldn't be processed
@@ -254,7 +266,8 @@ class ProcessEvents_TestCase(unittest.TestCase):
     def _handler_start_inner_loop_and_enqueue_event(self, signal, data):
         self.loop.execute_new_loop(data)
 
-    def _handler_raise_ExitMainLoop_exception(self, signal, data):
+    @staticmethod
+    def _handler_raise_ExitMainLoop_exception(signal, data):
         raise ExitMainLoop()
 
     def _handler_force_quit_exception(self, signal, data):

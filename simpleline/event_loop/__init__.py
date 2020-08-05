@@ -92,7 +92,9 @@ class AbstractEventLoop(metaclass=ABCMeta):
         :param signal: Signal which you want to add to the event queue for processing.
         :type signal: Instance based on AbstractEvent class.
         """
-        log.debug("New signal %s enqueued with source %s", signal, signal.source.__class__.__name__)
+        log.debug("New signal %s enqueued with source %s",
+                  signal,
+                  signal.source.__class__.__name__)
 
     @abstractmethod
     def run(self):
@@ -132,14 +134,14 @@ class AbstractEventLoop(metaclass=ABCMeta):
     def process_signals(self, return_after=None):
         """This method processes incoming async messages.
 
-        Process signals enqueued by the `self.enqueue_signal()` method. Call handlers registered to the signals by
-        the `self.register_signal_handler()` method.
+        Process signals enqueued by the `self.enqueue_signal()` method. Call handlers
+        registered to the signals by the `self.register_signal_handler()` method.
 
         When `return_after` is specified then wait to the point when this signal is processed.
         NO warranty that this method will return immediately after the signal was processed!
 
-        Without `return_after` parameter this method will return after all queued signals with the highest priority
-        will be processed.
+        Without `return_after` parameter this method will return after all queued signals
+        with the highest priority will be processed.
 
         The method is NOT thread safe!
 
@@ -161,8 +163,8 @@ class AbstractEventLoop(metaclass=ABCMeta):
     def kill_app_with_traceback(self, exception_signal, data=None):
         """Print exception and screen stack and kill the application.
 
-        :param exception_signal: ExceptionSignal encapsulating the original exception which will be passed to
-                                 the sys.excepthook method.
+        :param exception_signal: ExceptionSignal encapsulating the original exception which
+                                 will be passed to the sys.excepthook method.
         :type exception_signal: Instance of `simpleline.event_loop.signals.ExceptionSignal` class.
 
         :param data: To be usable as signal handler.
@@ -171,7 +173,7 @@ class AbstractEventLoop(metaclass=ABCMeta):
         log.debug("Unhandled error in handler raised:")
         sys.excepthook(*exception_signal.exception_info)
 
-        from simpleline import App
+        from simpleline import App # pylint: disable=import-outside-toplevel
         stack_dump = App.get_scheduler().dump_stack()
         print("")
         print(stack_dump)
@@ -180,7 +182,8 @@ class AbstractEventLoop(metaclass=ABCMeta):
         log.debug("Killing application!")
         sys.exit(1)
 
-    def _create_event_handler(self, callback, data):
+    @staticmethod
+    def _create_event_handler(callback, data):
         """Create event handler data object and return it."""
         return EventHandler(callback=callback, data=data)
 
@@ -214,7 +217,7 @@ class AbstractEventLoop(metaclass=ABCMeta):
         return self._processed_signals.check_ticket(wait_on_signal.__name__, unique_id)
 
 
-class EventHandler(object):
+class EventHandler():
     """Data class to save event handlers."""
 
     def __init__(self, callback, data):
@@ -250,7 +253,8 @@ class AbstractSignal(metaclass=ABCMeta):
         """Priority of this event.
 
         Values less than 0 denote higher priorities. Values greater than 0 denote lower priorities.
-        Events from high priority sources are always processed before events from lower priority sources.
+        Events from high priority sources are always processed before events from lower priority
+        sources.
         """
         return self._priority
 

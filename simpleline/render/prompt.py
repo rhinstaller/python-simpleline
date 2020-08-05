@@ -19,14 +19,14 @@
 #
 # Author(s):  Vendula Poncova <vponcova@redhat.com>
 #
+import logging
 
 from simpleline.utils.i18n import C_, N_, _
 
-import logging
 log = logging.getLogger("simpleline")
 
 
-class Prompt(object):
+class Prompt():
     """Class to create a prompt message with options."""
     # Default message of the prompt
     DEFAULT_MESSAGE = N_("Please make a selection from the above")

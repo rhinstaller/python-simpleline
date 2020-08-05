@@ -61,8 +61,8 @@ coverage:
 
 .PHONY: check
 check:
-	@echo "*** Running pocketlint ***"
-	PYTHONPATH=. tests/pylint/runpylint.py
+	@echo "*** Running pylint ***"
+	$(PYTHON) -m pylint simpleline/ examples/*/*.py tests/
 
 .PHONY: install
 install:

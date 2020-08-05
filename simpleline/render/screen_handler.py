@@ -23,7 +23,7 @@
 from simpleline import App
 
 
-class ScreenHandler(object):
+class ScreenHandler():
 
     @classmethod
     def schedule_screen(cls, ui_screen, args=None):

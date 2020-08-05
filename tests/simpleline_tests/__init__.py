@@ -22,9 +22,10 @@ from simpleline import App
 from simpleline.global_configuration import DEFAULT_WIDTH
 
 
-class UtilityMixin(object):
+class UtilityMixin():
 
-    def calculate_separator(self, width=DEFAULT_WIDTH):
+    @staticmethod
+    def calculate_separator(width=DEFAULT_WIDTH):
         separator = "\n".join(2 * [width * "="])
         separator += "\n"  # print adds another newline
         return separator
@@ -37,7 +38,8 @@ class UtilityMixin(object):
 
         return msg
 
-    def schedule_screen_and_run(self, screen):
+    @staticmethod
+    def schedule_screen_and_run(screen):
         App.initialize()
         App.get_scheduler().schedule_screen(screen)
         App.run()

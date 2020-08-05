@@ -29,7 +29,7 @@ from simpleline.errors import NothingScheduledError
 setup_logging()
 
 
-class App(object):
+class App():
     """This is the main class for Simpleline library.
 
     Do not create instance of this class. Use this class as static!
@@ -43,7 +43,7 @@ class App(object):
     """
     __app = None
 
-    class AppPimpl(object):
+    class AppPimpl():
 
         def __init__(self, scheduler, event_loop, configuration):
             self.event_loop = event_loop
@@ -69,9 +69,9 @@ class App(object):
         :type global_configuration: object based on class
                                     `simpleline.global_configuration.GlobalConfiguration`
         """
-        from simpleline.event_loop.main_loop import MainLoop
-        from simpleline.render.screen_scheduler import ScreenScheduler
-        from simpleline.global_configuration import GlobalConfiguration
+        from simpleline.event_loop.main_loop import MainLoop # pylint: disable=import-outside-toplevel
+        from simpleline.render.screen_scheduler import ScreenScheduler # pylint: disable=import-outside-toplevel
+        from simpleline.global_configuration import GlobalConfiguration # pylint: disable=import-outside-toplevel
 
         if event_loop is None:
             event_loop = MainLoop()
@@ -86,7 +86,7 @@ class App(object):
 
     @classmethod
     def _post_init(cls):
-        from simpleline.input.input_threading import InputThreadManager
+        from simpleline.input.input_threading import InputThreadManager # pylint: disable=import-outside-toplevel
         # FIXME: This should be done by more general way not by calling exact class here.
         # Create new instance of InputThreadManager because it needs new event loop
         InputThreadManager.create_new_instance()
@@ -99,8 +99,8 @@ class App(object):
         """
         if cls.__app is None:
             return False
-        else:
-            return True
+
+        return True
 
     @classmethod
     def get_scheduler(cls):

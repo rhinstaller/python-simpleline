@@ -215,7 +215,9 @@ class UIScreen(SignalHandler):
         self.window = WindowContainer(self._title)
 
     def _print_widget(self, widget):
-        """Prints a widget (could be longer than the screen height) with user interaction (when needed).
+        """Prints a widget with user interaction (when needed).
+
+        Could be longer than the screen height.
 
         :param widget: widget to print
         :type widget: Widget instance

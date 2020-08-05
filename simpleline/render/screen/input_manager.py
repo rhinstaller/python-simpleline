@@ -33,7 +33,7 @@ from simpleline.logging import get_simpleline_logger
 log = get_simpleline_logger()
 
 
-class InputManager(object):
+class InputManager():
 
     def __init__(self, ui_screen):
         """Processor for user input.
@@ -118,8 +118,8 @@ class InputManager(object):
         if prompt is None:
             self._input_error_counter = 0
             return False
-        else:
-            return True
+
+        return True
 
     def process_input(self, user_input):
         """Process input from the screens.
@@ -157,16 +157,19 @@ class InputManager(object):
 
         :raises: Anything the Screen can raise in the input processing.
         """
-        from simpleline.render.screen import InputState
+        from simpleline.render.screen import InputState # pylint: disable=import-outside-toplevel
         # delegate the handling to active screen first
         key = self._ui_screen.input(self._input_args, key)
         if key == InputState.PROCESSED:
             return UserInputAction.NOOP
-        elif key == InputState.PROCESSED_AND_REDRAW:
+
+        if key == InputState.PROCESSED_AND_REDRAW:
             return UserInputAction.REDRAW
-        elif key == InputState.PROCESSED_AND_CLOSE:
+
+        if key == InputState.PROCESSED_AND_CLOSE:
             return UserInputAction.CLOSE
-        elif key == InputState.DISCARDED:
+
+        if key == InputState.DISCARDED:
             return UserInputAction.INPUT_ERROR
 
         # global refresh command

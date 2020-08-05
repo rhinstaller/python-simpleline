@@ -36,13 +36,13 @@ def ensure_str(str_or_bytes, keep_none=True):
     """
     if keep_none and str_or_bytes is None:
         return None
-    elif isinstance(str_or_bytes, str):
+    if isinstance(str_or_bytes, str):
         return str_or_bytes
-    elif isinstance(str_or_bytes, bytes):
+    if isinstance(str_or_bytes, bytes):
         return str_or_bytes.decode(sys.getdefaultencoding())
-    else:
-        raise ValueError(
-            "str_or_bytes must be of type 'str' or 'bytes', not '%s'" % type(str_or_bytes))
+
+    raise ValueError(
+        "str_or_bytes must be of type 'str' or 'bytes', not '%s'" % type(str_or_bytes))
 
 
 # Define translations between ASCII uppercase and lowercase for

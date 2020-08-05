@@ -21,7 +21,7 @@
 #
 
 
-class TicketMachine(object):
+class TicketMachine():
     """Hold signals processed by the event loop if someone wait on them.
 
     This is useful when recursive process events will skip required signal.
@@ -58,9 +58,14 @@ class TicketMachine(object):
 
         :param line: Line where you are waiting.
         :type line: Anything.
+
+        :return: True if the ticket was already marked, False otherwise
+        :rtype: bool
         """
         if self._lines[line][unique_id]:
             return self._lines[line].pop(unique_id)
+
+        return False
 
     def mark_line_to_go(self, line):
         """All in the `line` are ready to go.

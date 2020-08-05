@@ -52,11 +52,17 @@ class HelloWorld(UIScreen):
 
         # Checkbox widget
         # Checkbox which can hold 2 states.
-        checkbox_widget = CheckboxWidget(key="o", title="Checkbox title", text="Checkbox text", completed=True)
+        checkbox_widget = CheckboxWidget(key="o",
+                                         title="Checkbox title",
+                                         text="Checkbox text",
+                                         completed=True)
         self.window.add_with_separator(checkbox_widget)
 
         # Checkbox widget unchecked
-        checkbox_widget_unchecked = CheckboxWidget(key="o", title="Checkbox title", text="Unchecked", completed=False)
+        checkbox_widget_unchecked = CheckboxWidget(key="o",
+                                                   title="Checkbox title",
+                                                   text="Unchecked",
+                                                   completed=False)
         self.window.add_with_separator(checkbox_widget_unchecked)
 
 

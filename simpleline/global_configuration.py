@@ -26,7 +26,7 @@ DEFAULT_WIDTH = 80
 DEFAULT_PASSWORD_FUNC = getpass
 
 
-class GlobalConfiguration(object):
+class GlobalConfiguration():
     """Class for global configuration of application defaults.
 
     All stored data are persistent between App.initialize() calls and can be used before this call.

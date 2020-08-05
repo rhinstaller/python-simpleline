@@ -82,8 +82,9 @@ class Hub(UIScreen):
         #
         # widget - Widget we want to render. It will be numbered automatically.
         #          Could be container if needed.
-        # callback - This callback will be called by the ListRowContainer.process_user_input() method
-        #            when a user press the number of this item. Callback will get args passed as 3rd argument.
+        # callback - This callback will be called by the ListRowContainer.process_user_input()
+        #            method when a user press the number of this item. Callback will get args
+        #            passed as 3rd argument.
         # args - Argument for callback.
         self._container.add(widget, self._push_screen_callback, self._name_spoke)
 
@@ -139,16 +140,18 @@ class Hub(UIScreen):
         if self._container.process_user_input(key):
             # Do not process other input if spoke is entered.
             return InputState.PROCESSED
+
         # Block continue ('c') if everything is not set.
-        elif key == Prompt.CONTINUE:
+        if key == Prompt.CONTINUE:
             if self._name_spoke and self._surname_spoke and self._password_spoke.answer:
                 return key
-            else:  # catch 'c' key if not everything set
-                return InputState.DISCARDED
-        else:
-            return key
+            # catch 'c' key if not everything set
+            return InputState.DISCARDED
 
-    def _push_screen_callback(self, target_screen):
+        return key
+
+    @staticmethod
+    def _push_screen_callback(target_screen):
         """Push target screen as new screen.
 
         Target screen is passed in as an argument in the refresh() method.

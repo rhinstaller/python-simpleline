@@ -89,8 +89,8 @@ class EventQueue_TestCase(unittest.TestCase):
         signal = TestSignal()
         signal_low_priority = TestSignal(priority=25)
 
-        # the get method will wait if nothing present so adding low priority signal below give us check if the queue
-        # is really empty
+        # the get method will wait if nothing present so adding low priority signal below
+        # give us check if the queue is really empty
         self.e.enqueue(signal_low_priority)
 
         self.assertFalse(self.e.enqueue_if_source_belongs(signal, MagicMock()))

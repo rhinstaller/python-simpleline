@@ -32,7 +32,7 @@ class ScreenStackEmptyException(ScreenStackException):
     """Screen stack exception when stack is empty."""
 
 
-class ScreenStack(object):
+class ScreenStack():
     """Managing screen stack used in `ScreenScheduler`."""
 
     def __init__(self):
@@ -70,8 +70,8 @@ class ScreenStack(object):
         try:
             if remove:
                 return self._screens.pop()
-            else:
-                return self._screens[-1]
+
+            return self._screens[-1]
         except IndexError as e:
             raise ScreenStackEmptyException(e)
 
@@ -101,7 +101,7 @@ class ScreenStack(object):
         return msg
 
 
-class ScreenData(object):
+class ScreenData():
     """Inner data class to store screen data."""
 
     def __init__(self, ui_screen, args=None, execute_new_loop=False):
