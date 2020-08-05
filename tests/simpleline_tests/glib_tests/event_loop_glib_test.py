@@ -17,8 +17,8 @@
 # Red Hat, Inc.
 #
 
-from tests.simpleline_tests.event_loop_test import ProcessEvents_TestCase
-from tests.simpleline_tests.glib_tests import GLibUtilityMixin
+from . import GLibUtilityMixin
+from ..event_loop_test import ProcessEvents_TestCase
 
 
 class GLibProcessEvents_TestCase(ProcessEvents_TestCase, GLibUtilityMixin):

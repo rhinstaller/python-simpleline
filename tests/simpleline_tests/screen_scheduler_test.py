@@ -23,7 +23,7 @@ from unittest import mock
 
 from simpleline.render.screen import UIScreen
 from simpleline.render.screen_handler import ScreenHandler
-from tests.simpleline_tests import UtilityMixin
+from . import UtilityMixin
 
 
 @mock.patch('sys.stdout', new_callable=StringIO)

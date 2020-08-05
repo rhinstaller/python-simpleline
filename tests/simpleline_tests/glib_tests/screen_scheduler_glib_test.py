@@ -18,8 +18,8 @@
 #
 
 
-from tests.simpleline_tests.glib_tests import GLibUtilityMixin
-from tests.simpleline_tests.screen_scheduler_test import ScreenScheduler_TestCase
+from . import GLibUtilityMixin
+from ..screen_scheduler_test import ScreenScheduler_TestCase
 
 
 class GLibScreenScheduler_TestCase(ScreenScheduler_TestCase, GLibUtilityMixin):
