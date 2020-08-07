@@ -19,8 +19,8 @@
 #
 
 
-from tests.simpleline_tests.glib_tests import GLibUtilityMixin
-from tests.simpleline_tests.render_screen_test import SimpleUIScreenProcessing_TestCase, \
+from . import GLibUtilityMixin
+from ..main.render_screen_test import SimpleUIScreenProcessing_TestCase, \
     InputProcessing_TestCase, ScreenException_TestCase
 
 

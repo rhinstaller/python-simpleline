@@ -51,18 +51,18 @@ clean:
 .PHONY: test
 test:
 	@echo "*** Running unittests ***"
-	PYTHONPATH=. $(PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
+	./tests/units/run_test.sh
 
 .PHONY: coverage
 coverage:
 	@echo "*** Running unittests with coverage ***"
-	PYTHONPATH=. $(COVERAGE) run --branch -m unittest discover -v -s tests/ -p '*_test.py'
+	PYTHON="$(COVERAGE) run --branch" ./tests/units/run_test.sh
 	$(COVERAGE) report -m --include="simpleline/*" | tee tests/coverage-report.log
 
 .PHONY: check
 check:
 	@echo "*** Running pylint ***"
-	$(PYTHON) -m pylint simpleline/ examples/*/*.py tests/
+	$(PYTHON) -m pylint simpleline/ examples/*/*.py tests/units/
 
 .PHONY: install
 install:

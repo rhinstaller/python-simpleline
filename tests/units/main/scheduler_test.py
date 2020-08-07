@@ -21,6 +21,7 @@
 #
 
 import unittest
+
 from unittest import mock
 
 from simpleline.event_loop.main_loop import MainLoop

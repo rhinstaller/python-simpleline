@@ -20,7 +20,9 @@
 
 
 import unittest
+
 from unittest.mock import MagicMock
+
 from simpleline.event_loop.event_queue import EventQueue, EventQueueError
 from simpleline.event_loop.signals import AbstractSignal
 

@@ -19,6 +19,7 @@
 #
 
 import unittest
+
 from io import StringIO
 from unittest.mock import patch
 
@@ -27,7 +28,8 @@ from simpleline.render.containers import WindowContainer, ListRowContainer, List
     KeyPattern
 from simpleline.render.screen import UIScreen, InputState
 from simpleline.render.widgets import TextWidget
-from tests.simpleline_tests.widgets_test import BaseWidgets_TestCase
+
+from .widgets_test import BaseWidgets_TestCase
 
 
 class Containers_TestCase(BaseWidgets_TestCase):

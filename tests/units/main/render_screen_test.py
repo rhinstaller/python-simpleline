@@ -26,7 +26,8 @@ from unittest import mock
 from simpleline import App
 from simpleline.render import RenderUnexpectedError
 from simpleline.render.screen import UIScreen, InputState
-from tests.simpleline_tests import UtilityMixin
+
+from .. import UtilityMixin
 
 
 def _fake_input(queue_instance, prompt):
