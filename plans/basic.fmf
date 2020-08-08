@@ -1,0 +1,8 @@
+summary: Run unit tests
+discover:
+    how: fmf
+provision:
+    how: container
+    image: fedora:latest
+execute:
+    how: shell
