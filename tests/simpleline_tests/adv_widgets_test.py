@@ -22,7 +22,7 @@ from unittest.mock import patch
 
 from io import StringIO
 
-from tests.simpleline_tests import UtilityMixin
+from . import UtilityMixin
 
 from simpleline.render.adv_widgets import GetInputScreen, GetPasswordInputScreen
 

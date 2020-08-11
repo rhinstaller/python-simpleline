@@ -29,7 +29,7 @@ clean:
 
 test:
 	@echo "*** Running unittests ***"
-	PYTHONPATH=. $(PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
+	$(PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 
 check:
 	@echo "*** Running pocketlint ***"
