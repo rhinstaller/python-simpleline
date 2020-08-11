@@ -1,0 +1,8 @@
+/basic:
+    summary+: ' (localhost)'
+    discover+:
+        filter: tag:local
+    prepare:
+        how: install
+        package:
+            - python3-gobject-base

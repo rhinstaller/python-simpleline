@@ -2,5 +2,15 @@ summary: Run unit tests
 description: Run all unit tests for the Simpleline project.
 contact: Jiri Konecny <jkonecny@redhat.com>
 duration: 10m
-path: tests/
-test: ./units/run_test.sh
+
+/source:
+    summary+: ' (source)'
+    path: /
+    test: ./tests/units/run_test.sh
+    tag: local
+
+/system:
+    summary+: ' (system)'
+    path: tests/
+    test: ./units/run_test.sh
+    tag: sys-installed
