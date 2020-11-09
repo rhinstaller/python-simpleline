@@ -73,7 +73,7 @@ class ScreenStack():
 
             return self._screens[-1]
         except IndexError as e:
-            raise ScreenStackEmptyException(e)
+            raise ScreenStackEmptyException(e) from e
 
     def add_first(self, screen):
         """Add `screen` to the bottom of the stack.

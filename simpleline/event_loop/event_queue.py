@@ -136,8 +136,8 @@ class EventQueue():
             # pylint: disable=not-context-manager
             with self._lock:
                 self._contained_screens.remove(signal_source)
-        except KeyError:
-            raise EventQueueError("Can't remove non-existing event source!")
+        except KeyError as e:
+            raise EventQueueError("Can't remove non-existing event source!") from e
 
     def contains_source(self, signal_source):
         """Test if `signal_source` belongs to this queue.
