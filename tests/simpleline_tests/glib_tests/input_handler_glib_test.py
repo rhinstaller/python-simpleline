@@ -19,8 +19,8 @@
 #
 
 
-from . import GLibUtilityMixin
-from ..main.input_handler_test import InputHandler_TestCase
+from tests.simpleline_tests.input_handler_test import InputHandler_TestCase
+from tests.simpleline_tests.glib_tests import GLibUtilityMixin
 
 
 class GLibInputHandler_TestCase(InputHandler_TestCase, GLibUtilityMixin):

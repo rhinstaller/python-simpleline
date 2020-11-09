@@ -18,8 +18,8 @@
 # along with Simpleline.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from . import GLibUtilityMixin
-from ..main.event_loop_test import ProcessEvents_TestCase
+from tests.simpleline_tests.event_loop_test import ProcessEvents_TestCase
+from tests.simpleline_tests.glib_tests import GLibUtilityMixin
 
 
 class GLibProcessEvents_TestCase(ProcessEvents_TestCase, GLibUtilityMixin):

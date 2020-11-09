@@ -20,7 +20,6 @@
 
 
 import unittest
-
 from unittest.mock import patch, MagicMock
 
 from simpleline import App

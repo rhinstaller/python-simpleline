@@ -19,13 +19,13 @@
 #
 
 import unittest
-
 from unittest.mock import patch
+
 from io import StringIO
 
-from simpleline.render.adv_widgets import GetInputScreen, GetPasswordInputScreen
+from tests.simpleline_tests import UtilityMixin
 
-from .. import UtilityMixin
+from simpleline.render.adv_widgets import GetInputScreen, GetPasswordInputScreen
 
 
 @patch('simpleline.input.input_handler.InputHandlerRequest._get_input')

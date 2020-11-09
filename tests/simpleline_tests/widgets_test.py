@@ -18,8 +18,8 @@
 # along with Simpleline.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import unittest
 
+import unittest
 from io import StringIO
 from unittest.mock import patch
 
