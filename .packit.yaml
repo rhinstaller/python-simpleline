@@ -2,8 +2,6 @@ specfile_path: python-simpleline.spec
 upstream_package_name: simpleline
 upstream_tag_template: simpleline-{version}
 actions:
-  get-current-version:
-    - "python3 ./setup.py --version"
   create-archive:
     - "make BUILD_ARGS=sdist archive"
     - 'bash -c "cp dist/*.tar.gz ."'
