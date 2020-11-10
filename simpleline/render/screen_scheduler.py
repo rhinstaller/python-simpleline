@@ -131,9 +131,9 @@ class ScreenScheduler():
         log.debug("Replacing screen %s", ui_screen)
         try:
             execute_new_loop = self._screen_stack.pop().execute_new_loop
-        except ScreenStackEmptyException:  # pylint: disable=try-except-raise
+        except ScreenStackEmptyException as e:
             raise ScreenStackEmptyException("Switch screen is not possible when there is no "
-                                            "screen scheduled!")
+                                            "screen scheduled!") from e
 
         # we have to keep the old_loop value so we stop
         # dialog's mainloop if it ever uses switch_screen
@@ -305,7 +305,7 @@ class ScreenScheduler():
                             raise ExitMainLoop()
 
                         self.redraw()
-                    except AttributeError:
-                        raise ExitMainLoop()
+                    except AttributeError as e:
+                        raise ExitMainLoop() from e
                 else:
                     raise ExitMainLoop()

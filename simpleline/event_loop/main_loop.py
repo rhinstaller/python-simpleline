@@ -124,7 +124,7 @@ class MainLoop(AbstractEventLoop):
                 self._active_queue = self._event_queues[-1]
             except IndexError:
                 log.error("No more event queues to work with!")
-                raise ExitMainLoop()
+                raise ExitMainLoop()  # pylint: disable=raise-missing-from
 
         self._run_loop = False
 
