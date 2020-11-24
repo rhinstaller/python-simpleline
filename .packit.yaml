@@ -17,3 +17,9 @@ jobs:
     metadata:
       targets:
         - fedora-all
+
+  - job: copr_build
+    trigger: pull_request
+    metadata:
+      targets:
+        - fedora-eln
