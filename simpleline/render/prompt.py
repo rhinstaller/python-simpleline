@@ -21,7 +21,7 @@
 #
 import logging
 
-from simpleline.utils.i18n import C_, N_, _
+from simpleline.utils.i18n import N_, _
 
 log = logging.getLogger("simpleline")
 
@@ -35,20 +35,20 @@ class Prompt():
     ENTER = N_("ENTER")
 
     # TRANSLATORS: 'q' to quit
-    QUIT = C_('TUI|Spoke Navigation', 'q')
     QUIT_DESCRIPTION = N_("to quit")
+    QUIT = 'q'
 
     # TRANSLATORS:'c' to continue
-    CONTINUE = C_('TUI|Spoke Navigation', 'c')
     CONTINUE_DESCRIPTION = N_("to continue")
+    CONTINUE = 'c'
 
     # TRANSLATORS:'r' to refresh
-    REFRESH = C_('TUI|Spoke Navigation', 'r')
     REFRESH_DESCRIPTION = N_("to refresh")
+    REFRESH = 'r'
 
     # TRANSLATORS:'h' to help
-    HELP = C_('TUI|Spoke Navigation', 'h')
     HELP_DESCRIPTION = N_("to help")
+    HELP = 'h'
 
     def __init__(self, message=DEFAULT_MESSAGE):
         """
