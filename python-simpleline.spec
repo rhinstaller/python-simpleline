@@ -12,6 +12,7 @@ Source0: https://github.com/rhinstaller/python-%{srcname}/releases/download/%{sr
 
 License: LGPLv3+
 BuildArch: noarch
+BuildRequires: make
 BuildRequires: python3-devel
 BuildRequires: gettext
 BuildRequires: python3-setuptools
