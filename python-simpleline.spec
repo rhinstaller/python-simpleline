@@ -3,7 +3,7 @@
 Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
-Version: 1.7
+Version: 1.8
 Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
@@ -60,6 +60,33 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Mon Feb 22 2021 Jiri Konecny <jkonecny@redhat.com> - 1.8-1
+- Add missing make command to spec file (jkonecny)
+- Don't translate the prompt keys (vponcova)
+- Enable daily build for Anaconda-devel COPR repository (jkonecny)
+- Use Fedora container registry instead of Dockerhub (jkonecny)
+- Migrate COPR daily COPR builds to Packit (jkonecny)
+- Test build on Fedora ELN (jkonecny)
+- Remove packit get-current-action (jkonecny)
+- Run tests in GitHub workflow (martin)
+- Fix raise-missing-from (W0707) pylint warnings (martin)
+- Fix pylint to check test code correctly (jkonecny)
+- Use script to run unit tests (jkonecny)
+- Use relative imports in tests (jkonecny)
+- Change directory structure of unit tests (jkonecny)
+- Fix documentation of _process_screen method (jkonecny)
+- Fix pylint issues (jkonecny)
+- Use pylint instead of pocketlint (jkonecny)
+- Add coverage support (jkonecny)
+- Make link to exmples directory in Readme (jkonecny)
+- Fix homepage of the project in setup.py (jkonecny)
+- Fix classifiers in setup.py (jkonecny)
+- Add pypi-upload to Makefile (jkonecny)
+- Use correct variant of the field (jkonecny)
+- Propose Fedora update only to Fedora in development (jkonecny)
+- Add upstream tag template to packit for releasing (jkonecny)
+- Packit will download archive from Source0 if needed (jkonecny)
+
 * Thu Jun 25 2020 Jiri Konecny <jkonecny@redhat.com> - 1.7-1
 - Testing farm seems like a better option (jkonecny)
 - Fix upstream package name (jkonecny)
