@@ -54,25 +54,18 @@ class MainLoop(AbstractEventLoop):
         super().register_signal_source(signal_source)
         self._active_queue.add_source(signal_source)
 
-    def run(self):
+    def _run(self):
         """This methods starts the application.
 
         Do not use self.mainloop() directly as run() handles all the required exceptions
         needed to keep nested mainloop working.
         """
-        super().run()
         self._run_loop = True
 
         try:
             self._mainloop()
         except ExitMainLoop:
             pass
-
-        log.debug("Main loop ended. Running callback if set.")
-
-        if self._quit_callback:
-            cb = self._quit_callback.callback
-            cb(self._quit_callback.args)
 
     def force_quit(self):
         """Force quit all running event loops.

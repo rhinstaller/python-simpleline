@@ -133,18 +133,12 @@ class GLibEventLoop(AbstractEventLoop):
         for loop_data in reversed(self._event_loops):
             loop_data.loop.quit()
 
-    def run(self):
+    def _run(self):
         """Starts the event loop."""
-        super().run()
         if len(self._event_loops) != 1:
             raise ValueError("Can't run event loop multiple times.")
 
         self._event_loops[0].loop.run()
-        log.debug("Main loop ended. Running callback if set.")
-
-        if self._quit_callback:
-            cb = self._quit_callback.callback
-            cb(self._quit_callback.args)
 
     def force_quit(self):
         """Force quit all running event loops.
