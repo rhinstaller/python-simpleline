@@ -96,11 +96,28 @@ class AbstractEventLoop(metaclass=ABCMeta):
                   signal,
                   signal.source.__class__.__name__)
 
-    @abstractmethod
     def run(self):
         """Starts the event loop."""
         log.debug("Starting main loop")
         self._force_quit = False
+
+        # Start a loop specific code.
+        self._run()
+
+        log.debug("Main loop ended. Running callback if set.")
+
+        if self._quit_callback:
+            cb = self._quit_callback.callback
+            cb(self._quit_callback.args)
+
+    @abstractmethod
+    def _run(self):
+        """Internal implementation of run method.
+
+        Event loop specific implementation goes here.
+        Exit callbacks are not processed here but by the `run` method.
+        """
+        pass
 
     def force_quit(self):
         """Force quit all running event loops.
