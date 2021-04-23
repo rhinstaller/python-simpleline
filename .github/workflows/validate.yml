@@ -2,7 +2,7 @@ name: validate
 on: [push, pull_request]
 jobs:
   rawhide:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, kstest]
     container:
       image: registry.fedoraproject.org/fedora:rawhide
     steps:
