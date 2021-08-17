@@ -3,14 +3,12 @@ on: [push, pull_request]
 jobs:
   rawhide:
     runs-on: ubuntu-latest
-    container:
-      image: registry.fedoraproject.org/fedora:rawhide
     steps:
       - name: Clone repository
         uses: actions/checkout@v2
 
-      - name: install test dependencies
-        run: dnf install -y python3-pylint python3-gobject-base make
-
-      - name: run tests
-        run: make ci
+      - name: Run test
+        run: |
+          podman run --rm -v .:/simpleline:Z --workdir /simpleline registry.fedoraproject.org/fedora:rawhide sh -c " \
+              dnf install -y python3-pylint python3-gobject-base make; \
+              make ci"
