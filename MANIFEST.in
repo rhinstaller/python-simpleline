@@ -1,4 +1,11 @@
+# Documentation
 include LICENSE.md Makefile ChangeLog README.md
+
+# Sources
 recursive-include simpleline *.py
+
+# Localization
 recursive-include po *.po *.pot Makefile
+
+# Tests
 recursive-include tests *.py *.sh
