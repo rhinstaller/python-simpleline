@@ -19,7 +19,7 @@ PKGNAME=simpleline
 SPECNAME=python-$(PKGNAME)
 VERSION=$(shell awk '/Version:/ { print $$2 }' $(SPECNAME).spec)
 RELEASE=$(shell awk '/Release:/ { print $$2 }' $(SPECNAME).spec | sed -e 's|%.*$$||g')
-TAG=$(PKGNAME)-$(VERSION)
+TAG=$(VERSION)
 
 PYTHON?=python3
 COVERAGE?=coverage3
