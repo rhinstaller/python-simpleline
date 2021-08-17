@@ -9,3 +9,6 @@ recursive-include po *.po *.pot Makefile
 
 # Tests
 recursive-include tests *.py *.sh
+
+# Docs
+recursive-include docs *
