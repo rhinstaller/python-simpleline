@@ -3,7 +3,7 @@
 Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
-Version: 1.8
+Version: 1.8.1
 Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
@@ -60,6 +60,9 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Mon Aug 23 2021 Jiri Konecny <jkonecny@redhat.com> - 1.8.1-1
+
+
 * Mon Feb 22 2021 Jiri Konecny <jkonecny@redhat.com> - 1.8-1
 - Add missing make command to spec file (jkonecny)
 - Don't translate the prompt keys (vponcova)
