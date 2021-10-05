@@ -89,6 +89,14 @@ class UIScreen(SignalHandler):
         self._title = title
 
     @property
+    def input_manager(self):
+        """Get input manager.
+
+        The input manager could be used to tweak input settings.
+        """
+        return self._input_manager
+
+    @property
     def password_func(self):
         """Get password function.
 
