@@ -145,7 +145,7 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase, UtilityMixin):
 
     def test_screen_title_rendering(self, stdout_mock):
         screen = NoInputScreen()
-        screen.title = u"TestTitle"
+        screen.title = "TestTitle"
 
         self.schedule_screen_and_run(screen)
 

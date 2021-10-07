@@ -235,7 +235,7 @@ class UIScreen(SignalHandler):
 
         if num_lines < real_screen_height:
             # widget plus prompt are shorter than screen height, just print the widget
-            print(u"\n".join(lines))
+            print("\n".join(lines))
             return
 
         # long widget, print it in steps and prompt user to continue

@@ -41,7 +41,7 @@ from simpleline.render.widgets import TextWidget
 class HelloWorld(UIScreen):
 
     def __init__(self):
-        super().__init__(title=u"Hello World with GLib")
+        super().__init__(title="Hello World with GLib")
 
     def refresh(self, args=None):
         super().refresh()

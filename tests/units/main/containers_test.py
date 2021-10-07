@@ -45,8 +45,8 @@ class Containers_TestCase(BaseWidgets_TestCase):
                              numbering=False)
         c.render(25)
 
-        expected_result = [u"Test        Test 2",
-                           u"Test 3"]
+        expected_result = ["Test        Test 2",
+                           "Test 3"]
         res_lines = c.get_lines()
 
         self.evaluate_result(res_lines, expected_result)
@@ -63,7 +63,7 @@ class Containers_TestCase(BaseWidgets_TestCase):
         c = ListRowContainer(columns=3, items=[self.w1], columns_width=40, numbering=False)
         c.render(80)
 
-        expected_result = [u"Můj krásný dlouhý text"]
+        expected_result = ["Můj krásný dlouhý text"]
 
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
@@ -76,10 +76,10 @@ class Containers_TestCase(BaseWidgets_TestCase):
                              numbering=False)
         c.render(25)
 
-        expected_result = [u"Můj krásný        Test",
-                           u"dlouhý text",
-                           u"Test 2            Krásný dlouhý",
-                           u"                  text podruhé"]
+        expected_result = ["Můj krásný        Test",
+                           "dlouhý text",
+                           "Test 2            Krásný dlouhý",
+                           "                  text podruhé"]
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
 
@@ -90,10 +90,10 @@ class Containers_TestCase(BaseWidgets_TestCase):
         c = ListRowContainer(3, widgets, columns_width=6, spacing=1, numbering=False)
         c.render(80)
 
-        expected_result = [u"Hello  Wrap   Hi",
-                           u"       this",
-                           u"       text",
-                           u"Hello2"]
+        expected_result = ["Hello  Wrap   Hi",
+                           "       this",
+                           "       text",
+                           "Hello2"]
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
 
@@ -105,8 +105,8 @@ class Containers_TestCase(BaseWidgets_TestCase):
                                 numbering=False)
         c.render(25)
 
-        expected_result = [u"Test        Test 3",
-                           u"Test 2"]
+        expected_result = ["Test        Test 3",
+                           "Test 2"]
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
 
@@ -118,10 +118,10 @@ class Containers_TestCase(BaseWidgets_TestCase):
                                 numbering=False)
         c.render(25)
 
-        expected_result = [u"Můj krásný        Test 2",
-                           u"dlouhý text",
-                           u"Test              Krásný dlouhý",
-                           u"                  text podruhé"]
+        expected_result = ["Můj krásný        Test 2",
+                           "dlouhý text",
+                           "Test              Krásný dlouhý",
+                           "                  text podruhé"]
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
 
@@ -132,7 +132,7 @@ class Containers_TestCase(BaseWidgets_TestCase):
                              spacing=0,
                              numbering=False)
 
-        expected_result = [u"Ahoj"]
+        expected_result = ["Ahoj"]
 
         c.render(80)
         self.evaluate_result(c.get_lines(), expected_result)
@@ -140,8 +140,8 @@ class Containers_TestCase(BaseWidgets_TestCase):
         c.add(TextWidget("Nový widget"))
         c.add(TextWidget("Hello"))
 
-        expected_result = [u"Ahoj           Nový widget",
-                           u"Hello"]
+        expected_result = ["Ahoj           Nový widget",
+                           "Hello"]
 
         c.render(80)
         self.evaluate_result(c.get_lines(), expected_result)
@@ -151,10 +151,10 @@ class Containers_TestCase(BaseWidgets_TestCase):
         c = ListColumnContainer(2, [self.w1, self.w2, self.w3, self.w4], columns_width=16)
         c.render(25)
 
-        expected_result = [u"1) Můj krásný      3) Test 2",
-                           u"   dlouhý text",
-                           u"2) Test            4) Krásný dlouhý",
-                           u"                      text podruhé"]
+        expected_result = ["1) Můj krásný      3) Test 2",
+                           "   dlouhý text",
+                           "2) Test            4) Krásný dlouhý",
+                           "                      text podruhé"]
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
 
@@ -163,10 +163,10 @@ class Containers_TestCase(BaseWidgets_TestCase):
         c = ListRowContainer(2, [self.w1, self.w2, self.w3, self.w4], columns_width=16)
         c.render(25)
 
-        expected_result = [u"1) Můj krásný      2) Test",
-                           u"   dlouhý text",
-                           u"3) Test 2          4) Krásný dlouhý",
-                           u"                      text podruhé"]
+        expected_result = ["1) Můj krásný      2) Test",
+                           "   dlouhý text",
+                           "3) Test 2          4) Krásný dlouhý",
+                           "                      text podruhé"]
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
 
@@ -176,10 +176,10 @@ class Containers_TestCase(BaseWidgets_TestCase):
         c.key_pattern = KeyPattern("a {:d} a ")
         c.render(25)
 
-        expected_result = [u"a 1 a Můj krásný       a 2 a Test",
-                           u"      dlouhý text",
-                           u"a 3 a Test 2           a 4 a Krásný dlouhý",
-                           u"                             text podruhé"]
+        expected_result = ["a 1 a Můj krásný       a 2 a Test",
+                           "      dlouhý text",
+                           "a 3 a Test 2           a 4 a Krásný dlouhý",
+                           "                             text podruhé"]
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
 
@@ -189,9 +189,9 @@ class Containers_TestCase(BaseWidgets_TestCase):
         c.add(TextWidget("Body"))
         c.render(10)
 
-        expected_result = [u"Test",
-                           u"",
-                           u"Body"]
+        expected_result = ["Test",
+                           "",
+                           "Body"]
 
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
@@ -203,10 +203,10 @@ class Containers_TestCase(BaseWidgets_TestCase):
         c.add(TextWidget("Body second line"))
         c.render(30)
 
-        expected_result = [u"Test",
-                           u"",
-                           u"Body",
-                           u"Body second line"]
+        expected_result = ["Test",
+                           "",
+                           "Body",
+                           "Body second line"]
 
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
@@ -218,12 +218,12 @@ class Containers_TestCase(BaseWidgets_TestCase):
         c.add(TextWidget("Body"))
         c.render(5)
 
-        expected_result = [u"Test",
-                           u"",
-                           u"Body",
-                           u"long",
-                           u"line",
-                           u"Body"]
+        expected_result = ["Test",
+                           "",
+                           "Body",
+                           "long",
+                           "line",
+                           "Body"]
 
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
@@ -243,9 +243,9 @@ class Containers_TestCase(BaseWidgets_TestCase):
         render_width = (column_count * expected_col_width) + expected_spacing_sum
         c.render(render_width)
 
-        expected_result = [u"AAAA   BBBB   CCCC",
-                           u"              C",
-                           u"DDDD"]
+        expected_result = ["AAAA   BBBB   CCCC",
+                           "              C",
+                           "DDDD"]
 
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)

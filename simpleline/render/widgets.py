@@ -84,7 +84,7 @@ class Widget():
         :return: lines representing this widget
         :rtype: list(str)
         """
-        return [str(u"".join(line)) for line in self._buffer]
+        return [str("".join(line)) for line in self._buffer]
 
     def set_cursor_position(self, row, col):
         """Set cursor position.
@@ -138,7 +138,7 @@ class Widget():
             l_len = len(self._buffer[l])
             w_len = len(w.content[l - row])
             if l_len < col + w_len:
-                self._buffer[l] += ((col + w_len - l_len) * list(u" "))
+                self._buffer[l] += ((col + w_len - l_len) * list(" "))
             self._buffer[l][col:col + w_len] = w.content[l - row][:]
 
         # move the cursor to new spot
@@ -224,7 +224,7 @@ class Widget():
 
     def _increase_y_buffer_size(self, x, y):
         if y >= len(self._buffer[x]):
-            self._buffer[x] += ((y - len(self._buffer[x]) + 1) * list(u" "))
+            self._buffer[x] += ((y - len(self._buffer[x]) + 1) * list(" "))
 
     def _save_character_to_buffer(self, x, y, character):
         self._buffer[x][y] = character
@@ -343,7 +343,7 @@ class SeparatorWidget(Widget):
         """
         for i in range(0, self._lines):
             self._buffer.append(list())
-            self._buffer[i] += u""
+            self._buffer[i] += ""
         self.set_cursor_position(self._lines - 1, 0)
 
 
