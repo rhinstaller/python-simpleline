@@ -41,14 +41,14 @@ class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
         App.initialize()
 
     def test_separator(self, stdout_mock):
-        ui_screen = EmptyScreen()
+        ui_screen = EmptyScreenMock()
 
         self.schedule_screen_and_run(ui_screen)
 
         self.assertEqual(self.calculate_separator(), stdout_mock.getvalue())
 
     def test_other_width_separator(self, stdout_mock):
-        ui_screen = EmptyScreen()
+        ui_screen = EmptyScreenMock()
         width = 60
 
         App.get_configuration().width = width
@@ -58,7 +58,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
         self.assertEqual(self.calculate_separator(width), stdout_mock.getvalue())
 
     def test_zero_width_no_separator(self, stdout_mock):
-        ui_screen = EmptyScreen()
+        ui_screen = EmptyScreenMock()
         width = 0
 
         App.get_configuration().width = width
@@ -68,7 +68,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
         self.assertEqual("\n\n", stdout_mock.getvalue())
 
     def test_no_separator_when_screen_setup_fails(self, stdout_mock):
-        ui_screen = TestScreenSetupFail()
+        ui_screen = ScreenSetupFailMock()
 
         App.initialize()
         App.get_scheduler().schedule_screen(ui_screen)
@@ -78,7 +78,7 @@ class SeparatorPrinting_TestCase(unittest.TestCase, UtilityMixin):
 
     def test_no_separator(self, stdout_mock):
         print_text = "testing"
-        screen = NoSeparatorScreen(print_text)
+        screen = NoSeparatorScreenMock(print_text)
 
         self.schedule_screen_and_run(screen)
         self.schedule_screen_and_run(screen)
@@ -106,7 +106,7 @@ class SimpleUIScreenFeatures_TestCase(unittest.TestCase):
             App.get_scheduler().close_screen(closed_from=mock.MagicMock())
 
     def test_failed_screen_setup(self):
-        screen = FailedSetupScreen()
+        screen = FailedSetupScreenMock()
 
         App.initialize()
         App.get_scheduler().schedule_screen(screen)
@@ -120,7 +120,7 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase, UtilityMixin):
         self._default_separator = self.calculate_separator(80)
 
     def test_screen_event_loop_processing(self, _):
-        ui_screen = EmptyScreen()
+        ui_screen = EmptyScreenMock()
 
         self.schedule_screen_and_run(ui_screen)
 
@@ -132,8 +132,8 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase, UtilityMixin):
         loop.process_signals()
 
     def test_screen_event_loop_processing_with_two_screens(self, _):
-        first_screen = EmptyScreen()
-        screen = EmptyScreen()
+        first_screen = EmptyScreenMock()
+        screen = EmptyScreenMock()
 
         App.initialize()
         App.get_scheduler().schedule_screen(first_screen)
@@ -144,7 +144,7 @@ class SimpleUIScreenProcessing_TestCase(unittest.TestCase, UtilityMixin):
         self.assertTrue(screen)
 
     def test_screen_title_rendering(self, stdout_mock):
-        screen = NoInputScreen()
+        screen = NoInputScreenMock()
         screen.title = "TestTitle"
 
         self.schedule_screen_and_run(screen)
@@ -168,14 +168,14 @@ class ScreenException_TestCase(unittest.TestCase, UtilityMixin):
         loop.force_quit()
 
     def test_raise_exception_in_refresh(self, mock_kill_app, _):
-        screen = ExceptionTestScreen(ExceptionTestScreen.REFRESH)
+        screen = ExceptionTestScreenMock(ExceptionTestScreenMock.REFRESH)
         mock_kill_app.side_effect = self.force_quit_mock
 
         self.schedule_screen_and_run(screen)
         self.assertTrue(self._force_quit_called)
 
     def test_raise_exception_in_rendering(self, mock_kill_app, _):
-        screen = ExceptionTestScreen(ExceptionTestScreen.REDRAW)
+        screen = ExceptionTestScreenMock(ExceptionTestScreenMock.REDRAW)
         mock_kill_app.side_effect = self.force_quit_mock
 
         self.schedule_screen_and_run(screen)
@@ -191,7 +191,7 @@ class InputProcessing_TestCase(unittest.TestCase):
 
     def test_basic_input(self, input_mock, mock_stdout):
         input_mock.return_value = "a"
-        screen = InputScreen()
+        screen = InputScreenMock()
 
         App.get_scheduler().schedule_screen(screen)
         App.run()
@@ -200,7 +200,7 @@ class InputProcessing_TestCase(unittest.TestCase):
 
     def test_process_input_and_redraw(self, input_mock, mock_stdout):
         input_mock.return_value = "a"
-        screen = InputStateRedrawScreen()
+        screen = InputStateRedrawScreenMock()
 
         App.get_scheduler().schedule_screen(screen)
         App.run()
@@ -209,7 +209,7 @@ class InputProcessing_TestCase(unittest.TestCase):
 
     def test_process_input_and_close(self, input_mock, mock_stdout):
         input_mock.return_value = "a"
-        screen = InputStateCloseScreen()
+        screen = InputStateCloseScreenMock()
 
         App.get_scheduler().schedule_screen(screen)
         App.run()
@@ -226,7 +226,7 @@ class InputProcessing_TestCase(unittest.TestCase):
     def test_continue_input(self, mock_stdin, mock_stdout):
         mock_stdin.return_value = "c"
         screen = UIScreen()
-        screen2 = EmptyScreen()
+        screen2 = EmptyScreenMock()
 
         App.get_scheduler().schedule_screen(screen)
         App.get_scheduler().schedule_screen(screen2)
@@ -237,7 +237,7 @@ class InputProcessing_TestCase(unittest.TestCase):
 
     def test_refresh_input(self, mock_stdin, mock_stdout):
         mock_stdin.return_value = "r"
-        screen = RefreshTestScreen()
+        screen = RefreshTestScreenMock()
 
         App.get_scheduler().schedule_screen(screen)
         App.run()
@@ -247,7 +247,7 @@ class InputProcessing_TestCase(unittest.TestCase):
     def test_refresh_on_input_error(self, mock_stdin, mock_stdout):
         mock_stdin.return_value = "q"
         threshold = 5
-        screen = InputErrorTestScreen(threshold)
+        screen = InputErrorTestScreenMock(threshold)
 
         App.get_scheduler().schedule_screen(screen)
         App.run()
@@ -258,7 +258,7 @@ class InputProcessing_TestCase(unittest.TestCase):
     def test_multiple_refresh_on_input_error(self, mock_stdin, mock_stdout):
         mock_stdin.return_value = "q"
         threshold = 12
-        screen = InputErrorTestScreen(threshold)
+        screen = InputErrorTestScreenMock(threshold)
 
         App.get_scheduler().schedule_screen(screen)
         App.run()
@@ -269,7 +269,7 @@ class InputProcessing_TestCase(unittest.TestCase):
     def test_no_refresh_when_prompt_is_none(self, mock_stdin, mock_stdout):
         mock_stdin.return_value = "q"
         threshold = 5
-        screen = InputErrorDynamicPromptTestScreen(threshold, not_return_prompt_on=3)
+        screen = InputErrorDynamicPromptTestScreenMock(threshold, not_return_prompt_on=3)
 
         App.get_scheduler().schedule_screen(screen)
         App.run()
@@ -280,7 +280,7 @@ class InputProcessing_TestCase(unittest.TestCase):
         self.assertEqual(screen.error_counter, threshold)
 
     def test_input_no_prompt(self, mock_stdin, mock_stdout):
-        screen = InputWithNoPrompt()
+        screen = InputWithNoPromptMock()
 
         App.get_scheduler().schedule_screen(screen)
         App.run()
@@ -291,7 +291,7 @@ class InputProcessing_TestCase(unittest.TestCase):
     def test_custom_getpass(self, mock_stdin, mock_stdout, process_signals):
         prompt = mock.MagicMock()
         ret = "test"
-        screen = TestScreenWithPassFunc(prompt, ret)
+        screen = ScreenWithPassFuncMock(prompt, ret)
 
         App.get_scheduler().schedule_screen(screen)
         App.run()
@@ -303,7 +303,7 @@ class InputProcessing_TestCase(unittest.TestCase):
         prompt_message = "test prompt"
         ret = "blocking test"
         mock_stdin.return_value = ret
-        screen = BlockingInputTestScreen(prompt_message, False)
+        screen = BlockingInputTestScreenMock(prompt_message, False)
 
         App.get_scheduler().schedule_screen(screen)
         App.run()
@@ -319,7 +319,7 @@ class InputProcessing_TestCase(unittest.TestCase):
         prompt_message = "test prompt"
         ret = "blocking test"
         mock_getpass.return_value = ret
-        screen = BlockingInputTestScreen(prompt_message, True)
+        screen = BlockingInputTestScreenMock(prompt_message, True)
 
         App.get_scheduler().schedule_screen(screen)
         App.run()
@@ -333,12 +333,12 @@ class InputProcessing_TestCase(unittest.TestCase):
 
 # HELPER CLASSES
 
-class EmptyScreen(UIScreen):
+class EmptyScreenMock(UIScreen):
 
     def __init__(self):
         super().__init__()
         self.is_closed = False
-        EmptyScreen.title = ""
+        EmptyScreenMock.title = ""
         self.input_required = False
 
     def show_all(self):
@@ -348,7 +348,7 @@ class EmptyScreen(UIScreen):
         self.is_closed = True
 
 
-class TestScreenSetupFail(UIScreen):
+class ScreenSetupFailMock(UIScreen):
 
     def __init__(self):
         super().__init__()
@@ -359,7 +359,7 @@ class TestScreenSetupFail(UIScreen):
         return False
 
 
-class TestScreenWithPassFunc(UIScreen):
+class ScreenWithPassFuncMock(UIScreen):
 
     def __init__(self, prompt, return_value):
         super().__init__()
@@ -382,7 +382,7 @@ class TestScreenWithPassFunc(UIScreen):
         return InputState.PROCESSED_AND_CLOSE
 
 
-class InputErrorTestScreen(UIScreen):
+class InputErrorTestScreenMock(UIScreen):
 
     def __init__(self, error_threshold=5):
         super().__init__()
@@ -402,7 +402,7 @@ class InputErrorTestScreen(UIScreen):
         self.render_counter += 1
 
 
-class InputErrorDynamicPromptTestScreen(InputErrorTestScreen):
+class InputErrorDynamicPromptTestScreenMock(InputErrorTestScreenMock):
 
     def __init__(self, error_threshold=5, not_return_prompt_on=2):
         super().__init__(error_threshold=error_threshold)
@@ -418,7 +418,7 @@ class InputErrorDynamicPromptTestScreen(InputErrorTestScreen):
         return super().prompt(args)
 
 
-class InputWithNoPrompt(UIScreen):
+class InputWithNoPromptMock(UIScreen):
 
     def __init__(self):
         super().__init__()
@@ -432,7 +432,7 @@ class InputWithNoPrompt(UIScreen):
         return None
 
 
-class RefreshTestScreen(UIScreen):
+class RefreshTestScreenMock(UIScreen):
 
     def __init__(self):
         super().__init__()
@@ -450,14 +450,14 @@ class RefreshTestScreen(UIScreen):
         return
 
 
-class FailedSetupScreen(UIScreen):
+class FailedSetupScreenMock(UIScreen):
 
     def setup(self, args):
         super().setup(args)
         return False
 
 
-class NoSeparatorScreen(UIScreen):
+class NoSeparatorScreenMock(UIScreen):
 
     def __init__(self, print_string):
         super().__init__()
@@ -470,7 +470,7 @@ class NoSeparatorScreen(UIScreen):
         self.close()
 
 
-class NoInputScreen(UIScreen):
+class NoInputScreenMock(UIScreen):
 
     def __init__(self):
         super().__init__()
@@ -481,7 +481,7 @@ class NoInputScreen(UIScreen):
         self.close()
 
 
-class InputScreen(UIScreen):
+class InputScreenMock(UIScreen):
 
     def __init__(self):
         super().__init__()
@@ -494,7 +494,7 @@ class InputScreen(UIScreen):
         return InputState.PROCESSED
 
 
-class InputStateCloseScreen(UIScreen):
+class InputStateCloseScreenMock(UIScreen):
 
     def __init__(self):
         super().__init__()
@@ -505,7 +505,7 @@ class InputStateCloseScreen(UIScreen):
         return InputState.PROCESSED_AND_CLOSE
 
 
-class InputStateRedrawScreen(UIScreen):
+class InputStateRedrawScreenMock(UIScreen):
 
     def __init__(self):
         super().__init__()
@@ -521,7 +521,7 @@ class InputStateRedrawScreen(UIScreen):
         return InputState.PROCESSED_AND_CLOSE
 
 
-class ExceptionTestScreen(UIScreen):
+class ExceptionTestScreenMock(UIScreen):
     """Raising an exception in some place of processing."""
 
     REFRESH = 0
@@ -535,15 +535,15 @@ class ExceptionTestScreen(UIScreen):
     def refresh(self, args=None):
         super().refresh()
         if self._where == self.REFRESH:
-            raise TestRefreshException("Refresh test exception happened!")
+            raise RefreshExceptionMock("Refresh test exception happened!")
 
     def show_all(self):
         super().show_all()
         if self._where == self.REDRAW:
-            raise TestRedrawException("Redraw test exception happened!")
+            raise RedrawExceptionMock("Redraw test exception happened!")
 
 
-class BlockingInputTestScreen(EmptyScreen):
+class BlockingInputTestScreenMock(EmptyScreenMock):
 
     def __init__(self, prompt_message, hidden):
         super().__init__()
@@ -556,9 +556,9 @@ class BlockingInputTestScreen(EmptyScreen):
         super().show_all()
 
 
-class TestRefreshException(Exception):
+class RefreshExceptionMock(Exception):
     pass
 
 
-class TestRedrawException(Exception):
+class RedrawExceptionMock(Exception):
     pass

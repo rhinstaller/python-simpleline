@@ -42,8 +42,8 @@ class SignalHandler_TestCase(unittest.TestCase):
         connect_screen = UIScreen()
 
         App.initialize(scheduler=MagicMock())
-        connect_screen.connect(TestSignal, self._callback)
-        App.get_event_loop().enqueue_signal(TestSignal(self))
+        connect_screen.connect(SignalMock, self._callback)
+        App.get_event_loop().enqueue_signal(SignalMock(self))
         App.get_event_loop().process_signals()
 
         self.assertTrue(self.callback_called)
@@ -52,10 +52,10 @@ class SignalHandler_TestCase(unittest.TestCase):
         connect_screen = UIScreen()
 
         App.initialize(scheduler=MagicMock())
-        signal = connect_screen.create_signal(TestSignal, priority=20)
+        signal = connect_screen.create_signal(SignalMock, priority=20)
 
         self.assertEqual(signal.priority, 20)
-        self.assertTrue(isinstance(signal, TestSignal))
+        self.assertTrue(isinstance(signal, SignalMock))
         # source is set by create_signal
         self.assertEqual(signal.source, connect_screen)
 
@@ -63,16 +63,16 @@ class SignalHandler_TestCase(unittest.TestCase):
         connect_screen = UIScreen()
 
         App.initialize(scheduler=MagicMock())
-        connect_screen.connect(TestSignal, self._callback)
-        connect_screen.emit(TestSignal(self))
+        connect_screen.connect(SignalMock, self._callback)
+        connect_screen.emit(SignalMock(self))
         App.get_event_loop().process_signals()
 
         self.assertTrue(self.callback_called)
 
     @patch('sys.stdout')
     def test_connect_react_on_rendering(self, _):
-        connect_test_screen = TestRenderConnectHandler()
-        screen2 = EmptyScreen()
+        connect_test_screen = RenderConnectHandlerMock()
+        screen2 = EmptyScreenMock()
 
         App.initialize()
         App.get_scheduler().schedule_screen(connect_test_screen)
@@ -82,7 +82,7 @@ class SignalHandler_TestCase(unittest.TestCase):
         self.assertTrue(connect_test_screen.callback_called)
 
 
-class TestRenderConnectHandler(UIScreen):
+class RenderConnectHandlerMock(UIScreen):
 
     def __init__(self):
         super().__init__()
@@ -98,7 +98,7 @@ class TestRenderConnectHandler(UIScreen):
         self.callback_called = True
 
 
-class EmptyScreen(UIScreen):
+class EmptyScreenMock(UIScreen):
 
     def __init__(self):
         super().__init__()
@@ -109,5 +109,5 @@ class EmptyScreen(UIScreen):
         self.close()
 
 
-class TestSignal(AbstractSignal):
+class SignalMock(AbstractSignal):
     pass

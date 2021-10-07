@@ -63,8 +63,8 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.callback_called = False
 
         loop = self.loop
-        loop.register_signal_handler(TestSignal, self._handler_callback)
-        loop.enqueue_signal(TestSignal())
+        loop.register_signal_handler(SignalMock, self._handler_callback)
+        loop.enqueue_signal(SignalMock())
         loop.process_signals()
 
         self.assertTrue(self.callback_called)
@@ -73,10 +73,10 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.signal_counter = 0
 
         loop = self.loop
-        loop.register_signal_handler(TestSignal, self._handler_signal_counter)
-        loop.enqueue_signal(TestSignal())
-        loop.enqueue_signal(TestSignal())
-        loop.enqueue_signal(TestSignal())
+        loop.register_signal_handler(SignalMock, self._handler_signal_counter)
+        loop.enqueue_signal(SignalMock())
+        loop.enqueue_signal(SignalMock())
+        loop.enqueue_signal(SignalMock())
         loop.process_signals()
 
         self.assertEqual(self.signal_counter, 3)
@@ -85,14 +85,14 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.signal_counter = 0
 
         loop = self.loop
-        loop.register_signal_handler(TestSignal, self._handler_signal_counter)
-        loop.enqueue_signal(TestSignal())
-        loop.enqueue_signal(TestSignal())
+        loop.register_signal_handler(SignalMock, self._handler_signal_counter)
+        loop.enqueue_signal(SignalMock())
+        loop.enqueue_signal(SignalMock())
         loop.process_signals()
         self.assertEqual(self.signal_counter, 2)
 
-        loop.enqueue_signal(TestSignal())
-        loop.enqueue_signal(TestSignal())
+        loop.enqueue_signal(SignalMock())
+        loop.enqueue_signal(SignalMock())
         loop.process_signals()
         self.assertEqual(self.signal_counter, 4)
 
@@ -100,14 +100,14 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.signal_counter = 0
 
         loop = self.loop
-        loop.register_signal_handler(TestSignal,
+        loop.register_signal_handler(SignalMock,
                                      self._handler_signal_counter)
-        loop.register_signal_handler(TestSignal2,
+        loop.register_signal_handler(SignalMock2,
                                      self._handler_process_events_then_register_testsignal,
                                      loop)
-        loop.enqueue_signal(TestSignal())
-        loop.enqueue_signal(TestSignal2())
-        loop.process_signals(return_after=TestSignal2)
+        loop.enqueue_signal(SignalMock())
+        loop.enqueue_signal(SignalMock2())
+        loop.process_signals(return_after=SignalMock2)
         self.assertEqual(self.signal_counter, 1)
 
         loop.process_signals()
@@ -117,17 +117,17 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.signal_counter = 0
 
         loop = self.loop
-        loop.register_signal_handler(TestSignal,
+        loop.register_signal_handler(SignalMock,
                                      self._handler_signal_counter)
         # run process signals recursively in this handler which will skip processing
-        loop.register_signal_handler(TestSignal2,
+        loop.register_signal_handler(SignalMock2,
                                      self._handler_process_events_then_register_testsignal,
                                      loop)
-        loop.enqueue_signal(TestSignal2())
-        loop.enqueue_signal(TestSignal())
+        loop.enqueue_signal(SignalMock2())
+        loop.enqueue_signal(SignalMock())
         # new signal will be registered in handler method but that shouldn't be processed
         # because it should end on the first signal even when it was skipped
-        loop.process_signals(return_after=TestSignal)
+        loop.process_signals(return_after=SignalMock)
 
         self.assertEqual(self.signal_counter, 1)
 
@@ -136,10 +136,10 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.signal_counter2 = 0
 
         loop = self.loop
-        loop.register_signal_handler(TestSignal, self._handler_signal_counter)
-        loop.register_signal_handler(TestSignal, self._handler_signal_counter2)
-        loop.enqueue_signal(TestSignal())
-        loop.enqueue_signal(TestSignal())
+        loop.register_signal_handler(SignalMock, self._handler_signal_counter)
+        loop.register_signal_handler(SignalMock, self._handler_signal_counter2)
+        loop.enqueue_signal(SignalMock())
+        loop.enqueue_signal(SignalMock())
         loop.process_signals()
 
         self.assertEqual(self.signal_counter, 2)
@@ -149,13 +149,13 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.signal_counter = 0
 
         loop = self.loop
-        loop.register_signal_handler(TestSignal, self._handler_signal_counter)
-        loop.register_signal_handler(TestPrioritySignal, self._handler_signal_counter)
-        loop.enqueue_signal(TestSignal())
-        loop.enqueue_signal(TestSignal())
+        loop.register_signal_handler(SignalMock, self._handler_signal_counter)
+        loop.register_signal_handler(PrioritySignalMock, self._handler_signal_counter)
+        loop.enqueue_signal(SignalMock())
+        loop.enqueue_signal(SignalMock())
         # should be processed as first signal because of priority
-        loop.enqueue_signal(TestPrioritySignal())
-        loop.enqueue_signal(TestSignal())
+        loop.enqueue_signal(PrioritySignalMock())
+        loop.enqueue_signal(SignalMock())
         loop.process_signals()
         self.assertEqual(self.signal_counter, 1)
 
@@ -168,12 +168,12 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.signal_counter_copied = 0
 
         loop = self.loop
-        loop.register_signal_handler(TestSignal, self._handler_signal_counter)
-        loop.register_signal_handler(TestLowPrioritySignal, self._handler_signal_copy_counter)
-        loop.enqueue_signal(TestSignal())
-        loop.enqueue_signal(TestLowPrioritySignal())
-        loop.enqueue_signal(TestSignal())
-        loop.enqueue_signal(TestSignal())
+        loop.register_signal_handler(SignalMock, self._handler_signal_counter)
+        loop.register_signal_handler(LowPrioritySignalMock, self._handler_signal_copy_counter)
+        loop.enqueue_signal(SignalMock())
+        loop.enqueue_signal(LowPrioritySignalMock())
+        loop.enqueue_signal(SignalMock())
+        loop.enqueue_signal(SignalMock())
         loop.process_signals()
         self.assertEqual(self.signal_counter, 3)
 
@@ -188,8 +188,8 @@ class ProcessEvents_TestCase(unittest.TestCase):
 
         loop = self.loop
         loop.set_quit_callback(self._handler_quit_callback, args=msg)
-        loop.register_signal_handler(TestSignal, self._handler_raise_ExitMainLoop_exception)
-        loop.enqueue_signal(TestSignal())
+        loop.register_signal_handler(SignalMock, self._handler_raise_ExitMainLoop_exception)
+        loop.enqueue_signal(SignalMock())
         loop.run()
 
         self.assertTrue(self.callback_called)
@@ -199,10 +199,10 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.callback_called = False
 
         loop = self.loop
-        loop.register_signal_handler(TestSignal, self._handler_callback)
-        loop.register_signal_handler(TestSignal2, self._handler_force_quit_exception)
-        loop.enqueue_signal(TestSignal2())
-        loop.enqueue_signal(TestSignal())
+        loop.register_signal_handler(SignalMock, self._handler_callback)
+        loop.register_signal_handler(SignalMock2, self._handler_force_quit_exception)
+        loop.enqueue_signal(SignalMock2())
+        loop.enqueue_signal(SignalMock())
         loop.run()
 
         self.assertFalse(self.callback_called)
@@ -211,15 +211,15 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.callback_called = False
 
         loop = self.loop
-        loop.register_signal_handler(TestSignal,
+        loop.register_signal_handler(SignalMock,
                                      self._handler_start_inner_loop_and_enqueue_event,
-                                     TestSignal3())
-        loop.register_signal_handler(TestSignal2,
+                                     SignalMock3())
+        loop.register_signal_handler(SignalMock2,
                                      self._handler_callback)
-        loop.register_signal_handler(TestSignal3,
+        loop.register_signal_handler(SignalMock3,
                                      self._handler_force_quit_exception)
-        loop.enqueue_signal(TestSignal())
-        loop.enqueue_signal(TestSignal2())
+        loop.enqueue_signal(SignalMock())
+        loop.enqueue_signal(SignalMock2())
         loop.run()
 
         self.assertFalse(self.callback_called)
@@ -228,14 +228,14 @@ class ProcessEvents_TestCase(unittest.TestCase):
         self.callback_called = False
 
         loop = self.loop
-        loop.register_signal_handler(TestSignal, self._handler_force_quit_exception)
-        loop.register_signal_handler(TestSignal2, self._handler_callback)
-        loop.enqueue_signal(TestSignal())
-        loop.enqueue_signal(TestSignal2())
+        loop.register_signal_handler(SignalMock, self._handler_force_quit_exception)
+        loop.register_signal_handler(SignalMock2, self._handler_callback)
+        loop.enqueue_signal(SignalMock())
+        loop.enqueue_signal(SignalMock2())
 
         # FIXME: Find a better way how to detect infinite loop
         # if force quit won't work properly this will hang up
-        loop.process_signals(return_after=TestSignal3)
+        loop.process_signals(return_after=SignalMock3)
 
         self.assertFalse(self.callback_called)
 
@@ -261,7 +261,7 @@ class ProcessEvents_TestCase(unittest.TestCase):
         event_loop = data
         event_loop.process_signals()
         # This shouldn't be processed
-        event_loop.enqueue_signal(TestSignal())
+        event_loop.enqueue_signal(SignalMock())
 
     def _handler_start_inner_loop_and_enqueue_event(self, signal, data):
         self.loop.execute_new_loop(data)
@@ -275,35 +275,35 @@ class ProcessEvents_TestCase(unittest.TestCase):
 
 
 # TESTING EVENTS
-class TestSignal(AbstractSignal):
+class SignalMock(AbstractSignal):
 
     def __init__(self):
         # ignore source
         super().__init__(None)
 
 
-class TestSignal2(AbstractSignal):
+class SignalMock2(AbstractSignal):
 
     def __init__(self):
         # ignore source
         super().__init__(None)
 
 
-class TestSignal3(AbstractSignal):
+class SignalMock3(AbstractSignal):
 
     def __init__(self):
         # ignore source
         super().__init__(None)
 
 
-class TestPrioritySignal(AbstractSignal):
+class PrioritySignalMock(AbstractSignal):
 
     def __init__(self):
         # ignore source
         super().__init__(None, -10)
 
 
-class TestLowPrioritySignal(AbstractSignal):
+class LowPrioritySignalMock(AbstractSignal):
 
     def __init__(self):
         # ignore source
