@@ -28,6 +28,9 @@ from simpleline.global_configuration import DEFAULT_WIDTH, DEFAULT_PASSWORD_FUNC
 
 class GlobalConfiguration_TestCase(unittest.TestCase):
 
+    def setUp(self):
+        App.initialize()
+
     def tearDown(self):
         App.initialize()
 
