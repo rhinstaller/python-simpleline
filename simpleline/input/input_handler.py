@@ -52,6 +52,9 @@ class InputHandler(object):
         self._skip_concurrency_check = False
         self._source = source
 
+        self._register_input_ready_signal()
+
+    def _register_input_ready_signal(self):
         App.get_event_loop().register_signal_handler(InputReadySignal,
                                                      self._input_received_handler)
 
