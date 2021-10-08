@@ -104,12 +104,12 @@ class ScreenStack_TestCase(unittest.TestCase):
     def test_stack_dump(self):
         stack = ScreenStack()
 
-        stack.append(ScreenData(TestScreen1()))
-        stack.append(ScreenData(TestScreen2()))
+        stack.append(ScreenData(ScreenMock1()))
+        stack.append(ScreenData(ScreenMock2()))
 
         dump = stack.dump_stack()
         dump = dump.replace('\n', '')
-        self.assertRegex(dump, r"TestScreen2.*TestScreen1")
+        self.assertRegex(dump, r"ScreenMock2.*ScreenMock1")
 
 
 class ScreenData_TestCase(unittest.TestCase):
@@ -154,9 +154,9 @@ class ScreenData_TestCase(unittest.TestCase):
         self._screen_check(screen, self.ui_screen, "test", True)
 
 
-class TestScreen1(UIScreen):
+class ScreenMock1(UIScreen):
     pass
 
 
-class TestScreen2(UIScreen):
+class ScreenMock2(UIScreen):
     pass

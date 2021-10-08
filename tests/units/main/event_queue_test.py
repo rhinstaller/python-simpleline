@@ -45,8 +45,8 @@ class EventQueue_TestCase(unittest.TestCase):
         self.assertTrue(self.e.empty())
 
     def test_enqueue_priority(self):
-        signal_low_priority = TestSignal(priority=10)
-        signal_high_priority = TestSignal(priority=0)
+        signal_low_priority = SignalMock(priority=10)
+        signal_high_priority = SignalMock(priority=0)
 
         self.e.enqueue(signal_low_priority)
         self.e.enqueue(signal_high_priority)
@@ -81,15 +81,15 @@ class EventQueue_TestCase(unittest.TestCase):
 
     def test_enqueue_if_source_belongs(self):
         source = MagicMock()
-        signal = TestSignal(source=source)
+        signal = SignalMock(source=source)
 
         self.e.add_source(source)
         self.assertTrue(self.e.enqueue_if_source_belongs(signal, source))
         self.assertEqual(signal, self.e.get())
 
     def test_enqueue_if_source_does_not_belong(self):
-        signal = TestSignal()
-        signal_low_priority = TestSignal(priority=25)
+        signal = SignalMock()
+        signal_low_priority = SignalMock(priority=25)
 
         # the get method will wait if nothing present so adding low priority signal below
         # give us check if the queue is really empty
@@ -99,7 +99,7 @@ class EventQueue_TestCase(unittest.TestCase):
         self.assertEqual(signal_low_priority, self.e.get())
 
 
-class TestSignal(AbstractSignal):
+class SignalMock(AbstractSignal):
 
     def __init__(self, source=None, priority=20):  # pylint: disable=useless-super-delegation
         super().__init__(source, priority)
