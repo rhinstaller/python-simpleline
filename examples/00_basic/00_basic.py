@@ -35,7 +35,7 @@ class HelloWorld(UIScreen):
 
     def __init__(self):
         # Set title of the screen.
-        super().__init__(title=u"Hello World")
+        super().__init__(title="Hello World")
 
     def refresh(self, args=None):
         # Fill the self.window attribute by the WindowContainer and set screen title as header.

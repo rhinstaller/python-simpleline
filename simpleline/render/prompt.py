@@ -56,7 +56,7 @@ class Prompt():
         :type message: str|None
         """
         self.message = message
-        self.options = dict()
+        self.options = {}
 
     def set_message(self, message):
         """Set the prompt message.

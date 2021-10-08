@@ -33,7 +33,7 @@ class HelloWorld(UIScreen):
 
     def __init__(self):
         # Set title of the screen.
-        super().__init__(title=u"Show Widgets")
+        super().__init__(title="Show Widgets")
 
     def refresh(self, args=None):
         super().refresh()

@@ -59,7 +59,7 @@ class Widget():
 
     def clear(self):
         """Clears this widgets buffer and resets cursor."""
-        self._buffer = list()
+        self._buffer = []
         self._cursor = (0, 0)
 
     @property
@@ -84,7 +84,7 @@ class Widget():
         :return: lines representing this widget
         :rtype: list(str)
         """
-        return [str(u"".join(line)) for line in self._buffer]
+        return [str("".join(line)) for line in self._buffer]
 
     def set_cursor_position(self, row, col):
         """Set cursor position.
@@ -131,14 +131,14 @@ class Widget():
         # fill up rows to accommodate for w.height
         if self.height < row + w.height:
             for _i in range(row + w.height - self.height):
-                self._buffer.append(list())
+                self._buffer.append([])
 
         # append columns to accommodate for w.width
         for l in range(row, row + w.height):
             l_len = len(self._buffer[l])
             w_len = len(w.content[l - row])
             if l_len < col + w_len:
-                self._buffer[l] += ((col + w_len - l_len) * list(u" "))
+                self._buffer[l] += ((col + w_len - l_len) * [" "])
             self._buffer[l][col:col + w_len] = w.content[l - row][:]
 
         # move the cursor to new spot
@@ -220,11 +220,11 @@ class Widget():
     def _increase_x_buffer_size(self, x):
         if x >= len(self._buffer):
             for _i in range(x - len(self._buffer) + 1):
-                self._buffer.append(list())
+                self._buffer.append([])
 
     def _increase_y_buffer_size(self, x, y):
         if y >= len(self._buffer[x]):
-            self._buffer[x] += ((y - len(self._buffer[x]) + 1) * list(u" "))
+            self._buffer[x] += ((y - len(self._buffer[x]) + 1) * [" "])
 
     def _save_character_to_buffer(self, x, y, character):
         self._buffer[x][y] = character
@@ -342,8 +342,8 @@ class SeparatorWidget(Widget):
         To print just a blank line we don't need too much logic.
         """
         for i in range(0, self._lines):
-            self._buffer.append(list())
-            self._buffer[i] += u""
+            self._buffer.append([])
+            self._buffer[i] += ""
         self.set_cursor_position(self._lines - 1, 0)
 
 

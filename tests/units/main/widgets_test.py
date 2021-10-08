@@ -33,11 +33,11 @@ from simpleline.render.widgets import TextWidget, SeparatorWidget, CheckboxWidge
 class BaseWidgets_TestCase(unittest.TestCase):
     """Base class containing helper functions."""
     def setUp(self):
-        self.w1 = TextWidget(u"Můj krásný dlouhý text")
-        self.w2 = TextWidget(u"Test")
-        self.w3 = TextWidget(u"Test 2")
-        self.w4 = TextWidget(u"Krásný dlouhý text podruhé")
-        self.w5 = TextWidget(u"Test 3")
+        self.w1 = TextWidget("Můj krásný dlouhý text")
+        self.w2 = TextWidget("Test")
+        self.w3 = TextWidget("Test 2")
+        self.w4 = TextWidget("Krásný dlouhý text podruhé")
+        self.w5 = TextWidget("Test 3")
         self.w6 = TextWidget("The rescue environment will now attempt "
                              "to find your Linux installation and mount it under "
                              "the directory : bla.  You can then make any changes "
@@ -65,7 +65,7 @@ class Widgets_TestCase(BaseWidgets_TestCase):
 
         res_lines = w.get_lines()
 
-        expected_result = [u""]
+        expected_result = [""]
 
         self.evaluate_result(res_lines, expected_result)
 
@@ -75,9 +75,9 @@ class Widgets_TestCase(BaseWidgets_TestCase):
 
         res_lines = w.get_lines()
 
-        expected_result = [u"",
-                           u"",
-                           u""]
+        expected_result = ["",
+                           "",
+                           ""]
 
         self.evaluate_result(res_lines, expected_result)
 
@@ -89,10 +89,10 @@ class Widgets_TestCase(BaseWidgets_TestCase):
         c.render(80)
         res_lines = c.get_lines()
 
-        expected_result = [u"Můj krásný dlouhý      Krásný dlouhý text          Můj krásný",
-                           u"text                   podruhé                     dlouhý text",
-                           u"Test                   Test 3                      Test",
-                           u"Test 2                                             Test 2"]
+        expected_result = ["Můj krásný dlouhý      Krásný dlouhý text          Můj krásný",
+                           "text                   podruhé                     dlouhý text",
+                           "Test                   Test 3                      Test",
+                           "Test 2                                             Test 2"]
         self.evaluate_result(res_lines, expected_result)
 
     def test_column_wrapping(self):
@@ -100,11 +100,11 @@ class Widgets_TestCase(BaseWidgets_TestCase):
         c = ColumnWidget([(15, [self.w1, self.w2, self.w3]), (10, [self.w4, self.w5])], spacing=1)
         c.render(80)
 
-        expected_result = [u"Můj krásný      Krásný",
-                           u"dlouhý text     dlouhý",
-                           u"Test            text",
-                           u"Test 2          podruhé",
-                           u"                Test 3"]
+        expected_result = ["Můj krásný      Krásný",
+                           "dlouhý text     dlouhý",
+                           "Test            text",
+                           "Test 2          podruhé",
+                           "                Test 3"]
 
         res_lines = c.get_lines()
         self.evaluate_result(res_lines, expected_result)
@@ -149,8 +149,8 @@ class Widgets_TestCase(BaseWidgets_TestCase):
 
         checkbox.render(80)
 
-        expected_result = [u"[ ] Test Title",
-                           u"    (Description)"]
+        expected_result = ["[ ] Test Title",
+                           "    (Description)"]
 
         self.evaluate_result(checkbox.get_lines(), expected_result)
 
@@ -159,8 +159,8 @@ class Widgets_TestCase(BaseWidgets_TestCase):
 
         checkbox.render(80)
 
-        expected_result = [u"[x] Title",
-                           u"    (Description)"]
+        expected_result = ["[x] Title",
+                           "    (Description)"]
 
         self.evaluate_result(checkbox.get_lines(), expected_result)
 
@@ -169,8 +169,8 @@ class Widgets_TestCase(BaseWidgets_TestCase):
 
         checkbox.render(80)
 
-        expected_result = [u"[o] Title",
-                           u"    (Description)"]
+        expected_result = ["[o] Title",
+                           "    (Description)"]
 
         self.evaluate_result(checkbox.get_lines(), expected_result)
 
@@ -179,7 +179,7 @@ class Widgets_TestCase(BaseWidgets_TestCase):
 
         checkbox.render(80)
 
-        expected_result = [u"[ ]"]
+        expected_result = ["[ ]"]
 
         self.evaluate_result(checkbox.get_lines(), expected_result)
 
@@ -188,9 +188,9 @@ class Widgets_TestCase(BaseWidgets_TestCase):
 
         checkbox.render(80)
 
-        expected_result = [u"[ ] Title",
-                           u"    (Testing",
-                           u"    wrapping)"]
+        expected_result = ["[ ] Title",
+                           "    (Testing",
+                           "    wrapping)"]
 
         self.evaluate_result(checkbox.get_lines(), expected_result)
 
@@ -199,7 +199,7 @@ class Widgets_TestCase(BaseWidgets_TestCase):
 
         w.render(10)
 
-        expected_result = [u"   Test"]
+        expected_result = ["   Test"]
 
         self.evaluate_result(w.get_lines(), expected_result)
 
@@ -222,10 +222,10 @@ class Widgets_TestCase(BaseWidgets_TestCase):
 
         w.render(10)
 
-        expected_result = [u"Title too",
-                           u"long",
-                           u"Value also",
-                           u"too long"]
+        expected_result = ["Title too",
+                           "long",
+                           "Value also",
+                           "too long"]
 
         self.evaluate_result(w.get_lines(), expected_result)
 

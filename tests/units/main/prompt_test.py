@@ -33,8 +33,8 @@ class Prompt_TestCase(unittest.TestCase):
         p.set_message("Brand new message")
         self.assertEqual(p.message, "Brand new message")
 
-        p.set_message(u"Žluťoučký kůň")
-        self.assertEqual(p.message, u"Žluťoučký kůň")
+        p.set_message("Žluťoučký kůň")
+        self.assertEqual(p.message, "Žluťoučký kůň")
 
         p2 = Prompt("Default prompt text")
         self.assertEqual(p2.message, "Default prompt text")

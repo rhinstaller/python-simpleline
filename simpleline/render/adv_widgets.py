@@ -173,7 +173,7 @@ class HelpScreen(UIScreen):
         help_message = _("The help is not available.")
 
         if self.help_path:
-            with open(self.help_path, 'r') as f:
+            with open(self.help_path, 'r', encoding='utf-8') as f:
                 help_message = f.read()
 
         self.window.add_with_separator(widgets.TextWidget(help_message))

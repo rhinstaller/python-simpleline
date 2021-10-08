@@ -36,7 +36,7 @@ class DividerScreen(UIScreen):
 
     def __init__(self):
         # Set title of the screen.
-        super().__init__(title=u"Divider")
+        super().__init__(title="Divider")
         self._message = 0
 
     def refresh(self, args=None):
