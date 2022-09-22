@@ -2,7 +2,7 @@
 
 from distutils.core import setup
 
-setup(name='simpleline', version='1.1.1',
+setup(name='simpleline', version='1.1.2',
       description='Python text UI framework',
       author='Jiri Konecny', author_email='jkonecny@redhat.com',
       url='http://git.fedoraproject.org/git/?p=python-simpleline.git',
