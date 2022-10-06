@@ -140,7 +140,7 @@ class AdvWidgets_TestCase(unittest.TestCase, UtilityMixin):
     def test_gettext_with_condition(self, stdout_mock, stdin_mock):
         prompt = "Type input"
         wrong_input = "wrong"
-        condition = lambda x, _: x != wrong_input
+        condition = lambda x, _: x != wrong_input  # pylint: disable=unnecessary-lambda-assignment
         stdin_mock.side_effect = self.input_generator()
 
         screen = GetInputScreen(message=prompt)
@@ -185,7 +185,7 @@ class AdvWidgets_TestCase(unittest.TestCase, UtilityMixin):
     def test_getpass_with_condition(self, hiden_stdin_mock, stdout_mock, stdin_mock):
         prompt = "Type input"
         wrong_input = "wrong"
-        condition = lambda x, _: x != wrong_input
+        condition = lambda x, _: x != wrong_input  # pylint: disable=unnecessary-lambda-assignment
         hiden_stdin_mock.side_effect = self.input_generator()
 
         screen = GetPasswordInputScreen(message=prompt)
