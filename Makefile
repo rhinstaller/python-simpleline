@@ -148,3 +148,9 @@ pypi-upload:
 
 .PHONY: ci
 ci: check test
+
+.PHONY: container-ci
+container-ci:
+	podman run --pull=always --rm -v .:/simpleline:Z --workdir /simpleline registry.fedoraproject.org/fedora:rawhide sh -c " \
+	dnf install -y python3-pylint python3-gobject-base make; \
+	make ci"
