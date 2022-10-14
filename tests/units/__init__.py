@@ -38,8 +38,7 @@ class UtilityMixin():
 
         return msg
 
-    @staticmethod
-    def schedule_screen_and_run(screen):
+    def schedule_screen_and_run(self, screen):
         App.initialize()
         App.get_scheduler().schedule_screen(screen)
         App.run()
