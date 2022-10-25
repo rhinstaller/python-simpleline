@@ -128,4 +128,10 @@ bumpver: po-push
 
 ci: check test
 
-.PHONY: clean install tag archive local
+# Run tests in the container but with fixed pylint version
+container-ci:
+	podman run --pull=always --rm -v .:/simpleline:Z --workdir /simpleline registry.access.redhat.com/ubi8:latest sh -c " \
+	dnf install -y python3-pip python3-gobject-base make && pip3 install pocketlint 'pylint==2.5.3' ; \
+	make ci"
+
+.PHONY: clean install tag archive local ci container-ci
