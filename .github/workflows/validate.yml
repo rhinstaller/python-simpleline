@@ -1,0 +1,12 @@
+name: validate
+on: [push, pull_request]
+jobs:
+  ubi8:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+
+      - name: Run test
+        run: |
+          make container-ci
