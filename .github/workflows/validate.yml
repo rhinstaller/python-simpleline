@@ -9,6 +9,4 @@ jobs:
 
       - name: Run test
         run: |
-          podman run --rm -v .:/simpleline:Z --workdir /simpleline registry.fedoraproject.org/fedora:rawhide sh -c " \
-              dnf install -y python3-pylint python3-gobject-base make; \
-              make ci"
+          make container-ci

@@ -147,3 +147,9 @@ pypi-upload:
 
 .PHONY: ci
 ci: check test
+
+# Run tests in the container but with fixed pylint version
+container-ci:
+	podman run --pull=always --rm -v .:/simpleline:Z --workdir /simpleline quay.io/centos/centos:stream9 sh -c " \
+	dnf install -y python3-pip python3-gobject-base make && pip3 install pocketlint 'pylint==2.8.3' ; \
+	make ci"
