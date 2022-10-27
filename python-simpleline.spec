@@ -3,7 +3,7 @@
 Name: python-%{srcname}
 Summary: A Python library for creating text UI
 Url: https://github.com/rhinstaller/python-%{srcname}
-Version: 1.1.2
+Version: 1.1.3
 Release: 1%{?dist}
 # This tarball was created from upstream git:
 #   git clone https://github.com/rhinstaller/python-simpleline
@@ -59,6 +59,14 @@ make test
 %{python3_sitelib}/*
 
 %changelog
+* Thu Oct 27 2022 Jiri Konecny <jkonecny@redhat.com> - 1.1.3-1
+- Add tests for UIScreen wide disabling of concurrency check (jkonecny)
+- Abstract registering signal handler in the InputHandler constructor (jkonecny)
+- Allow to disable concurrency check for all UIScreen inputs (jkonecny)
+- Enable execution of the tests on GitHub actions (jkonecny)
+- Add Makefile target for container tests execution (jkonecny)
+- Remove pocketlint from the build requires (jkonecny)
+
 * Thu Sep 22 2022 Jiri Konecny <jkonecny@redhat.com> - 1.1.2-1
 - Always close the password dialog (vponcova)
 
