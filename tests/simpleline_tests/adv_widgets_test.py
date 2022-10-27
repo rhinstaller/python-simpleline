@@ -23,8 +23,96 @@ from unittest.mock import patch
 from io import StringIO
 
 from . import UtilityMixin
-
+from simpleline.render.screen import UIScreen
+from simpleline.input.input_handler import InputHandler
 from simpleline.render.adv_widgets import GetInputScreen, GetPasswordInputScreen
+
+
+class InputHandlerMock(InputHandler):
+    """Dummy InputHandler instance.
+
+    This class based on InputHandler has all threading logic disabled for simpler testing.
+    """
+    def _register_input_ready_signal(self):
+        pass
+
+    def get_input(self, prompt):
+        pass
+
+    def wait_on_input(self):
+        pass
+
+
+class UIScreen_TestCase(unittest.TestCase):
+    @patch('simpleline.render.screen.input_manager.InputHandler')
+    def test_uiscreen_disable_concurrency_check(self, input_handler_class_mock):
+        # Replace default InputHandler instance created by InputManager by our mock to have
+        # it stored after use.
+        input_handler_instance_mock = InputHandlerMock()
+        input_handler_class_mock.return_value = input_handler_instance_mock
+
+        screen = UIScreen()
+        input_manager = screen.input_manager
+        input_manager.skip_concurrency_check = True
+        screen.get_user_input("test")
+
+        self.assertTrue(screen.input_manager.skip_concurrency_check)
+        # Check that the created InputHandler instance has the flag correctly set.
+        # We don't need to check the concurrency check functionality, it is tested
+        # elsewhere already.
+        self.assertTrue(input_handler_instance_mock.skip_concurrency_check)
+
+    @patch('simpleline.render.screen.input_manager.InputHandler')
+    def test_uiscreen_password_disable_concurrency_check(self, input_handler_class_mock):
+        # Replace default InputHandler instance created by InputManager by our mock to have
+        # it stored after use.
+        input_handler_instance_mock = InputHandlerMock()
+        input_handler_class_mock.return_value = input_handler_instance_mock
+
+        screen = GetPasswordInputScreen(message="Test prompt")
+        input_manager = screen.input_manager
+        input_manager.skip_concurrency_check = True
+        screen.get_user_input("test")
+
+        self.assertTrue(screen.input_manager.skip_concurrency_check)
+        # Check that the created InputHandler instance has the flag correctly set.
+        # We don't need to check the concurrency check functionality, it is tested
+        # elsewhere already.
+        self.assertTrue(input_handler_instance_mock.skip_concurrency_check)
+
+    @patch('simpleline.render.screen.input_manager.InputHandler')
+    def test_uiscreen_non_blocking_input_disable_concurrency_check(self, input_handler_class_mock):
+        # Replace default InputHandler instance created by InputManager by our mock to have
+        # it stored after use.
+        input_handler_instance_mock = InputHandlerMock()
+        input_handler_class_mock.return_value = input_handler_instance_mock
+
+        screen = UIScreen()
+        input_manager = screen.input_manager
+        input_manager.skip_concurrency_check = True
+        screen.get_input_with_error_check("test")
+
+        self.assertTrue(screen.input_manager.skip_concurrency_check)
+        # Check that the created InputHandler instance has the flag correctly set.
+        # We don't need to check the concurrency check functionality, it is tested
+        # elsewhere already.
+        self.assertTrue(input_handler_instance_mock.skip_concurrency_check)
+
+    @patch('simpleline.render.screen.input_manager.InputHandler')
+    def test_uiscreen_default_concurrency_check(self, input_handler_class_mock):
+        # Replace default InputHandler instance created by InputManager by our mock to have
+        # it stored after use.
+        input_handler_instance_mock = InputHandlerMock()
+        input_handler_class_mock.return_value = input_handler_instance_mock
+
+        screen = UIScreen()
+        screen.get_user_input("test")
+
+        self.assertFalse(screen.input_manager.skip_concurrency_check)
+        # Check that the created InputHandler instance has the flag correctly set.
+        # We don't need to check the concurrency check functionality, it is tested
+        # elsewhere already.
+        self.assertFalse(input_handler_instance_mock.skip_concurrency_check)
 
 
 @patch('simpleline.input.input_handler.InputHandlerRequest._get_input')

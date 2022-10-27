@@ -46,6 +46,7 @@ class InputManager(object):
         self._ui_screen = ui_screen
         self._input_error_counter = 0
         self._input_error_threshold = 5
+        self._skip_concurrency_check = False
         self._input_args = None
 
     @property
@@ -61,6 +62,25 @@ class InputManager(object):
         """
         errors = self._input_error_counter % self._input_error_threshold
         return errors == 0
+
+    @property
+    def skip_concurrency_check(self):
+        """Should the concurrency check be skipped?
+
+        :returns bool: True if the check should be skipped.
+        """
+        return self._skip_concurrency_check
+
+    @skip_concurrency_check.setter
+    def skip_concurrency_check(self, value):
+        """Set if the concurrency check should be skipped when asking for user input.
+
+        WARNING: Use this option with caution. When the concurrency check is disabled you
+                 can easily get to unexpected behavior which is hard to debug.
+
+        :param bool value: True to skip the concurrency check.
+        """
+        self._skip_concurrency_check = value
 
     def get_input_blocking(self, message, hidden):
         """Get blocking input from the user.
@@ -78,6 +98,7 @@ class InputManager(object):
         else:
             handler = InputHandler(source=self)
 
+        handler.skip_concurrency_check = self._skip_concurrency_check
         handler.get_input(message)
         handler.wait_on_input()
         return handler.value
@@ -101,6 +122,7 @@ class InputManager(object):
             if self._ui_screen.password_func:
                 handler.set_pass_func(self._ui_screen.password_func)
 
+        handler.skip_concurrency_check = self._skip_concurrency_check
         handler.set_callback(self.process_input)
         handler.get_input(prompt)
 
