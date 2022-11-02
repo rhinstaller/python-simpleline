@@ -136,8 +136,8 @@ po-push: potfile
 bumpver: po-push
 	read -p "Please see the above message. Verify and push localization commit. Press anything to continue." -n 1 -r
 
-	@NEWSUBVER=$$((`echo $(VERSION) |cut -d . -f 2` + 1)) ; \
-	NEWVERSION=`echo $(VERSION).$$NEWSUBVER |cut -d . -f 1,3` ; \
+	@NEWSUBVER=$$((`echo $(VERSION) |cut -d . -f 3` + 1)) ; \
+	NEWVERSION=`echo $(VERSION).$$NEWSUBVER |cut -d . -f 1,2,4` ; \
 	sed -i "s/Version: $(VERSION)/Version: $$NEWVERSION/" $(SPECNAME).spec ; \
 	sed -i "s/version='$(VERSION)'/version='$$NEWVERSION'/" setup.py
 
