@@ -10,38 +10,33 @@ actions:
 jobs:
   - job: propose_downstream
     trigger: release
-    metadata:
-      dist_git_branches: fedora-development
+    dist_git_branches: fedora-development
 
   - job: tests
     trigger: pull_request
-    metadata:
-      targets:
-        - fedora-all
+    targets:
+      - fedora-all
 
   - job: copr_build
     trigger: pull_request
-    metadata:
-      targets:
-        - fedora-eln
+    targets:
+      - fedora-eln
 
   - job: copr_build
     trigger: commit
-    metadata:
-      targets:
-        - fedora-rawhide
-        - fedora-eln
-      branch: master
-      owner: "@rhinstaller"
-      project: Anaconda
-      preserve_project: True
+    targets:
+      - fedora-rawhide
+      - fedora-eln
+    branch: master
+    owner: "@rhinstaller"
+    project: Anaconda
+    preserve_project: True
 
   - job: copr_build
     trigger: commit
-    metadata:
-      targets:
-        - fedora-latest
-      branch: master
-      owner: "@rhinstaller"
-      project: Anaconda-devel
-      preserve_project: True
+    targets:
+      - fedora-latest
+    branch: master
+    owner: "@rhinstaller"
+    project: Anaconda-devel
+    preserve_project: True
