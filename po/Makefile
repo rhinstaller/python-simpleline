@@ -23,6 +23,10 @@
 
 TOP	 = ../..
 
+# Variables used in xgettext arguments
+COPYRIGHT_HOLDER = Red Hat, Inc.
+MSGID_BUGS_ADDRESS = anaconda-devel@lists.fedoraproject.org
+
 # What is this package?
 NLSPACKAGE	= python-simpleline
 POTFILE		= $(NLSPACKAGE).pot
@@ -35,8 +39,15 @@ INSTALL_NLS_DIR = $(RPM_BUILD_ROOT)/usr/share/locale
 
 # PO catalog handling
 MSGMERGE	= msgmerge -v
-XGETTEXT	= xgettext --default-domain=$(NLSPACKAGE) \
-		  --add-comments
+XGETTEXT	= xgettext \
+	--default-domain=$(NLSPACKAGE) \
+	--add-comments \
+	--sort-output \
+	--package-name=$(PKGNAME) \
+	--package-version=$(VERSION) \
+	--copyright-holder="$(COPYRIGHT_HOLDER)" \
+	--msgid-bugs-address="$(MSGID_BUGS_ADDRESS)"
+
 MSGFMT		= msgfmt --statistics --verbose
 
 # What do we need to do
