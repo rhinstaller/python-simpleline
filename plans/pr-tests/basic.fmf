@@ -1,0 +1,9 @@
+summary: Run unit tests
+discover:
+    how: fmf
+    filter: tag:sys-installed
+provision:
+    how: container
+    image: fedora:latest
+execute:
+    how: shell

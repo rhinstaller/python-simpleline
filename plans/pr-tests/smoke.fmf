@@ -1,0 +1,7 @@
+summary: Run smoke test
+provision:
+    how: container
+    image: fedora:latest
+execute:
+    how: shell
+    script: python3 -c "import simpleline"
