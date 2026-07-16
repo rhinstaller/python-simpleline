@@ -43,8 +43,9 @@ __all__ = ["GLibEventLoop"]
 
 class GLibEventLoop(AbstractEventLoop):
 
-    def __init__(self):
+    def __init__(self, blocking=True):
         super().__init__()
+        self._blocking = blocking
         # Create first loop
         loop = GLib.MainLoop()
         self._event_loops = [EventLoopData(loop)]
@@ -208,12 +209,9 @@ class GLibEventLoop(AbstractEventLoop):
         else:
             self._iterate_event_loop(loop_data.loop)
 
-    @staticmethod
-    def _iterate_event_loop(event_loop):
+    def _iterate_event_loop(self, event_loop):
         context = event_loop.get_context()
-        # This is useful for tests
-        wait_on_timeout = False
-        context.iteration(wait_on_timeout)
+        context.iteration(self._blocking)
 
 
 class EventLoopData():
