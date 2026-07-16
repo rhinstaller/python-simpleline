@@ -20,6 +20,7 @@ jobs:
   - job: copr_build
     trigger: pull_request
     targets:
+      - fedora-rawhide
       - fedora-eln
 
   - job: copr_build
