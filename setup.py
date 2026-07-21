@@ -24,7 +24,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 setup(name='simpleline',
-      version='1.9.0',
+      version='1.9.1',
       author='Jiri Konecny',
       author_email='jkonecny@redhat.com',
       description='Python text UI framework',
