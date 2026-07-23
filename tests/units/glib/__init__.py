@@ -42,7 +42,7 @@ class GLibUtilityMixin():
     def create_glib_loop(self):
         # clear flags
         self.timeout_error = False
-        self.loop = GLibEventLoop(blocking=False)
+        self.loop = GLibEventLoop()
 
         loop = self.loop.active_main_loop
         context = loop.get_context()
